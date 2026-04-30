@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsEmail, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsOptional,
+  IsString,
+  IsTimeZone,
+} from 'class-validator';
 
 export class CreateUserDto {
   @ApiProperty({ description: 'The given name of the user.' })
@@ -18,4 +24,9 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   image?: string;
+
+  @ApiProperty({ description: 'The time zone of the users profile.' })
+  @IsOptional()
+  @IsTimeZone()
+  timezone?: string;
 }

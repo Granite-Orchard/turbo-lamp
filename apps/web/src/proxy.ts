@@ -1,7 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { cookies } from "next/headers";
 
-const PUBLIC_PATHS = ["/", "/login", "/register", "/api", "/_not-found"];
+const PUBLIC_PATHS = [
+  "/",
+  "/login",
+  "/register",
+  "/api",
+  "/_not-found",
+  "/onboarding/auth",
+];
 
 const protectedPaths = ["/dashboard", "/onboarding"];
 

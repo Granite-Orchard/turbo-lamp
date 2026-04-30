@@ -44,21 +44,6 @@ const today = new Date().toISOString().split("T")[0];
 
 // ─── Zod schemas ──────────────────────────────────────────────────────────────
 
-// const meetingGroupSchema = z
-//   .object({
-//     summary: z.string().min(1, "Summary is required"),
-//     description: z.string().min(1, "Description is required"),
-//     duration: z.number().min(15, "Minimum duration is 15 minutes"),
-//     location: z.string().nullable(),
-//     after: z.string().min(1, "Start date is required"),
-//     before: z.string().min(1, "End date is required"),
-//     calendarId: z.string().min(1, "Please select a calendar"),
-//   })
-//   .refine((d) => new Date(d.before) > new Date(d.after), {
-//     message: '"To" date must be on or after the "From" date',
-//     path: ["before"],
-//   });
-
 const emailSchema = z.email("Invalid email address");
 
 type FormData = z.input<typeof meetingGroupSchema>;
@@ -98,8 +83,8 @@ export function CreateGroupDialog({
   setIsDialogOpenAction: (open: boolean) => void;
   handleSubmitAction: (data: Partial<MeetingGroup>) => Promise<MeetingGroup>;
   createMeetingGroupParticipantAction: (
-    data: Partial<MeetingParticipant>,
-  ) => Promise<MeetingParticipant>;
+    data: Partial<MeetingParticipant>[],
+  ) => Promise<MeetingParticipant[]>;
   onSuccessAction?: () => void;
 }) {
   const router = useRouter();
@@ -204,17 +189,14 @@ export function CreateGroupDialog({
       });
 
       if (participants.length > 0) {
-        await Promise.all(
-          participants.map((draft) =>
-            createMeetingGroupParticipantAction({
-              id: crypto.randomUUID(),
+        createMeetingGroupParticipantAction(
+          participants.map((p) => {
+            return {
               meetingGroupId: createdGroup.id,
-              email: draft.email,
-              required: draft.required,
-              createdAt: now,
-              updatedAt: now,
-            }),
-          ),
+              email: p.email,
+              required: p.required,
+            };
+          }),
         );
       }
 

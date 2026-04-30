@@ -219,7 +219,7 @@ export class MeetingParticipantsService {
       throw new NotFoundException();
     }
     const result = await this.findOne(id);
-    if (result && newAuthState === ParticipantAuthState.AUTHORIZED) {
+    if (result && result.authState === ParticipantAuthState.AUTHORIZED) {
       await this.eventBus.publish(
         new MeetingParticipantAuthorizedEvent(result),
       );

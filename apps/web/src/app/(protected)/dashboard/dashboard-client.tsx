@@ -5,6 +5,7 @@ import { Meeting, MeetingGroup, MeetingParticipant } from "@/lib/types";
 import { format } from "date-fns";
 import { Calendar, CheckCircle, Clock, Users } from "lucide-react";
 import { Badge } from "../../../components/ui/badge";
+import { useProfile } from "../../../lib/providers/profile-provider";
 
 type InitialData = {
   meetingGroups: MeetingGroup[];
@@ -17,6 +18,7 @@ export default function DashboardClient({
 }: {
   initialData: InitialData;
 }) {
+  const profile = useProfile();
   const { meetingGroups, meetings, participations } = initialData;
 
   const now = new Date();

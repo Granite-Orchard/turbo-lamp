@@ -61,6 +61,14 @@ const invitationColors: Record<InvitationState, string> = {
   declined: "bg-red-50 text-red-700 border-red-200",
 };
 
+type AuthState = "authorized" | "unauthorized" | "not_required";
+
+const authColors: Record<AuthState, string> = {
+  not_required: "bg-amber-50 text-amber-700 border-amber-200",
+  authorized: "bg-green-50 text-green-700 border-green-200",
+  unauthorized: "bg-red-50 text-red-700 border-red-200",
+};
+
 const statusConfig: Record<
   MeetingGroup["status"],
   { label: string; className: string }
@@ -282,15 +290,15 @@ export function MeetingGroupDetail({
                       </p>
                     </div>
                   </div>
-                  <div className="space-x-2">
+                  <div className="flex justify-end space-x-2">
                     {p.userId === group.authorId ? (
-                      <span
+                      <Badge
                         className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs border ${invitationColors["pending"]}`}
                       >
                         Author
-                      </span>
+                      </Badge>
                     ) : undefined}
-                    <span
+                    <Badge
                       className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs border ${
                         invitationColors[
                           (p.invitationState as InvitationState) || "pending"
@@ -298,7 +306,14 @@ export function MeetingGroupDetail({
                       }`}
                     >
                       {p.invitationState}
-                    </span>
+                    </Badge>
+                    <Badge
+                      className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs border ${
+                        authColors[(p.authState as AuthState) || "unauthorized"]
+                      }`}
+                    >
+                      {p.authState}
+                    </Badge>
                   </div>
                 </div>
               ))}

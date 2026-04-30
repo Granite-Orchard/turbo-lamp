@@ -1,15 +1,19 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateCalendarDto } from './dto/create-calendar.dto';
-import { UpdateCalendarDto } from './dto/update-calendar.dto';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
+import { CreateCalendarDto } from './dto/create-calendar.dto';
+import { UpdateCalendarDto } from './dto/update-calendar.dto';
 import { Calendar } from './entities/calendar.entity';
+import { EventBus } from '@nestjs/cqrs';
+import { CalendarCreatedEvent } from './events/calendar-created.event';
 
 @Injectable()
 export class CalendarsService {
+  private readonly logger: Logger = new Logger(CalendarsService.name);
   constructor(
     @InjectRepository(Calendar)
     private readonly repository: Repository<Calendar>,
+    private eventBus: EventBus,
   ) {}
 
   async findAll() {
@@ -50,11 +54,13 @@ export class CalendarsService {
       skipUpdateIfNoValuesChanged: true,
       conflictPaths: ['userId', 'externalId', 'providerId'],
     });
-    return this.findOneBy({
+    const result = await this.findOneBy({
       userId: createCalendarDto.userId,
       externalId: createCalendarDto.externalId,
       providerId: createCalendarDto.providerId,
     });
+    if (result) await this.eventBus.publish(new CalendarCreatedEvent(result));
+    return result;
   }
 
   async create(
@@ -63,9 +69,11 @@ export class CalendarsService {
       createdBy: string;
     },
   ) {
-    return await this.repository.save(
+    const result = await this.repository.save(
       this.repository.create(createCalendarDto),
     );
+    await this.eventBus.publish(new CalendarCreatedEvent(result));
+    return result;
   }
 
   async update(id: string, updateCalendarDto: UpdateCalendarDto) {

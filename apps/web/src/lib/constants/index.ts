@@ -20,3 +20,5 @@ export const DAYS: DayOfWeek[] = [
   "Friday",
   "Saturday",
 ];
+
+export const TIMEZONES = Intl.supportedValuesOf("timeZone");

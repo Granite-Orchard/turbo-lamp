@@ -40,6 +40,7 @@ export default function RegisterClient({ actions }: { actions: Actions }) {
       username: "",
       password: "",
       confirmPassword: "",
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     },
   });
 

@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Logger,
   NotFoundException,
   Param,
@@ -29,7 +30,9 @@ import { ExternalCalendarService } from './external-calendar.service';
 export class CalendarsController {
   private readonly logger: Logger = new Logger(CalendarsController.name);
   constructor(
+    @Inject(CalendarsService)
     private readonly calendarService: CalendarsService,
+    @Inject(ExternalCalendarService)
     private readonly externalCalendarService: ExternalCalendarService,
   ) {}
 

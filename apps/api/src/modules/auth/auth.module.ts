@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AccountsModule } from '../accounts/accounts.module';
+import { CalendarsModule } from '../calendars/calendars.module';
 import { MeetingParticipantsModule } from '../meeting-participants/meeting-participants.module';
 import { SessionsModule } from '../sessions/sessions.module';
 import { UsersModule } from '../users/users.module';
@@ -16,6 +17,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { TokenService } from './token.service';
+import { InvitationsModule } from '../invitations/invitations.module';
 
 @Module({
   imports: [
@@ -26,6 +28,8 @@ import { TokenService } from './token.service';
     VerificationsModule,
     MeetingParticipantsModule,
     HttpModule,
+    CalendarsModule,
+    InvitationsModule,
   ],
   providers: [
     JwtService,

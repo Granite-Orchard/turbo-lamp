@@ -1,16 +1,15 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { meetingGroupsApi } from "@/lib/api/meeting-groups";
 import {
   createMeetingGroupSchema,
   createMeetingParticipantSchema,
 } from "@/lib/schemas";
 import { MeetingGroup, MeetingParticipant } from "@/lib/types";
+import { revalidatePath } from "next/cache";
 import { meetingParticipantsApi } from "../../../../lib/api/meeting-participants";
 
 export async function createMeetingGroupAction(data: Partial<MeetingGroup>) {
-  console.log(data);
   const payload = createMeetingGroupSchema.parse(data);
   const result = await meetingGroupsApi.create(payload);
   revalidatePath("/dashboard/meeting-groups");
@@ -34,11 +33,11 @@ export async function deleteMeetingGroupAction(id: string) {
 }
 
 export async function createMeetingGroupParticipantAction(
-  data: Partial<MeetingParticipant>,
+  data: Partial<MeetingParticipant>[],
 ) {
-  const payload = createMeetingParticipantSchema.parse(data);
-  return await meetingParticipantsApi.create({
-    ...payload,
-    userId: payload.userId ?? undefined,
-  });
+  const payload = data.map((d) => createMeetingParticipantSchema.parse(d));
+  const promises = payload.map((p) =>
+    meetingParticipantsApi.create({ ...p, userId: p.userId ?? undefined }),
+  );
+  return await Promise.all(promises);
 }

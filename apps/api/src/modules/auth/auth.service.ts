@@ -67,7 +67,7 @@ export class AuthService {
     register: RegisterDto,
     metadata?: { userAgent: string | undefined; ip: string | undefined },
   ): Promise<Session> {
-    const { username, password, confirmPassword } = register;
+    const { username, password, confirmPassword, timezone } = register;
     const hashedPassword = bcrypt.hashSync(password, 10);
     const isMatch = await bcrypt.compare(confirmPassword, hashedPassword);
     if (!isMatch) {
@@ -86,6 +86,7 @@ export class AuthService {
       name: username,
       email: username,
       emailVerified: false,
+      timezone,
     });
     validated = await this.accountService.create({
       userId: user.id,

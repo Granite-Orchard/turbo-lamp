@@ -58,6 +58,9 @@ export class User {
   emailVerified: boolean;
 
   @Column({ nullable: true })
+  timezone?: string;
+
+  @Column({ nullable: true })
   image?: string;
 
   @CreateDateColumn()

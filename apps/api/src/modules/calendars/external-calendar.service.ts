@@ -80,7 +80,12 @@ export type ListCalendarsParams = {
   account: Account;
 };
 
+export type GetTimezoneParams = {
+  account: Account;
+};
+
 export interface CalendarProvider {
+  getTimezone(params: GetTimezoneParams): Promise<string>;
   listCalendars(params: ListCalendarsParams): Promise<Calendar[]>;
   listEvents(params: ListEventsParams): Promise<CalendarEvent[]>;
   getEvent(params: GetEventParams): Promise<CalendarEvent>;
@@ -103,6 +108,10 @@ export class ExternalCalendarService {
     const instance = this.providers[provider];
     if (!instance) throw new Error(`Unsupported provider: ${provider}`);
     return instance;
+  }
+
+  getTimezone(provider: CalendarProviderType, params: GetTimezoneParams) {
+    return this.resolve(provider).getTimezone(params);
   }
 
   listCalendars(provider: CalendarProviderType, params: ListCalendarsParams) {

@@ -18,6 +18,7 @@ export const loginSchema = z.object({
 
 export const registerSchema = loginSchema
   .extend({
+    timezone: z.string().optional(),
     confirmPassword: z
       .string()
       .min(8, "Password must be at least 8 characters.")

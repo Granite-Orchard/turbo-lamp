@@ -40,8 +40,8 @@ type Actions = {
   ) => Promise<MeetingGroup>;
   deleteMeetingGroupAction: (id: string) => Promise<void>;
   createMeetingGroupParticipantAction: (
-    data: Partial<MeetingParticipant>,
-  ) => Promise<MeetingParticipant>;
+    data: Partial<MeetingParticipant>[],
+  ) => Promise<MeetingParticipant[]>;
 };
 
 function formatDate(dateString: string) {

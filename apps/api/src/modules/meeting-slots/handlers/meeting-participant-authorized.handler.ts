@@ -13,11 +13,13 @@ export class MeetingParticipantAuthorizedHandler implements IEventHandler<Meetin
   async handle(event: MeetingParticipantAuthorizedEvent) {
     const { entity } = event;
 
-    const meetingGroup = await this.meetingGroupsService.findOne(
-      entity.meetingGroupId,
-    );
+    const meetingGroup = await this.meetingGroupsService.findOneBy({
+      id: entity.meetingGroupId,
+    });
 
     if (!meetingGroup) return;
+
+    if (meetingGroup.authorId === entity.userId) return;
 
     await this.meetingSlotsService.calculate(
       entity.meetingGroupId,

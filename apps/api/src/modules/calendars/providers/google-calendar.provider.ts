@@ -9,6 +9,7 @@ import {
   CreateEventParams,
   DeleteEventParams,
   GetEventParams,
+  GetTimezoneParams,
   ListCalendarsParams,
   ListEventsParams,
   UpdateEventParams,
@@ -38,6 +39,13 @@ type GoogleCalendarListResponse = {
   items: GoogleCalendarListItem[];
 };
 
+type GoogleCalendarSettingsResponse = {
+  kind: string;
+  id: string;
+  value: string;
+};
+
+// TODO: implement cache manager here to mitigate rate limiting?
 @Injectable()
 export class GoogleCalendarProvider implements CalendarProvider {
   private readonly logger: Logger = new Logger(GoogleCalendarProvider.name);
@@ -47,6 +55,20 @@ export class GoogleCalendarProvider implements CalendarProvider {
     private readonly http: HttpService,
     private readonly auth: GoogleAuthManager,
   ) {}
+
+  async getTimezone(params: GetTimezoneParams): Promise<string> {
+    const accessToken = await this.auth.getValidAccessToken(params.account);
+    const { data } = await firstValueFrom<{
+      data: GoogleCalendarSettingsResponse;
+    }>(
+      this.http.get(`${this.baseUrl}/users/me/settings/timezone`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }),
+    );
+    return data.value;
+  }
 
   async listCalendars(params: ListCalendarsParams): Promise<Calendar[]> {
     const accessToken = await this.auth.getValidAccessToken(params.account);

@@ -6,6 +6,8 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
   ValidationArguments,
+  IsOptional,
+  IsTimeZone,
 } from 'class-validator';
 
 interface RegisterDtoPayload {
@@ -37,4 +39,9 @@ export class RegisterDto {
   @IsStrongPassword()
   @Validate(PasswordsMatchConstraint)
   confirmPassword: string;
+
+  @ApiProperty({ description: 'The time zone of the users profile.' })
+  @IsOptional()
+  @IsTimeZone()
+  timezone?: string;
 }

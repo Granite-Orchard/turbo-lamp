@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Profile, Strategy } from 'passport-google-oauth20';
@@ -11,12 +11,14 @@ import { AccountsService } from '../../accounts/accounts.service';
 import { Account } from '../../accounts/entities/account.entity';
 import { UsersService } from '../../users/users.service';
 import { AuthService } from '../auth.service';
+import { ExternalCalendarService } from '../../calendars/external-calendar.service';
 
 const PROVIDER: PROVIDERS = 'google';
 const SCOPES = ['email', 'profile', 'https://www.googleapis.com/auth/calendar'];
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, PROVIDER) {
+  private readonly logger: Logger = new Logger(GoogleStrategy.name);
   constructor(
     @Inject(ConfigService)
     private readonly configService: ConfigService,
@@ -26,6 +28,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, PROVIDER) {
     private readonly accountService: AccountsService,
     @Inject(UsersService)
     private readonly userService: UsersService,
+    @Inject(ExternalCalendarService)
+    private readonly externalCalendarService: ExternalCalendarService,
   ) {
     super({
       clientID: configService.get<string>(
@@ -66,6 +70,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, PROVIDER) {
       if (refreshToken) {
         account.refreshToken = refreshToken;
       }
+
       await this.accountService.update(account.id, account);
       return account;
     }
@@ -73,9 +78,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, PROVIDER) {
     const user = await this.userService.create({
       name: profile.displayName,
       email,
+      image: profile.photos![0].value,
       emailVerified: true,
     });
-    user.calendars = [];
     account = await this.accountService.create({
       userId: user.id,
       accountId: profile.id,
@@ -85,6 +90,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, PROVIDER) {
       refreshToken,
       accessTokenExpiresAt: new Date(Date.now() + 3600 * 1000),
     });
+    user.timezone = await this.externalCalendarService.getTimezone(
+      AccountProvider.GOOGLE,
+      { account },
+    );
+    await this.userService.update(user.id, { timezone: user.timezone });
+    user.calendars = [];
     account.user = user;
     return account;
   }

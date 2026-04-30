@@ -14,6 +14,7 @@ export interface Register {
   username: string;
   password: string;
   confirmPassword: string;
+  timezone?: string;
 }
 
 export interface User {
@@ -22,6 +23,7 @@ export interface User {
   email: string;
   emailVerified: boolean;
   image?: string;
+  timezone?: string;
 }
 
 export interface Profile {

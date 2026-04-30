@@ -14,7 +14,6 @@ export const meetingGroupsApi = {
     await serverRequest<MeetingGroup>(`/meeting-groups/${id}`, "GET"),
 
   create: async (data: Partial<MeetingGroup>) => {
-    console.log(data);
     const payload = createMeetingGroupSchema.parse(data);
     return await serverRequest<MeetingGroup>(
       "/meeting-groups",

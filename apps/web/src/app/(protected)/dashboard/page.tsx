@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { meetingGroupsApi } from "@/lib/api/meeting-groups";
 import { meetingParticipantsApi } from "@/lib/api/meeting-participants";
 import { meetingsApi } from "@/lib/api/meetings";

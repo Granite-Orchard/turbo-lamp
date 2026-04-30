@@ -22,10 +22,11 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Clock, Save } from "lucide-react";
-import { DAYS, TIMES } from "@/lib/constants";
+import { DAYS, TIMES, TIMEZONES } from "@/lib/constants";
+import { useProfile } from "../../../../lib/providers/profile-provider";
 
 type Actions = {
-  update: (data: Availability) => Promise<Availability>;
+  update: (id: string, data: Partial<Availability>) => Promise<Availability>;
 };
 
 export default function AvailabilityClient({
@@ -35,34 +36,55 @@ export default function AvailabilityClient({
   initialData: Availability[];
   actions: Actions;
 }) {
+  const profile = useProfile();
   const router = useRouter();
-  const [availability, setAvailability] = useState<Availability[]>(initialData);
-  const [hasChanges, setHasChanges] = useState(false);
+  const [availabilities, setAvailabilities] =
+    useState<Availability[]>(initialData);
 
-  const updateAvailability = (
+  const updateAvailability = async (
     id: string,
     field: keyof Availability,
     value: string | boolean,
   ) => {
-    setAvailability((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, [field]: value } : a)),
+    const foundAvailability = availabilities.find((a) => a.id === id);
+    if (!foundAvailability) return;
+    const updatedCopy: Availability = {
+      ...foundAvailability,
+      [field]: value,
+    };
+    await actions.update(id, updatedCopy);
+    setAvailabilities(
+      availabilities.map((a) => (a.id === id ? updatedCopy : a)),
     );
-    setHasChanges(true);
-  };
-
-  const handleSave = async () => {
-    await Promise.all(availability.map((a) => actions.update(a)));
-    setHasChanges(false);
     router.refresh();
   };
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
-      <Button onClick={handleSave} disabled={!hasChanges} className="gap-2">
-        <Save className="size-4" />
-        Save Changes
-      </Button>
-
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Timezone</CardTitle>
+          <CardDescription>
+            All times are displayed in your selected timezone
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Select defaultValue={profile.user.timezone ?? "America/Halifax"}>
+            <SelectTrigger className="w-full max-w-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {TIMEZONES.map((tz) => {
+                return (
+                  <SelectItem key={tz} value={tz}>
+                    {tz}
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Weekly Schedule</CardTitle>
@@ -72,7 +94,7 @@ export default function AvailabilityClient({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {availability.map((day) => (
+          {availabilities.map((day) => (
             <div
               key={day.id}
               className={`flex flex-col gap-4 rounded-lg border p-4 transition-colors sm:flex-row sm:items-center ${
@@ -147,41 +169,6 @@ export default function AvailabilityClient({
               )}
             </div>
           ))}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Timezone</CardTitle>
-          <CardDescription>
-            All times are displayed in your selected timezone
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Select defaultValue="America/New_York">
-            <SelectTrigger className="w-full max-w-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="America/New_York">
-                Eastern Time (ET)
-              </SelectItem>
-              <SelectItem value="America/Chicago">Central Time (CT)</SelectItem>
-              <SelectItem value="America/Denver">Mountain Time (MT)</SelectItem>
-              <SelectItem value="America/Los_Angeles">
-                Pacific Time (PT)
-              </SelectItem>
-              <SelectItem value="Europe/London">
-                Greenwich Mean Time (GMT)
-              </SelectItem>
-              <SelectItem value="Europe/Paris">
-                Central European Time (CET)
-              </SelectItem>
-              <SelectItem value="Asia/Tokyo">
-                Japan Standard Time (JST)
-              </SelectItem>
-            </SelectContent>
-          </Select>
         </CardContent>
       </Card>
     </div>

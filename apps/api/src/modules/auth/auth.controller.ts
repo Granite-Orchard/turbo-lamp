@@ -13,24 +13,24 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
 import type { Request } from 'express';
 import express from 'express';
 import { LocalAuthGuard } from '../../guards/local-auth.guard';
 import { OAuthGuard } from '../../guards/oauth-auth.guard';
 import { OAuthInitiationGuard } from '../../guards/oauth-initiation.guard';
+import { OAuthRegisterInitiationGuard } from '../../guards/oauth-register-initiation.guard';
 import { SessionCookieInterceptor } from '../../interceptors/session-cookie.interceptor';
 import {
   AccountProvider,
   CookieKey,
   EnvironmentVariables,
-  ParticipantAuthState,
-  ParticipantInvitationState,
   SanitizedRoutes,
   VerificationValue,
 } from '../../libs/constants';
 import { Account } from '../accounts/entities/account.entity';
-import { MeetingParticipantsService } from '../meeting-participants/meeting-participants.service';
+import { InvitationsService } from '../invitations/invitations.service';
 import { VerificationsService } from '../verifications/verifications.service';
 import { AuthService } from './auth.service';
 import { CookieService } from './cookie.service';
@@ -38,8 +38,6 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { SessionResponseDto } from './dto/session.response.dto';
 import { TokenService } from './token.service';
-import { OAuthRegisterInitiationGuard } from '../../guards/oauth-register-initiation.guard';
-import { ConfigService } from '@nestjs/config';
 
 @Controller({ path: 'auth', version: '1' })
 export class AuthController {
@@ -55,8 +53,8 @@ export class AuthController {
     private readonly verificationService: VerificationsService,
     @Inject(CookieService)
     private readonly cookieService: CookieService,
-    @Inject(MeetingParticipantsService)
-    private readonly meetingParticipantsService: MeetingParticipantsService,
+    @Inject(InvitationsService)
+    private readonly invitationsService: InvitationsService,
   ) {}
 
   @UseInterceptors(SessionCookieInterceptor)
@@ -124,10 +122,10 @@ export class AuthController {
       throw new UnauthorizedException();
     }
 
-    let redirect: string =
-      req.user.calendars && req.user.calendars.length > 0
-        ? SanitizedRoutes.MEETING_GROUPS
-        : SanitizedRoutes.ONBOARDING;
+    const hasCalendars = req.user.calendars && req.user.calendars.length > 0;
+    let redirect: string = hasCalendars
+      ? SanitizedRoutes.MEETING_GROUPS
+      : SanitizedRoutes.ONBOARDING;
 
     if (verification.value !== '') {
       const payload = this.tokenService.verify<VerificationValue>(
@@ -139,11 +137,7 @@ export class AuthController {
       redirect = `${base}`;
       // TODO:... abstract to invitation service for better handling?
       if (base === SanitizedRoutes.MEETING_INVIATION_ACCEPTED) {
-        await this.meetingParticipantsService.update(payload.id, {
-          invitationState: ParticipantInvitationState.ACCEPTED,
-          authState: ParticipantAuthState.AUTHORIZED,
-          userId: req.user.userId,
-        });
+        await this.invitationsService.acceptInvitation(payload.id, req.user);
         redirect = SanitizedRoutes.ONBOARDING;
       }
     }
