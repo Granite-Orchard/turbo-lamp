@@ -5,6 +5,7 @@ import { VerificationsModule } from '../verifications/verifications.module';
 import { MeetingParticipant } from './entities/meeting-participant.entity';
 import { MeetingParticipantsController } from './meeting-participants.controller';
 import { MeetingParticipantsService } from './meeting-participants.service';
+import { CalendarCreatedHandler } from './handlers/calendar-created.handler';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { MeetingParticipantsService } from './meeting-participants.service';
     forwardRef(() => AuthModule),
   ],
   controllers: [MeetingParticipantsController],
-  providers: [MeetingParticipantsService],
+  providers: [MeetingParticipantsService, CalendarCreatedHandler],
   exports: [MeetingParticipantsService],
 })
 export class MeetingParticipantsModule {}
