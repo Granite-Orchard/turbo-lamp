@@ -1,8 +1,8 @@
 # Default owner
-* @brandon-kyle-bailey
+* @Granite-Orchard/brandon-kyle-bailey
 
 # Frontend
-/apps/web/ @frontend-team
+/apps/web/ @Granite-Orchard/frontend-team
 
 # Backend/API
-/apps/api/ @backend-team
+/apps/api/ @Granite-Orchard/backend-team
