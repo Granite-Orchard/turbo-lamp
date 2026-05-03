@@ -79,6 +79,20 @@ describe('UsersService', () => {
       expect(mockRepository.save).toHaveBeenCalledWith(mockUser);
       expect(result).toEqual(mockUser);
     });
+
+    it('should throw error when create fails', async () => {
+      const createUserDto: CreateUserDto = {
+        name: 'Test User',
+        email: 'test@example.com',
+        emailVerified: true,
+        timezone: 'America/New_York',
+      };
+
+      mockRepository.create.mockReturnValue(mockUser);
+      mockRepository.save.mockRejectedValue(new Error('DB error'));
+
+      await expect(service.create(createUserDto)).rejects.toThrow('DB error');
+    });
   });
 
   describe('findAll', () => {
