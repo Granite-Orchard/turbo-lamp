@@ -1,4 +1,5 @@
 {
+  "coverageReporters": ["text", "lcov", "json-summary"],
   "moduleFileExtensions": ["js", "json", "ts"],
   "rootDir": "src",
   "testRegex": ".*\\.spec\\.ts$",
