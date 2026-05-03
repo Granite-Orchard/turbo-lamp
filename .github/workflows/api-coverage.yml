@@ -30,8 +30,6 @@ jobs:
         with:
           node-version: 24
           check-latest: true
-          # no cache: npm here — managed explicitly below so it
-          # doesn't error when ~/.npm doesn't exist on a failed run
 
       - name: Cache npm store
         uses: actions/cache@v4
@@ -58,7 +56,8 @@ jobs:
       - name: Enforce 80% coverage threshold
         run: |
           node <<'EOF'
-          const data = require('./coverage/coverage-summary.json');
+          const fs = require('fs');
+          const data = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'));
           const total = data.total;
           const metrics = ['lines', 'statements', 'functions', 'branches'];
           let failed = false;
@@ -93,7 +92,7 @@ jobs:
         with:
           name: api-coverage
           path: coverage
-        continue-on-error: true # no artifact exists when tests fail before coverage is written
+        continue-on-error: true
 
       - name: Build comment
         id: build-comment
@@ -118,7 +117,7 @@ jobs:
           const rows = Object.entries(data)
             .filter(([k]) => k !== 'total')
             .map(([file, c]) => ({
-              file: file.replace(process.cwd() + '/', ''),
+              file: file.replace(/^.*?apps\/api\//, ''),
               uncovered: c.lines.total - c.lines.covered,
               lines: c.lines.pct,
               stmts: c.statements.pct,
