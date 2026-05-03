@@ -10,7 +10,7 @@ import { Calendar, MoreVertical } from "lucide-react";
 import Link from "next/link";
 
 type Actions = {
-  updateMeetingAction: () => Promise<void>;
+  updateMeetingAction: (id: string, data: Partial<Meeting>) => Promise<Meeting>;
 };
 
 export default function MeetingsClient({

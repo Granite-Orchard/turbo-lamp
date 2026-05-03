@@ -177,7 +177,12 @@ export default function MeetingGroupsClient({
                       >
                         Edit group
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
+                      <DropdownMenuItem
+                        className="text-destructive"
+                        onSelect={async () => {
+                          await actions.deleteMeetingGroupAction(group.id);
+                        }}
+                      >
                         Delete group
                       </DropdownMenuItem>
                     </DropdownMenuContent>

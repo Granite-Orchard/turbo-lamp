@@ -1,12 +1,8 @@
-import { meetingsApi } from "@/lib/api/meetings";
+import { listMeetingsAction, updateMeetingAction } from "./actions";
 import MeetingsClient from "./meetings-client";
 
-const updateMeetingAction = async () => {
-  await Promise.resolve();
-};
-
 export default async function Page() {
-  const meetings = await meetingsApi.list();
+  const meetings = await listMeetingsAction();
 
   return (
     <MeetingsClient

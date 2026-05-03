@@ -4,23 +4,23 @@ import { revalidatePath } from "next/cache";
 import { meetingsApi } from "@/lib/api/meetings";
 import type { Meeting } from "@/lib/types";
 
-export async function listMeetings(): Promise<Meeting[]> {
+export async function listMeetingsAction(): Promise<Meeting[]> {
   return await meetingsApi.list();
 }
 
-export async function createMeeting(data: Partial<Meeting>) {
+export async function createMeetingAction(data: Partial<Meeting>) {
   const result = await meetingsApi.create(data);
   revalidatePath("/dashboard/meetings");
   return result;
 }
 
-export async function updateMeeting(id: string, data: Partial<Meeting>) {
+export async function updateMeetingAction(id: string, data: Partial<Meeting>) {
   const result = await meetingsApi.update(id, data);
   revalidatePath("/dashboard/meetings");
   return result;
 }
 
-export async function deleteMeeting(id: string) {
+export async function deleteMeetingAction(id: string) {
   const result = await meetingsApi.delete(id);
   revalidatePath("/dashboard/meetings");
   return result;
