@@ -30,15 +30,22 @@ jobs:
         with:
           node-version: 24
           check-latest: true
-          cache: npm
-          cache-dependency-path: apps/api/package-lock.json
+          # no cache: npm here — managed explicitly below so it
+          # doesn't error when ~/.npm doesn't exist on a failed run
+
+      - name: Cache npm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('apps/api/package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}-
 
       - name: Cache build artifacts
         uses: actions/cache@v4
         with:
           path: apps/api/node_modules/.cache
-          key: cache-${{ runner.os }}-${{ hashFiles('apps/api/package-lock.json') }}
-          restore-keys: cache-${{ runner.os }}-
+          key: build-${{ runner.os }}-${{ hashFiles('apps/api/package-lock.json') }}
+          restore-keys: build-${{ runner.os }}-
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit --no-fund
@@ -74,6 +81,7 @@ jobs:
           name: api-coverage
           path: apps/api/coverage/
           retention-days: 7
+
   report:
     name: PR Coverage Comment
     runs-on: ubuntu-latest
@@ -85,6 +93,7 @@ jobs:
         with:
           name: api-coverage
           path: coverage
+        continue-on-error: true # no artifact exists when tests fail before coverage is written
 
       - name: Build comment
         id: build-comment
