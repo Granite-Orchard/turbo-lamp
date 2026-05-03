@@ -21,9 +21,7 @@ describe('AccountsController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AccountsController],
-      providers: [
-        { provide: AccountsService, useValue: mockAccountsService },
-      ],
+      providers: [{ provide: AccountsService, useValue: mockAccountsService }],
     })
       .overrideGuard(JwtAuthGuard)
       .useValue(mockJwtAuthGuard)
@@ -42,7 +40,9 @@ describe('AccountsController', () => {
       const req = { user: { id: 'user-123' } } as Request & { user: any };
       const result = await controller.findAll(req);
       expect(result).toEqual([]);
-      expect(mockAccountsService.findAllBy).toHaveBeenCalledWith({ userId: 'user-123' });
+      expect(mockAccountsService.findAllBy).toHaveBeenCalledWith({
+        userId: 'user-123',
+      });
     });
   });
 
@@ -57,7 +57,7 @@ describe('AccountsController', () => {
   describe('update', () => {
     it('should update account', async () => {
       const req = { user: { id: 'user-123' } } as Request & { user: any };
-      const dto = { access_token: 'new-token' };
+      const dto = { accessToken: 'new-token' };
       const result = await controller.update(req, 'acc-123', dto);
       expect(result).toEqual({ id: '123', providerId: 'google' });
     });
@@ -71,3 +71,4 @@ describe('AccountsController', () => {
     });
   });
 });
+

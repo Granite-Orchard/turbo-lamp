@@ -7,6 +7,7 @@ import { VerificationsService } from '../verifications/verifications.service';
 import { InvitationsService } from '../invitations/invitations.service';
 import { SessionCookieInterceptor } from '../../interceptors/session-cookie.interceptor';
 import { ConfigService } from '@nestjs/config';
+import { RegisterDto } from './dto/register.dto';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -59,9 +60,14 @@ describe('AuthController', () => {
       const result = await controller.register(
         { headers: {}, ip: '127.0.0.1' } as any,
         '127.0.0.1',
-        { username: 'test@test.com', password: 'Pass123!', confirmPassword: 'Pass123!' } as any,
+        {
+          username: 'test@test.com',
+          password: 'Pass123!',
+          confirmPassword: 'Pass123!',
+        } as RegisterDto,
       );
       expect(result).toHaveProperty('token');
     });
   });
 });
+

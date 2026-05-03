@@ -4,7 +4,7 @@ import { CookieService } from './cookie.service';
 
 describe('CookieService', () => {
   let service: CookieService;
-  let mockResponse: any;
+  let mockResponse: { cookie: jest.Func };
 
   const mockConfigService = {
     get: jest.fn(),

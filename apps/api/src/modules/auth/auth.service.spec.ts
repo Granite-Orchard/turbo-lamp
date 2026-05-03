@@ -1,20 +1,16 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-  BadRequestException,
-  ConflictException,
-  UnauthorizedException,
-} from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
-import { TokenService, TokenSchema } from './token.service';
-import { AuthService } from './auth.service';
-import { RegisterDto } from './dto/register.dto';
+import { Test, TestingModule } from '@nestjs/testing';
 import { AccountProvider } from '../../libs/constants';
 import { AccountsService } from '../accounts/accounts.service';
 import { Account } from '../accounts/entities/account.entity';
 import { Session } from '../sessions/entities/session.entity';
 import { SessionsService } from '../sessions/sessions.service';
 import { UsersService } from '../users/users.service';
+import { AuthService } from './auth.service';
+import { RegisterDto } from './dto/register.dto';
+import { TokenService } from './token.service';
+import { User } from '../users/entities/user.entity';
 
 jest.mock('bcrypt', () => ({
   hashSync: jest.fn((pwd: string) => `hashed-${pwd}`),
@@ -36,12 +32,22 @@ describe('AuthService', () => {
     get: jest.fn().mockReturnValue(3600),
   };
 
-  const mockUser = {
+  const mockUser: User = {
     id: '123e4567-e89b-12d3-a456-426614174000',
     name: 'Test User',
     email: 'test@example.com',
     emailVerified: true,
     timezone: 'America/New_York',
+    accounts: [],
+    availabilityOverrides: [],
+    availabilities: [],
+    calendars: [],
+    participations: [],
+    sessions: [],
+    meetingGroups: [],
+    attendances: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 
   const mockAccount: Account = {
