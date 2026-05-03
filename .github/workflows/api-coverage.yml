@@ -125,7 +125,6 @@ jobs:
               branches: c.branches.pct,
             }))
             .sort((a, b) => b.uncovered - a.uncovered)
-            .slice(0, 10)
             .map(r => `| \`${r.file}\` | ${ok(r.lines)} ${fmt(r.lines)}% | ${ok(r.stmts)} ${fmt(r.stmts)}% | ${ok(r.funcs)} ${fmt(r.funcs)}% | ${ok(r.branches)} ${fmt(r.branches)}% |`)
             .join('\n');
 
@@ -140,7 +139,7 @@ jobs:
             `| Branches   | ${fmt(total.branches.pct)}%   | ${ok(total.branches.pct)}   |`,
             '',
             '<details>',
-            '<summary>10 highest-impact uncovered files</summary>',
+            '<summary>${rows.length} uncovered files</summary>',
             '',
             '| File | Lines | Statements | Functions | Branches |',
             '|------|-------|------------|-----------|----------|',
