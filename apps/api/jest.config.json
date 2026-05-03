@@ -1,0 +1,33 @@
+{
+  "coverageReporters": ["text", "lcov", "json-summary"],
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": "src",
+  "testRegex": ".*\\.spec\\.ts$",
+  "transform": { "^.+\\.(t|j)s$": "ts-jest" },
+  "collectCoverageFrom": [
+    "modules/accounts/accounts.service.ts",
+    "modules/availabilities/availabilities.service.ts",
+    "modules/availability-overrides/availability-overrides.service.ts",
+    "modules/calendars/calendars.service.ts",
+    "modules/invitations/invitations.service.ts",
+    "modules/meeting-attendees/meeting-attendees.service.ts",
+    "modules/meeting-groups/meeting-groups.service.ts",
+    "modules/meeting-participants/meeting-participants.service.ts",
+    "modules/meetings/meetings.service.ts",
+    "guards/jwt-auth.guard.ts",
+    "guards/local-auth.guard.ts",
+    "interceptors/session-cookie.interceptor.ts",
+    "libs/**/*.ts"
+  ],
+  "coverageDirectory": "../coverage",
+  "testEnvironment": "node",
+  "coverageProvider": "v8",
+  "coverageThreshold": {
+    "global": {
+      "lines": 80,
+      "statements": 80,
+      "functions": 80,
+      "branches": 80
+    }
+  }
+}
