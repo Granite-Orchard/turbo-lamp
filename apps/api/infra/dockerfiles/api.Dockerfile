@@ -1,3 +1,4 @@
+
 # =============================================================================
 # Base
 # =============================================================================
@@ -6,7 +7,7 @@ FROM node:24-alpine3.23 AS base
 # =============================================================================
 # Stage 1: Prune – generate a minimal subset of the monorepo for the API
 # NOTE: "api" must match the "name" field in apps/api/package.json
-# Build from monorepo root: docker build -f apps/api/dockerfiles/api.Dockerfile .
+# Build from monorepo root: docker build -f apps/api/infra/dockerfiles/api.Dockerfile .
 # =============================================================================
 FROM base AS pruner
 WORKDIR /app

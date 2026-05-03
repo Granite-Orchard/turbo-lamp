@@ -43,7 +43,7 @@ services:
   api:
     build:
       context: ../..
-      dockerfile: apps/api/dockerfiles/api.Dockerfile
+      dockerfile: apps/api/infra/dockerfiles/api.Dockerfile
     env_file:
       - .env
     ports:
