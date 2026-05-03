@@ -27,7 +27,7 @@ import { Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod";
-import { meetingGroupSchema } from "../../../../lib/schemas";
+import { meetingGroupSchema } from "@/lib/schemas";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

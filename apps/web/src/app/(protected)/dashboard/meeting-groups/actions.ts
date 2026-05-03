@@ -1,13 +1,13 @@
 "use server";
 
 import { meetingGroupsApi } from "@/lib/api/meeting-groups";
+import { meetingParticipantsApi } from "@/lib/api/meeting-participants";
 import {
   createMeetingGroupSchema,
   createMeetingParticipantSchema,
 } from "@/lib/schemas";
 import { MeetingGroup, MeetingParticipant } from "@/lib/types";
 import { revalidatePath } from "next/cache";
-import { meetingParticipantsApi } from "../../../../lib/api/meeting-participants";
 
 export async function createMeetingGroupAction(data: Partial<MeetingGroup>) {
   const payload = createMeetingGroupSchema.parse(data);

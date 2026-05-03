@@ -2,11 +2,10 @@ import { availabilitiesApi } from "@/lib/api/availabilities";
 import { availabilityOverridesApi } from "@/lib/api/availability-overrides";
 import { calendarsApi } from "@/lib/api/calendars";
 import OnboardingClient from "./onboarding-client";
-
 import {
-  saveAvailabilities,
-  saveAvailabilityOverrides,
-  saveCalendars,
+  saveCalendarsAction,
+  saveAvailabilitiesAction,
+  saveAvailabilityOverridesAction,
 } from "./actions";
 
 export default async function Page() {
@@ -20,13 +19,12 @@ export default async function Page() {
 
   return (
     <OnboardingClient
-      externalCalendars={externalCalendars}
-      calendars={calendars}
-      availabilities={availabilities}
-      overrides={overrides}
-      saveCalendarsAction={saveCalendars}
-      saveAvailabilitiesAction={saveAvailabilities}
-      saveAvailabilityOverridesAction={saveAvailabilityOverrides}
+      initialData={{ externalCalendars, calendars, availabilities, overrides }}
+      actions={{
+        saveCalendarsAction,
+        saveAvailabilitiesAction,
+        saveAvailabilityOverridesAction,
+      }}
     />
   );
 }

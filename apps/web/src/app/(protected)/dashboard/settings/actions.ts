@@ -2,7 +2,7 @@
 
 import { calendarsApi } from "@/lib/api/calendars";
 import { Calendar } from "@/lib/types";
-import { createCalendarSchema } from "../../../../lib/schemas";
+import { createCalendarSchema } from "@/lib/schemas";
 
 export async function createCalendarAction(data: Partial<Calendar>) {
   const payload = createCalendarSchema.parse(data);

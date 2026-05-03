@@ -1,12 +1,12 @@
 "use server";
-import { MeetingGroupDetail } from "@/components/meeting-groups/meeting-group-detail";
 import { meetingGroupsApi } from "@/lib/api/meeting-groups";
-import { meetingSlotsApi } from "../../../../../lib/api/meeting-slots";
+import { meetingSlotsApi } from "@/lib/api/meeting-slots";
 import {
   calculateSlotsAction,
   createMeetingAction,
   listSlotsAction,
 } from "./actions";
+import { MeetingGroupDetail } from "./meeting-group-detail-client";
 
 interface PageProps {
   params: Promise<{ id: string }>;

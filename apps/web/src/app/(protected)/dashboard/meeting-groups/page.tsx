@@ -9,15 +9,14 @@ import {
 import MeetingGroupsClient from "./meeting-groups-client";
 
 export default async function Page() {
-  const [initialData, calendars] = await Promise.all([
+  const [meetingGroups, calendars] = await Promise.all([
     meetingGroupsApi.list(),
     calendarsApi.list(),
   ]);
 
   return (
     <MeetingGroupsClient
-      initialData={initialData}
-      calendars={calendars}
+      initialData={{ meetingGroups, calendars }}
       actions={{
         createMeetingGroupAction: createMeetingGroupAction,
         updateMeetingGroupAction: updateMeetingGroupAction,

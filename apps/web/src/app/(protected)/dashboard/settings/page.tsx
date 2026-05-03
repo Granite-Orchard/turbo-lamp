@@ -10,8 +10,10 @@ export default async function Page() {
 
   return (
     <SettingsClient
-      initialCalendars={calendars}
-      initialExternalCalendars={externalCalendars}
+      initialData={{
+        calendars,
+        externalCalendars,
+      }}
       actions={{
         toggleCalendarEnabledAction: toggleCalendarAction,
         createCalendarAction: createCalendarAction,

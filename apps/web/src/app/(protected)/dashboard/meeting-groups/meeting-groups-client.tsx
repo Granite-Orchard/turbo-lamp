@@ -54,26 +54,29 @@ function formatDate(dateString: string) {
 
 export default function MeetingGroupsClient({
   initialData,
-  calendars,
   actions,
 }: {
-  initialData: MeetingGroup[];
-  calendars: Calendar[];
+  initialData: {
+    meetingGroups: MeetingGroup[];
+    calendars: Calendar[];
+  };
   actions: Actions;
 }) {
+  const { meetingGroups: initialMeetingGroups, calendars: initialCalendars } =
+    initialData;
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [meetingGroups, setMeetingGroups] =
-    useState<MeetingGroup[]>(initialData);
+    useState<MeetingGroup[]>(initialMeetingGroups);
   const [refreshKey, setRefreshKey] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     async function process() {
-      setMeetingGroups(initialData);
+      setMeetingGroups(initialData.meetingGroups);
     }
     process();
-  }, [initialData, refreshKey]);
+  }, [initialData.meetingGroups, refreshKey]);
 
   const filteredGroups = searchQuery
     ? meetingGroups.filter(
@@ -96,7 +99,7 @@ export default function MeetingGroupsClient({
           />
         </div>
         <CreateGroupDialog
-          calendars={calendars}
+          calendars={initialCalendars}
           isDialogOpen={isDialogOpen}
           setIsDialogOpenAction={setIsDialogOpen}
           handleSubmitAction={actions.createMeetingGroupAction}
@@ -119,7 +122,7 @@ export default function MeetingGroupsClient({
               Create a group to organize recurring meetings
             </p>
             <CreateGroupDialog
-              calendars={calendars}
+              calendars={initialCalendars}
               isDialogOpen={isDialogOpen}
               setIsDialogOpenAction={setIsDialogOpen}
               handleSubmitAction={actions.createMeetingGroupAction}

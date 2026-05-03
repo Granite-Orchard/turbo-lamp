@@ -37,8 +37,8 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { cn } from "../../lib/utils";
-import { Badge } from "../ui/badge";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 type Actions = {
   listSlotsAction: (id: string) => Promise<MeetingSlot[]>;
@@ -168,7 +168,8 @@ export function MeetingGroupDetail({
     if (group.status !== "finalized") {
       loadSlots();
     }
-  }, [group.id, group.status]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [group.status]);
 
   function handleSelectSlot(slot: MeetingSlot) {
     if (!canSchedule) {

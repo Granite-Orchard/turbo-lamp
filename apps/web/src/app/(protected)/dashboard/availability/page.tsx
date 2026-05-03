@@ -8,7 +8,7 @@ export default async function Page() {
     <AvailabilityClient
       initialData={result.sort((a, b) => a.dayOfWeek - b.dayOfWeek)}
       actions={{
-        update: updateAvailabilityAction,
+        updateAvailabilityAction,
       }}
     />
   );

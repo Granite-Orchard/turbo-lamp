@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import { DAYS } from "@/lib/constants";
 import type {
   Availability,
   AvailabilityOverride,
@@ -14,7 +15,6 @@ import type {
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
-import { DAYS } from "@/lib/constants";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -29,15 +29,19 @@ type Step = 1 | 2 | 3;
 type ValidationError = string | null;
 
 type Props = {
-  externalCalendars: ExternalCalendar[];
-  calendars: Calendar[];
-  availabilities: Availability[];
-  overrides: AvailabilityOverride[];
-  saveCalendarsAction: (data: Calendar[]) => Promise<Calendar[]>;
-  saveAvailabilitiesAction: (data: Availability[]) => Promise<Availability[]>;
-  saveAvailabilityOverridesAction: (
-    data: AvailabilityOverride[],
-  ) => Promise<AvailabilityOverride[]>;
+  initialData: {
+    externalCalendars: ExternalCalendar[];
+    calendars: Calendar[];
+    availabilities: Availability[];
+    overrides: AvailabilityOverride[];
+  };
+  actions: {
+    saveCalendarsAction: (data: Calendar[]) => Promise<Calendar[]>;
+    saveAvailabilitiesAction: (data: Availability[]) => Promise<Availability[]>;
+    saveAvailabilityOverridesAction: (
+      data: AvailabilityOverride[],
+    ) => Promise<AvailabilityOverride[]>;
+  };
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -740,15 +744,14 @@ const STEP_SESSION_KEY = "onboarding-step";
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function OnboardingClient({
-  externalCalendars,
-  calendars,
-  availabilities,
-  overrides,
-  saveCalendarsAction: saveCalendars,
-  saveAvailabilitiesAction: saveAvailabilities,
-  saveAvailabilityOverridesAction: saveAvailabilityOverrides,
-}: Props) {
+export default function OnboardingClient({ initialData, actions }: Props) {
+  const { externalCalendars, calendars, availabilities, overrides } =
+    initialData;
+  const {
+    saveCalendarsAction,
+    saveAvailabilitiesAction,
+    saveAvailabilityOverridesAction,
+  } = actions;
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -964,14 +967,14 @@ export default function OnboardingClient({
             timezone: c.timezone ?? "UTC",
             enabled: true,
           })) as Calendar[];
-        await saveCalendars(payload);
-        const result = await saveAvailabilities(localAvailabilities);
+        await saveCalendarsAction(payload);
+        const result = await saveAvailabilitiesAction(localAvailabilities);
         setLocalAvailabilities(result);
         setStep(3);
         return;
       }
       if (step === 2) {
-        const result = await saveAvailabilities(localAvailabilities);
+        const result = await saveAvailabilitiesAction(localAvailabilities);
         setLocalAvailabilities(result);
         setStep(3);
         return;
@@ -983,7 +986,7 @@ export default function OnboardingClient({
           ? o
           : { ...o, startTime: ALL_DAY_START, endTime: ALL_DAY_END },
       );
-      await saveAvailabilityOverrides(overridePayload);
+      await saveAvailabilityOverridesAction(overridePayload);
       sessionStorage.removeItem(STEP_SESSION_KEY);
       router.push("/dashboard/meeting-groups");
     });

@@ -1,10 +1,9 @@
 "use client";
 
 import { Availability } from "@/lib/types";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -21,12 +20,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Clock, Save } from "lucide-react";
 import { DAYS, TIMES, TIMEZONES } from "@/lib/constants";
-import { useProfile } from "../../../../lib/providers/profile-provider";
+import { Clock } from "lucide-react";
+import { useProfile } from "@/lib/providers/profile-provider";
 
 type Actions = {
-  update: (id: string, data: Partial<Availability>) => Promise<Availability>;
+  updateAvailabilityAction: (
+    id: string,
+    data: Partial<Availability>,
+  ) => Promise<Availability>;
 };
 
 export default function AvailabilityClient({
@@ -52,7 +54,7 @@ export default function AvailabilityClient({
       ...foundAvailability,
       [field]: value,
     };
-    await actions.update(id, updatedCopy);
+    await actions.updateAvailabilityAction(id, updatedCopy);
     setAvailabilities(
       availabilities.map((a) => (a.id === id ? updatedCopy : a)),
     );

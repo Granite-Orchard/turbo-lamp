@@ -24,8 +24,8 @@ import {
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Calendar as CalendarIcon, Link2, Plus, Trash2 } from "lucide-react";
-import { cn } from "../../../../lib/utils";
-import { Checkbox } from "../../../../components/ui/checkbox";
+import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 
 export function CalendarEntry({
   calendar,
@@ -135,14 +135,11 @@ export function AddCalendarDialog({
                   <Checkbox
                     id={`cal-${c.calendarId}`}
                     checked={checked}
-                    onCheckedChange={(v) => console.log("changed")}
+                    onCheckedChange={() => console.log("changed")}
                   />
                 </label>
               );
             })}
-            <p className="mt-1 text-xs text-muted-foreground">
-              {/* {selectedCalendarIds.size} of {externalCalendars.length} selected */}
-            </p>
           </CardContent>
         </Card>
 
@@ -168,14 +165,19 @@ type Actions = {
 };
 
 export default function SettingsClient({
-  initialCalendars,
-  initialExternalCalendars,
+  initialData,
   actions,
 }: {
-  initialCalendars: Calendar[];
-  initialExternalCalendars: ExternalCalendar[];
+  initialData: {
+    calendars: Calendar[];
+    externalCalendars: ExternalCalendar[];
+  };
   actions: Actions;
 }) {
+  const {
+    calendars: initialCalendars,
+    externalCalendars: initialExternalCalendars,
+  } = initialData;
   const [calendars, setCalendars] = useState<Calendar[]>(initialCalendars);
   const [externalCalendars, setExternalCalendars] = useState<
     ExternalCalendar[]

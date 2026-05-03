@@ -11,7 +11,7 @@ import {
 } from "@/lib/schemas";
 import type { Availability, AvailabilityOverride, Calendar } from "@/lib/types";
 
-export async function saveCalendars(data: Calendar[]) {
+export async function saveCalendarsAction(data: Calendar[]) {
   const payload = data.map((calendar) =>
     calendarSchema
       .pick({
@@ -35,7 +35,7 @@ export async function saveCalendars(data: Calendar[]) {
   return result;
 }
 
-export async function saveAvailabilities(data: Availability[]) {
+export async function saveAvailabilitiesAction(data: Availability[]) {
   const payload = data.map((d) =>
     createAvailabilitySchema.parse({
       dayOfWeek: d.dayOfWeek,
@@ -48,7 +48,9 @@ export async function saveAvailabilities(data: Availability[]) {
   revalidatePath("/onboarding");
   return result;
 }
-export async function saveAvailabilityOverrides(data: AvailabilityOverride[]) {
+export async function saveAvailabilityOverridesAction(
+  data: AvailabilityOverride[],
+) {
   const payload = data.map((override) =>
     createAvailabilityOverrideSchema.parse({
       date: override.date,
