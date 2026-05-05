@@ -22,7 +22,7 @@ export const meetingParticipantsApi = {
   create: async (data: Partial<MeetingParticipant>) => {
     const payload = createMeetingParticipantSchema.parse(data);
     return await serverRequest<MeetingParticipant>(
-      `/meeting-participants`,
+      `/meeting-participants?_rid=${crypto.randomUUID()}`,
       "POST",
       payload,
     );

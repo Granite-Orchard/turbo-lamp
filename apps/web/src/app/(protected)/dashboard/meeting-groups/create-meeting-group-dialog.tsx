@@ -75,14 +75,14 @@ export function CreateGroupDialog({
   isDialogOpen,
   setIsDialogOpenAction,
   handleSubmitAction,
-  createMeetingGroupParticipantAction,
+  createMeetingGroupParticipantsAction,
   onSuccessAction: onSuccess,
 }: {
   calendars: Calendar[];
   isDialogOpen: boolean;
   setIsDialogOpenAction: (open: boolean) => void;
   handleSubmitAction: (data: Partial<MeetingGroup>) => Promise<MeetingGroup>;
-  createMeetingGroupParticipantAction: (
+  createMeetingGroupParticipantsAction: (
     data: Partial<MeetingParticipant>[],
   ) => Promise<MeetingParticipant[]>;
   onSuccessAction?: () => void;
@@ -189,7 +189,7 @@ export function CreateGroupDialog({
       });
 
       if (participants.length > 0) {
-        createMeetingGroupParticipantAction(
+        createMeetingGroupParticipantsAction(
           participants.map((p) => {
             return {
               meetingGroupId: createdGroup.id,

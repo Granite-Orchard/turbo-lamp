@@ -51,6 +51,8 @@ export const createCalendarSchema = z.object(calendarSchema.shape).omit({
   updatedAt: true,
 });
 
+export const updateCalendarSchema = createCalendarSchema.partial();
+
 export const availabilitySchema = z
   .object({
     id: z.uuid().optional(),

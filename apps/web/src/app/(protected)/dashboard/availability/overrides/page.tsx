@@ -1,20 +1,20 @@
 import {
-  createOverride,
-  deleteOverride,
-  listOverrides,
-  updateOverride,
-} from "./actions";
+  listAvailabilityOverridesAction,
+  createAvailabilityOverrideAction,
+  updateAvailabilityOverrideAction,
+  deleteAvailabilityOverrideAction,
+} from "@/lib/actions/availability-overrides";
 import OverridesClient from "./overrides-client";
 
 export default async function Page() {
-  const initialData = await listOverrides();
+  const initialData = await listAvailabilityOverridesAction();
   return (
     <OverridesClient
       initialData={initialData}
       actions={{
-        createOverrideAction: createOverride,
-        updateOverrideAction: updateOverride,
-        deleteOverrideAction: deleteOverride,
+        createAvailabilityOverrideAction,
+        updateAvailabilityOverrideAction,
+        deleteAvailabilityOverrideAction,
       }}
     />
   );

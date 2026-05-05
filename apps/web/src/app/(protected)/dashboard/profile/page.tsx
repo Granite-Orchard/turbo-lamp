@@ -1,15 +1,15 @@
-import { authApi } from "@/lib/api/auth";
+import { getProfileAction } from "@/lib/actions/auth";
+import { updateUserAction } from "@/lib/actions/user";
 import ProfileClient from "./profile-client";
-import { updateProfileAction } from "./actions";
 
 export default async function Page() {
-  const profile = await authApi.profile();
+  const profile = await getProfileAction();
 
   return (
     <ProfileClient
       initialData={{ profile }}
       actions={{
-        updateProfileAction,
+        updateProfileAction: updateUserAction,
       }}
     />
   );

@@ -1,8 +1,13 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { meetingsApi } from "@/lib/api/meetings";
-import type { Meeting } from "@/lib/types";
+import { Meeting } from "@/lib/types";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+
+export async function getMeetingAction(id: string): Promise<Meeting> {
+  return await meetingsApi.get(id);
+}
 
 export async function listMeetingsAction(): Promise<Meeting[]> {
   return await meetingsApi.list();
@@ -21,7 +26,7 @@ export async function updateMeetingAction(id: string, data: Partial<Meeting>) {
 }
 
 export async function deleteMeetingAction(id: string) {
-  const result = await meetingsApi.delete(id);
+  await meetingsApi.delete(id);
   revalidatePath("/dashboard/meetings");
-  return result;
+  redirect("/dashboard/meetings");
 }

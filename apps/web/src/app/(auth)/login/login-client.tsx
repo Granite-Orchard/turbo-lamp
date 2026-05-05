@@ -24,7 +24,7 @@ import { ArrowLeft, Calendar } from "lucide-react";
 import Link from "next/link";
 
 type Actions = {
-  login: (data: Login) => Promise<unknown>;
+  loginAction: (data: Login) => Promise<unknown>;
 };
 
 export default function LoginClient({ actions }: { actions: Actions }) {
@@ -39,7 +39,10 @@ export default function LoginClient({ actions }: { actions: Actions }) {
 
   async function onSubmit(data: z.infer<typeof loginSchema>) {
     try {
-      await actions.login({ username: data.username, password: data.password });
+      await actions.loginAction({
+        username: data.username,
+        password: data.password,
+      });
 
       router.push("/dashboard");
     } catch (error) {

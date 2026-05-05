@@ -167,6 +167,7 @@ export interface Meeting {
   meetingGroupId: string;
   start: string;
   end: string;
+  status: string;
   meetingGroup?: MeetingGroup;
   attendees?: MeetingAttendee[];
   createdAt: string;

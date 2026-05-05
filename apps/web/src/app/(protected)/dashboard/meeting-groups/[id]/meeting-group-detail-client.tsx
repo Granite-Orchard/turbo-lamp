@@ -43,7 +43,7 @@ import { Badge } from "@/components/ui/badge";
 type Actions = {
   listSlotsAction: (id: string) => Promise<MeetingSlot[]>;
   calculateSlotsAction: (id: string) => Promise<MeetingSlot[]>;
-  createMeetingAction: (data: Partial<MeetingSlot>) => Promise<Meeting>;
+  createMeetingAction: (data: Partial<Meeting>) => Promise<Meeting>;
 };
 
 interface MeetingGroupDetailProps {
@@ -112,12 +112,17 @@ export function MeetingGroupDetail({
   const statusConf = statusConfig[group.status];
 
   const activeParticipants = useMemo(
-    () => participants.filter((p) => p.invitationState !== "declined"),
+    () =>
+      participants.filter(
+        (p) =>
+          p.invitationState === "accepted" &&
+          ["authorized", "not_required"].includes(p.authState),
+      ),
     [participants],
   );
 
   const canSchedule = useMemo(() => {
-    return activeParticipants.length > 0;
+    return activeParticipants.length > 1;
   }, [activeParticipants]);
 
   async function loadSlots() {
@@ -191,6 +196,7 @@ export function MeetingGroupDetail({
         meetingGroupId: group.id,
         start: selectedSlot.start,
         end: selectedSlot.end,
+        status: "scheduled",
       });
 
       toast.success("Meeting scheduled successfully");
@@ -337,7 +343,7 @@ export function MeetingGroupDetail({
                   variant="outline"
                   size="sm"
                   onClick={refreshSlots}
-                  disabled={slotsLoading}
+                  disabled={slotsLoading || !canSchedule}
                 >
                   <RefreshCw
                     className={`h-3.5 w-3.5 mr-1.5 ${

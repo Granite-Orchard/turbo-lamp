@@ -15,23 +15,15 @@ export const availabilitiesApi = {
   upsert: async (data: Partial<Availability>) => {
     const payload = createAvailabilitySchema.parse(data);
     return await serverRequest<Availability>(
-      "/availabilities/upsert",
+      `/availabilities/upsert?_rid=${crypto.randomUUID()}`,
       "POST",
       payload,
     );
   },
 
-  batchUpsert: async (data: Partial<Availability>[]) => {
-    return await serverRequest<Availability[]>(
-      "/availabilities/upsert/batch",
-      "POST",
-      data,
-    );
-  },
-
   create: async (data: Partial<Availability>) => {
     const result = await serverRequest<Availability>(
-      "/availabilities",
+      `/availabilities?_rid=${crypto.randomUUID()}`,
       "POST",
       data,
     );

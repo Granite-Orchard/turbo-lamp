@@ -39,7 +39,7 @@ type Actions = {
     data: Partial<MeetingGroup>,
   ) => Promise<MeetingGroup>;
   deleteMeetingGroupAction: (id: string) => Promise<void>;
-  createMeetingGroupParticipantAction: (
+  createMeetingGroupParticipantsAction: (
     data: Partial<MeetingParticipant>[],
   ) => Promise<MeetingParticipant[]>;
 };
@@ -103,8 +103,8 @@ export default function MeetingGroupsClient({
           isDialogOpen={isDialogOpen}
           setIsDialogOpenAction={setIsDialogOpen}
           handleSubmitAction={actions.createMeetingGroupAction}
-          createMeetingGroupParticipantAction={
-            actions.createMeetingGroupParticipantAction
+          createMeetingGroupParticipantsAction={
+            actions.createMeetingGroupParticipantsAction
           }
           onSuccessAction={() => {
             setRefreshKey((k) => k + 1);
@@ -126,8 +126,8 @@ export default function MeetingGroupsClient({
               isDialogOpen={isDialogOpen}
               setIsDialogOpenAction={setIsDialogOpen}
               handleSubmitAction={actions.createMeetingGroupAction}
-              createMeetingGroupParticipantAction={
-                actions.createMeetingGroupParticipantAction
+              createMeetingGroupParticipantsAction={
+                actions.createMeetingGroupParticipantsAction
               }
               onSuccessAction={() => {
                 setRefreshKey((k) => k + 1);

@@ -1,6 +1,5 @@
-import { meetingsApi } from "@/lib/api/meetings";
+import { deleteMeetingAction, getMeetingAction } from "@/lib/actions/meetings";
 import MeetingClient from "./meeting-client";
-import { cancelMeetingAction } from "./actions";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -8,7 +7,7 @@ interface PageProps {
 
 export default async function Page({ params }: PageProps) {
   const { id } = await params;
-  const meeting = await meetingsApi.get(id);
+  const meeting = await getMeetingAction(id);
 
   return (
     <MeetingClient
@@ -16,7 +15,7 @@ export default async function Page({ params }: PageProps) {
         meeting,
       }}
       actions={{
-        cancelMeetingAction,
+        cancelMeetingAction: deleteMeetingAction,
       }}
     />
   );

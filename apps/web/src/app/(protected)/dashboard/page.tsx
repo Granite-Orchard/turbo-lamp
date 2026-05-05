@@ -1,14 +1,14 @@
-import { meetingGroupsApi } from "@/lib/api/meeting-groups";
-import { meetingParticipantsApi } from "@/lib/api/meeting-participants";
-import { meetingsApi } from "@/lib/api/meetings";
+import { listMeetingGroupsAction } from "@/lib/actions/meeting-groups";
+import { listMeetingsAction } from "@/lib/actions/meetings";
 import DashboardClient from "./dashboard-client";
+import { listMeetingGroupParticipantsAction } from "@/lib/actions/meeting-participants";
 
 export default async function Page() {
   const [meetingGroupsResult, meetingsResult, participationsResult] =
     await Promise.all([
-      meetingGroupsApi.list(),
-      meetingsApi.list(),
-      meetingParticipantsApi.list(),
+      listMeetingGroupsAction(),
+      listMeetingsAction(),
+      listMeetingGroupParticipantsAction(),
     ]);
 
   return (

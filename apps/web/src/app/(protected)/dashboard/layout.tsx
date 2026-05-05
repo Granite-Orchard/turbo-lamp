@@ -1,19 +1,24 @@
+import { Header } from "@/components/dashboard/header";
 import { AppSidebar } from "@/components/dashboard/sidebar";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { getProfileAction } from "@/lib/actions/auth";
 import { ProfileProvider } from "@/lib/providers/profile-provider";
-import { ReactNode } from "react";
-import { Header } from "@/components/dashboard/header";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { ReactNode } from "react";
 import { authApi } from "@/lib/api/auth";
-import { logoutAction } from "./actions";
 
 interface ProtectedLayoutProps {
   children: ReactNode;
+}
+
+async function logoutAction() {
+  "use server";
+  await authApi.logout();
 }
 
 async function validateSession() {
@@ -25,11 +30,12 @@ async function validateSession() {
       redirect("/login");
     }
 
-    const profile = await authApi.profile();
+    const profile = await getProfileAction();
     return profile;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.log(err);
+    await logoutAction();
     redirect("/login");
   }
 }
@@ -42,7 +48,7 @@ export default async function ProtectedLayout({
   return (
     <ProfileProvider profile={profile}>
       <SidebarProvider>
-        <AppSidebar actions={{ logoutAction: logoutAction }} />
+        <AppSidebar actions={{ logoutAction }} />
         <SidebarTrigger />
         <SidebarInset className="p-6 space-y-6">
           <Header />

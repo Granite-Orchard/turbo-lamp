@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { registerAction } from "./actions";
+import { registerAction } from "@/lib/actions/auth";
 import RegisterClient from "./register-client";
 import { redirect } from "next/navigation";
 export default async function page() {
@@ -10,7 +10,7 @@ export default async function page() {
   return (
     <RegisterClient
       actions={{
-        register: registerAction,
+        registerAction,
       }}
     />
   );

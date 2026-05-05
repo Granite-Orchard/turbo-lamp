@@ -1,20 +1,23 @@
-import { availabilitiesApi } from "@/lib/api/availabilities";
-import { availabilityOverridesApi } from "@/lib/api/availability-overrides";
-import { calendarsApi } from "@/lib/api/calendars";
-import OnboardingClient from "./onboarding-client";
+import { listAvailabilitiesAction } from "@/lib/actions/availabilities";
+import { listAvailabilityOverridesAction } from "@/lib/actions/availability-overrides";
 import {
-  saveCalendarsAction,
+  listCalendarsAction,
+  listExternalCalendarsAction,
+} from "@/lib/actions/calendars";
+import {
   saveAvailabilitiesAction,
   saveAvailabilityOverridesAction,
+  saveCalendarsAction,
 } from "./actions";
+import OnboardingClient from "./onboarding-client";
 
 export default async function Page() {
   const [externalCalendars, calendars, availabilities, overrides] =
     await Promise.all([
-      calendarsApi.listExternal(),
-      calendarsApi.list(),
-      availabilitiesApi.list(),
-      availabilityOverridesApi.list(),
+      listExternalCalendarsAction(),
+      listCalendarsAction(),
+      listAvailabilitiesAction(),
+      listAvailabilityOverridesAction(),
     ]);
 
   return (

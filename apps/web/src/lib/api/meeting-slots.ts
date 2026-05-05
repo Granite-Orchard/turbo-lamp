@@ -10,10 +10,4 @@ export const meetingSlotsApi = {
       `/meeting-slots/${meetingGroupId}/calculate`,
       "GET",
     ),
-
-  getByGroup: async (meetingGroupId: string) =>
-    await serverRequest<MeetingSlot[]>(
-      `/meeting-slots?meetingGroupId=${meetingGroupId}`,
-      "GET",
-    ),
 };

@@ -37,7 +37,9 @@ type Props = {
   };
   actions: {
     saveCalendarsAction: (data: Calendar[]) => Promise<Calendar[]>;
-    saveAvailabilitiesAction: (data: Availability[]) => Promise<Availability[]>;
+    saveAvailabilitiesAction: (
+      data: Partial<Availability>[],
+    ) => Promise<Availability[]>;
     saveAvailabilityOverridesAction: (
       data: AvailabilityOverride[],
     ) => Promise<AvailabilityOverride[]>;
@@ -46,18 +48,14 @@ type Props = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function createDefaultAvailabilities(userId: string): Availability[] {
+function createDefaultAvailabilities(): Partial<Availability>[] {
   return DAYS.map((_, dayIndex) => {
     const isWeekend = [0, 6].includes(dayIndex);
     return {
-      id: crypto.randomUUID(),
-      userId,
       dayOfWeek: dayIndex,
       startTime: "09:00",
       endTime: "17:00",
       isAvailable: !isWeekend,
-      createdAt: "",
-      updatedAt: "",
     };
   });
 }
@@ -793,12 +791,10 @@ export default function OnboardingClient({ initialData, actions }: Props) {
   );
 
   const [localAvailabilities, setLocalAvailabilities] = useState<
-    Availability[]
+    Partial<Availability>[]
   >(() => {
     if (availabilities?.length) return availabilities;
-    // Always create the 7-day defaults. userId may be "" for brand-new users
-    // who have no records yet — that's fine, it gets filled server-side on save.
-    return createDefaultAvailabilities(userId);
+    return createDefaultAvailabilities();
   });
 
   const [localOverrides, setLocalOverrides] = useState<AvailabilityOverride[]>(
@@ -821,7 +817,7 @@ export default function OnboardingClient({ initialData, actions }: Props) {
         setLocalAvailabilities(availabilities);
       } else {
         // Re-seed defaults if props change and there are still no saved availabilities.
-        setLocalAvailabilities(createDefaultAvailabilities(userId));
+        setLocalAvailabilities(createDefaultAvailabilities());
       }
     }
     process();
@@ -929,10 +925,10 @@ export default function OnboardingClient({ initialData, actions }: Props) {
         return "Enable at least one day of availability.";
       }
       const invalid = enabled.find(
-        (a) => !isTimeRangeValid(a.startTime, a.endTime),
+        (a) => !isTimeRangeValid(a.startTime!, a.endTime!),
       );
       if (invalid) {
-        return `${DAYS[invalid.dayOfWeek]}: end time must be after start time.`;
+        return `${DAYS[invalid.dayOfWeek!]}: end time must be after start time.`;
       }
     }
     if (s === 3) {
@@ -974,8 +970,6 @@ export default function OnboardingClient({ initialData, actions }: Props) {
         return;
       }
       if (step === 2) {
-        const result = await saveAvailabilitiesAction(localAvailabilities);
-        setLocalAvailabilities(result);
         setStep(3);
         return;
       }
@@ -1032,7 +1026,7 @@ export default function OnboardingClient({ initialData, actions }: Props) {
 
       {step === 2 && (
         <AvailabilityStep
-          availabilities={localAvailabilities}
+          availabilities={localAvailabilities as Availability[]}
           allDaysFilled={localAvailabilities.length >= 7}
           onAdd={addAvailability}
           onRemove={removeAvailability}

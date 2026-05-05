@@ -22,7 +22,7 @@ export const availabilityOverridesApi = {
   create: async (data: Partial<AvailabilityOverride>) => {
     const payload = createAvailabilityOverrideSchema.parse(data);
     return await serverRequest<AvailabilityOverride>(
-      "/availability-overrides",
+      `/availability-overrides?_rid=${crypto.randomUUID()}`,
       "POST",
       payload,
     );
@@ -31,7 +31,7 @@ export const availabilityOverridesApi = {
   upsert: async (data: Partial<AvailabilityOverride>) => {
     const payload = createAvailabilityOverrideSchema.parse(data);
     return await serverRequest<AvailabilityOverride>(
-      "/availability-overrides/upsert",
+      `/availability-overrides/upsert?_rid=${crypto.randomUUID()}`,
       "POST",
       payload,
     );

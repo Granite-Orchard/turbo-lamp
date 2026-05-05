@@ -1,4 +1,4 @@
-import { createCalendarSchema } from "@/lib/schemas";
+import { createCalendarSchema, updateCalendarSchema } from "@/lib/schemas";
 import type { Calendar, ExternalCalendar } from "@/lib/types";
 import { serverRequest } from "./client";
 
@@ -12,13 +12,8 @@ export const calendarsApi = {
 
   create: async (data: Partial<Calendar>) => {
     const payload = createCalendarSchema.parse(data);
-    return await serverRequest<Calendar>("/calendars", "POST", payload);
-  },
-
-  batchUpsert: async (data: Partial<Calendar>[]) => {
-    const payload = data.map((c) => createCalendarSchema.parse(c));
-    return await serverRequest<Calendar[]>(
-      "/calendars/batch/upsert",
+    return await serverRequest<Calendar>(
+      `/calendars?_rid=${crypto.randomUUID()}`,
       "POST",
       payload,
     );
@@ -26,11 +21,16 @@ export const calendarsApi = {
 
   upsert: async (data: Partial<Calendar>) => {
     const payload = createCalendarSchema.parse(data);
-    return await serverRequest<Calendar>("/calendars/upsert", "POST", payload);
+    return await serverRequest<Calendar>(
+      `/calendars/upsert?_rid=${crypto.randomUUID()}`,
+      "POST",
+      payload,
+    );
   },
 
   update: async (id: string, data: Partial<Calendar>) => {
-    return await serverRequest<Calendar>(`/calendars/${id}`, "PATCH", data);
+    const payload = updateCalendarSchema.parse(data);
+    return await serverRequest<Calendar>(`/calendars/${id}`, "PATCH", payload);
   },
 
   delete: async (id: string) =>

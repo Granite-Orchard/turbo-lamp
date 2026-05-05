@@ -1,11 +1,10 @@
 "use server";
-import { meetingGroupsApi } from "@/lib/api/meeting-groups";
-import { meetingSlotsApi } from "@/lib/api/meeting-slots";
+import { getMeetingGroupAction } from "@/lib/actions/meeting-groups";
+import { createMeetingAction } from "@/lib/actions/meetings";
 import {
-  calculateSlotsAction,
-  createMeetingAction,
-  listSlotsAction,
-} from "./actions";
+  calculateMeetingSlotsAction,
+  listMeetingSlotsAction,
+} from "@/lib/actions/meeting-slots";
 import { MeetingGroupDetail } from "./meeting-group-detail-client";
 
 interface PageProps {
@@ -15,8 +14,8 @@ interface PageProps {
 export default async function Page({ params }: PageProps) {
   const { id } = await params;
   const [group, slots] = await Promise.all([
-    meetingGroupsApi.get(id),
-    meetingSlotsApi.list(id),
+    getMeetingGroupAction(id),
+    listMeetingSlotsAction(id),
   ]);
 
   return (
@@ -25,8 +24,8 @@ export default async function Page({ params }: PageProps) {
       initialSlots={slots}
       initialParticipants={group.participants}
       actions={{
-        listSlotsAction: listSlotsAction,
-        calculateSlotsAction: calculateSlotsAction,
+        listSlotsAction: listMeetingSlotsAction,
+        calculateSlotsAction: calculateMeetingSlotsAction,
         createMeetingAction: createMeetingAction,
       }}
     />

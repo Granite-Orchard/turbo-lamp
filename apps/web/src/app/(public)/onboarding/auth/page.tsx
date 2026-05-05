@@ -9,9 +9,9 @@ export default function Page() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-  // if (!token) {
-  //   router.push("/login");
-  // }
+  if (!token) {
+    router.push("/login");
+  }
   return (
     <div className="relative flex min-h-screen">
       {/* Background pattern */}
