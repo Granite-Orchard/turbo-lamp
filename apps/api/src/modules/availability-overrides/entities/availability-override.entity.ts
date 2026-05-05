@@ -29,7 +29,7 @@ export class AvailabilityOverride {
   user: User;
 
   @Column()
-  date: Date;
+  date: string;
 
   @Column()
   startTime: string;

@@ -15,7 +15,7 @@ describe('AvailabilityOverridesService', () => {
     id: '123e4567-e89b-12d3-a456-426614174000',
     userId: '123e4567-e89b-12d3-a456-426614174001',
     user: {} as any,
-    date: new Date('2024-01-15'),
+    date: '2024-01-15',
     startTime: '09:00',
     endTime: '17:00',
     isAvailable: true,
