@@ -15,6 +15,10 @@ export async function loginAction(data: LoginData) {
   return await authApi.login(data);
 }
 
+export async function logoutAction() {
+  return await authApi.logout();
+}
+
 export async function registerAction(data: RegisterData) {
   return await authApi.register(data);
 }

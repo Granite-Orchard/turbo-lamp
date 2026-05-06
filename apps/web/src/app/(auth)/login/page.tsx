@@ -1,10 +1,9 @@
-import { cookies } from "next/headers";
-import LoginClient from "./login-client";
+import { getProfileAction, loginAction } from "@/lib/actions/auth";
 import { redirect } from "next/navigation";
-import { loginAction } from "@/lib/actions/auth";
+import LoginClient from "./login-client";
 export default async function Page() {
-  const session = (await cookies()).get("session");
-  if (session) {
+  const profile = await getProfileAction().catch(() => null);
+  if (profile) {
     return redirect("/dashboard");
   }
   return (

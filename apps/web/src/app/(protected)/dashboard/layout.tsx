@@ -5,20 +5,14 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { getProfileAction } from "@/lib/actions/auth";
+import { getProfileAction, logoutAction } from "@/lib/actions/auth";
 import { ProfileProvider } from "@/lib/providers/profile-provider";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
-import { authApi } from "@/lib/api/auth";
 
 interface ProtectedLayoutProps {
   children: ReactNode;
-}
-
-async function logoutAction() {
-  "use server";
-  await authApi.logout();
 }
 
 async function validateSession() {
@@ -32,10 +26,8 @@ async function validateSession() {
 
     const profile = await getProfileAction();
     return profile;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (err: any) {
-    console.log(err);
-    await logoutAction();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (err) {
     redirect("/login");
   }
 }
