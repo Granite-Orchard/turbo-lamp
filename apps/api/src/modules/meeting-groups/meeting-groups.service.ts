@@ -1,14 +1,23 @@
 import {
+  BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
-  BadRequestException,
 } from '@nestjs/common';
-import { CreateMeetingGroupDto } from './dto/create-meeting-group.dto';
-import { UpdateMeetingGroupDto } from './dto/update-meeting-group.dto';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
+import {
+  MeetingGroupStatus,
+  SanitizedRoutes,
+  VerificationType,
+  VerificationValue,
+} from '../../libs/constants';
+import { TokenService } from '../auth/token.service';
+import { VerificationsService } from '../verifications/verifications.service';
+import { CreateMeetingGroupDto } from './dto/create-meeting-group.dto';
+import { UpdateMeetingGroupDto } from './dto/update-meeting-group.dto';
 import { MeetingGroup } from './entities/meeting-group.entity';
-import { MeetingGroupStatus } from '../../libs/constants';
 
 const ALLOWED_STATUS_TRANSITIONS: Record<
   MeetingGroupStatus,
@@ -24,6 +33,12 @@ export class MeetingGroupsService {
   constructor(
     @InjectRepository(MeetingGroup)
     private readonly repository: Repository<MeetingGroup>,
+    @Inject(VerificationsService)
+    private readonly verificationsService: VerificationsService,
+    @Inject(TokenService)
+    private readonly tokenService: TokenService,
+    @Inject(ConfigService)
+    private readonly configService: ConfigService,
   ) {}
 
   private validateStatusTransition(
@@ -115,6 +130,25 @@ export class MeetingGroupsService {
       where,
       relations,
     });
+  }
+
+  async generateMagicLink(meetinGroupId: string): Promise<string> {
+    const value: VerificationValue = {
+      type: VerificationType.MAGIC_LINK_INVITATION,
+      id: '',
+      to: '',
+      after: SanitizedRoutes.ONBOARDING_AUTH,
+    };
+    // 7 days
+    const expiresIn = 60 * 1000 * 60 * 24 * 7;
+    const expiresAt = new Date(Date.now() + expiresIn);
+    const verification = await this.verificationsService.create({
+      identifier: this.tokenService.randomHash(),
+      value: this.tokenService.sign(value, { expiresIn }),
+      expiresAt,
+    });
+    const url = `http://localhost:3001/api/core/v1/meeting-groups/${meetinGroupId}/accept?token=${encodeURIComponent(verification.identifier)}`;
+    return url;
   }
 
   async create(

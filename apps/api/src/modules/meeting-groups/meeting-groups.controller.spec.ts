@@ -20,7 +20,10 @@ describe('MeetingGroupsController', () => {
       controllers: [MeetingGroupsController],
       providers: [
         { provide: MeetingGroupsService, useValue: mockService },
-        { provide: MeetingParticipantsService, useValue: mockParticipantService },
+        {
+          provide: MeetingParticipantsService,
+          useValue: mockParticipantService,
+        },
       ],
     }).compile();
 

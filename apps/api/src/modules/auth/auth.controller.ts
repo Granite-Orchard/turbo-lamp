@@ -136,7 +136,7 @@ export class AuthController {
 
       redirect = `${base}`;
       // TODO:... abstract to invitation service for better handling?
-      if (base === SanitizedRoutes.MEETING_INVIATION_ACCEPTED) {
+      if (base === SanitizedRoutes.MEETING_INVITATION_ACCEPTED) {
         await this.invitationsService.acceptInvitation(payload.id, req.user);
         redirect = SanitizedRoutes.ONBOARDING;
       }

@@ -75,7 +75,7 @@ export class VerificationsService {
     const payload: VerificationValue = await this.tokenService.verify(
       createVerificationDto.value,
     );
-    if (payload.type === VerificationType.MEETING_INVITATION) {
+    if (payload.type === VerificationType.EMAIL_INVITATION) {
       await this.eventBus.publish(new InvitationCreatedEvent(verification));
     }
     return verification;

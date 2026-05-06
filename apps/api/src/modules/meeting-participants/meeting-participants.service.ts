@@ -131,10 +131,10 @@ export class MeetingParticipantsService {
       identifier: this.tokenService.randomHash(),
       value: this.tokenService.sign(
         {
-          type: VerificationType.MEETING_INVITATION,
+          type: VerificationType.EMAIL_INVITATION,
           id: result.id,
           to: result.email,
-          after: SanitizedRoutes.MEETING_INVIATION_ACCEPTED,
+          after: SanitizedRoutes.MEETING_INVITATION_ACCEPTED,
         } as VerificationValue,
         { expiresIn },
       ),

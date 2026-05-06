@@ -62,6 +62,9 @@ export class MeetingGroup {
   @Column()
   summary: string;
 
+  @Column()
+  magicLink: string;
+
   @Column({ nullable: true })
   description?: string;
 

@@ -20,6 +20,7 @@ export enum EnvironmentVariables {
   SMTP_URL = 'SMTP_URL',
   SMTP_FROM_EMAIL = 'SMTP_FROM_EMAIL',
   NODE_ENV = 'NODE_ENV',
+  BACKEND_URL = 'BACKEND_URL',
 }
 
 export const TOKEN_ISSUER = 'venn';
@@ -60,13 +61,15 @@ export enum FrontendRoutes {
 export enum SanitizedRoutes {
   DASHBOARD = FrontendRoutes.DASHBOARD,
   ONBOARDING = FrontendRoutes.ONBOARDING,
-  MEETING_INVIATION_ACCEPTED = FrontendRoutes.MEETING_PARTICIPANTS,
+  ONBOARDING_AUTH = FrontendRoutes.ONBOARDING_AUTH,
+  MEETING_INVITATION_ACCEPTED = FrontendRoutes.MEETING_PARTICIPANTS,
   MEETING_GROUPS = FrontendRoutes.MEETING_GROUPS,
 }
 
 export enum VerificationType {
   OAUTH_STATE = 'oauthState',
-  MEETING_INVITATION = 'meetingInvitation',
+  EMAIL_INVITATION = 'emailInvitation',
+  MAGIC_LINK_INVITATION = 'magicLinkInvitation',
 }
 
 export interface VerificationValue {
