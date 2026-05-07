@@ -144,8 +144,9 @@ export class MeetingGroupsController {
       createdBy: NIL,
       meetingGroupId: id,
       required: false,
+      email: `${this.tokenService.randomHash()}@anonymous.com`,
       authState: ParticipantAuthState.UNAUTHORIZED,
-      invitationState: ParticipantInvitationState.ACCEPTED,
+      invitationState: ParticipantInvitationState.PENDING,
     });
     const newValue: VerificationValue = {
       type: VerificationType.MAGIC_LINK_INVITATION,

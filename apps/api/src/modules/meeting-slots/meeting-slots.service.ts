@@ -1,7 +1,11 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
-import { AccountProvider, ParticipantAuthState } from '../../libs/constants';
+import {
+  AccountProvider,
+  CalendarProvider,
+  ParticipantAuthState,
+} from '../../libs/constants';
 import {
   CalendarEvent,
   ExternalCalendarService,
@@ -71,17 +75,19 @@ export class MeetingSlotsService {
         const account = participant.user.accounts.find(
           (account) => account.providerId === AccountProvider.GOOGLE,
         )!;
-        return participant.user.calendars.map((calendar) =>
-          this.externalCalendarService.listEvents(
-            calendar.providerId as 'google',
-            {
-              account,
-              calendarId: calendar.externalId,
-              timeMin: meetingGroup.after.toISOString(),
-              timeMax: meetingGroup.before.toISOString(),
-            },
-          ),
-        );
+        return participant.user.calendars
+          .filter((c) => c.enabled && c.providerId === CalendarProvider.GOOGLE)
+          .map((calendar) =>
+            this.externalCalendarService.listEvents(
+              calendar.providerId as 'google',
+              {
+                account,
+                calendarId: calendar.externalId,
+                timeMin: meetingGroup.after.toISOString(),
+                timeMax: meetingGroup.before.toISOString(),
+              },
+            ),
+          );
       }),
     );
 

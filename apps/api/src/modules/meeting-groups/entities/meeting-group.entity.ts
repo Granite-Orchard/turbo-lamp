@@ -62,7 +62,7 @@ export class MeetingGroup {
   @Column()
   summary: string;
 
-  @Column()
+  @Column({ nullable: true })
   magicLink: string;
 
   @Column({ nullable: true })

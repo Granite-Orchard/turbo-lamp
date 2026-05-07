@@ -1,5 +1,9 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { GoogleAuthManager } from '../../auth/managers/google-auth.manager';
 import {
@@ -81,52 +85,84 @@ export class GoogleCalendarProvider implements CalendarProvider {
       }),
     );
 
-    return (data.items ?? []).map((c) => ({
-      providerId: params.account.providerId,
-      calendarId: c.id,
-      name: c.summary,
-      description: c.description,
-      timezone: c.timeZone,
-      accessRole: c.accessRole,
-      primary: c.primary || false,
-    }));
+    return (data.items ?? []).reduce<Calendar[]>((acc, c) => {
+      if (c.id.includes('group.v.calendar.google.com')) {
+        return acc;
+      }
+
+      acc.push({
+        providerId: params.account.providerId,
+        calendarId: c.id,
+        name: c.summary,
+        description: c.description,
+        timezone: c.timeZone,
+        accessRole: c.accessRole,
+        primary: c.primary || false,
+      });
+
+      return acc;
+    }, []);
   }
 
   async listEvents(params: ListEventsParams): Promise<CalendarEvent[]> {
-    const accessToken = await this.auth.getValidAccessToken(params.account);
+    try {
+      const accessToken = await this.auth.getValidAccessToken(params.account);
 
-    const { timeMin, timeMax, calendarId = 'primary' } = params;
+      const { timeMin, timeMax, calendarId = 'primary' } = params;
 
-    const { data } = await firstValueFrom<{
-      data: { items: GoogleCalendarEvent[] };
-    }>(
-      this.http.get(`${this.baseUrl}/calendars/${calendarId}/events`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
+      this.logger.debug(
+        timeMin,
+        timeMax,
+        calendarId,
+        accessToken,
+        params.account,
+      );
+      const { data } = await firstValueFrom<{
+        data: { items: GoogleCalendarEvent[] };
+      }>(
+        this.http.get(`${this.baseUrl}/calendars/${calendarId}/events`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          params: {
+            timeMin,
+            timeMax,
+            singleEvents: true,
+            orderBy: 'startTime',
+          },
+        }),
+      );
+
+      this.logger.debug(
+        data.items.map((i) => ({
+          summary: i.summary,
+          start: i.start,
+          end: i.end,
+        })),
+      );
+      this.logger.debug(
+        `${data.items.length} number of events found for account`,
+        params.account.id,
+      );
+
+      return (data.items ?? []).map((e) => ({
+        id: e.id,
+        summary: e.summary,
+        description: e.description,
+        status: e.status,
+        start: {
+          dateTime: e.start.dateTime,
+          timeZone: e.start?.timeZone ?? '',
         },
-        params: {
-          timeMin,
-          timeMax,
-          singleEvents: true,
-          orderBy: 'startTime',
+        end: {
+          dateTime: e.end.dateTime,
+          timeZone: e.start?.timeZone ?? '',
         },
-      }),
-    );
-
-    return (data.items ?? []).map((e) => ({
-      id: e.id,
-      summary: e.summary,
-      description: e.description,
-      status: e.status,
-      start: {
-        dateTime: e.start.dateTime,
-        timeZone: e.start?.timeZone ?? '',
-      },
-      end: {
-        dateTime: e.end.dateTime,
-        timeZone: e.start?.timeZone ?? '',
-      },
-    }));
+      }));
+    } catch (err: any) {
+      this.logger.debug('List events experienced an error');
+      throw new InternalServerErrorException(err);
+    }
   }
 
   async getEvent(params: GetEventParams): Promise<CalendarEvent> {
