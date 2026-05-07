@@ -39,6 +39,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "../../../../../components/ui/input";
+import { Label } from "../../../../../components/ui/label";
 
 type Actions = {
   listSlotsAction: (id: string) => Promise<MeetingSlot[]>;
@@ -220,6 +222,8 @@ export function MeetingGroupDetail({
       }, {});
   }, [slots]);
 
+  const magicLinkRef = useRef<HTMLInputElement>(null);
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
@@ -261,6 +265,35 @@ export function MeetingGroupDetail({
                   </div>
                 </div>
               </div>
+              {group.magicLink && (
+                <div className="flex flex-col gap-2 text-muted-foreground">
+                  <Label htmlFor="magic-link">Invitation link</Label>
+                  <div className="flex">
+                    <Input
+                      ref={magicLinkRef}
+                      id="magic-link"
+                      value={group.magicLink}
+                      disabled
+                      readOnly
+                    />
+                    <Button
+                      variant="secondary"
+                      className="shrink-0"
+                      onClick={async () => {
+                        console.log(magicLinkRef.current);
+                        if (magicLinkRef.current) {
+                          await navigator.clipboard.writeText(
+                            magicLinkRef.current.value,
+                          );
+                          toast.success(`Copied ${magicLinkRef.current.value}`);
+                        }
+                      }}
+                    >
+                      Copy Link
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               {group.location && (
                 <div className="flex items-center gap-2 text-muted-foreground">

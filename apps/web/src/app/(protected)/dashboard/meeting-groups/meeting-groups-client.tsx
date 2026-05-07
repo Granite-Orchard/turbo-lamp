@@ -181,6 +181,7 @@ export default function MeetingGroupsClient({
                         className="text-destructive"
                         onSelect={async () => {
                           await actions.deleteMeetingGroupAction(group.id);
+                          router.refresh();
                         }}
                       >
                         Delete group

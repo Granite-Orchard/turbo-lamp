@@ -97,6 +97,7 @@ export const meetingGroupSchema = z
     creatorId: z.uuid().optional(),
     summary: z.string().min(1),
     description: z.string().optional(),
+    magicLink: z.string().optional(),
     location: z.string().optional(),
     duration: z.number().int().positive(),
     after: isoDateTimeSchema,
@@ -183,6 +184,7 @@ export const createMeetingGroupSchema = z
   .object(meetingGroupSchema.shape)
   .omit({
     id: true,
+    magicLink: true,
     timezone: true,
     creatorId: true,
     createdAt: true,

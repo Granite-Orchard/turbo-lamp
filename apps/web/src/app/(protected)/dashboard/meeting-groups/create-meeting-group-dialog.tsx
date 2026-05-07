@@ -28,6 +28,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod";
 import { meetingGroupSchema } from "@/lib/schemas";
+import { DatePickerWithRange } from "./components/date-range.component";
+import { CalendarSelector } from "./components/calendar-selector.component";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -203,7 +205,7 @@ export function CreateGroupDialog({
       resetState();
       setIsDialogOpenAction(false);
       onSuccess?.();
-      router.refresh();
+      router.push(`/dashboard/meeting-groups/${createdGroup.id}`);
     } catch {
       setErrors({ root: "Something went wrong. Please try again." });
     } finally {
@@ -273,35 +275,14 @@ export function CreateGroupDialog({
           </div>
 
           <div className="flex justify-between">
-            {/* Calendar */}
-            <div className="space-y-2">
-              <Label>Calendar</Label>
-              <Select
-                value={form.calendarId}
-                onValueChange={(v) => handleChange("calendarId", v)}
-                disabled={calendars.length === 0}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a calendar" />
-                </SelectTrigger>
-                <SelectContent>
-                  {calendars.map((cal) => (
-                    <SelectItem key={cal.id} value={cal.id}>
-                      {cal.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {calendars.length === 0 && (
-                <p className="text-xs text-muted-foreground">
-                  No calendars available.
-                </p>
-              )}
-              {errors.calendarId && (
-                <p className="text-xs text-destructive">{errors.calendarId}</p>
-              )}
-            </div>
-
+            <DatePickerWithRange
+              actions={{
+                handleAfterAction: (after: string) =>
+                  handleChange("after", after),
+                handleBeforeAction: (before: string) =>
+                  handleChange("before", before),
+              }}
+            />
             {/* Duration */}
             <div className="space-y-2">
               <Label>Duration</Label>
@@ -326,40 +307,19 @@ export function CreateGroupDialog({
             </div>
           </div>
 
-          {/* Date range */}
-          <div className="flex flex-col md:flex-row items-start gap-3 w-full">
-            <div className="flex-1 space-y-2 w-1/2">
-              <Label htmlFor="after">After</Label>
-              <Input
-                id="after"
-                type="datetime-local"
-                min={today}
-                onChange={(e) => handleChange("after", e.target.value)}
-              />
-              {errors.after && (
-                <p className="text-xs text-destructive">{errors.after}</p>
-              )}
-            </div>
-            <div className="flex-1 space-y-2 w-1/2">
-              <Label htmlFor="before">Before</Label>
-              <Input
-                id="before"
-                type="datetime-local"
-                min={form.after}
-                onChange={(e) => handleChange("before", e.target.value)}
-              />
-              {errors.before && (
-                <p className="text-xs text-destructive">{errors.before}</p>
-              )}
-            </div>
-          </div>
-
+          <CalendarSelector
+            form={form}
+            calendars={calendars}
+            errors={errors}
+            handleChangeAction={handleChange}
+          />
           <Separator />
 
           {/* Participants */}
           <div className="space-y-3">
-            <Label>Participants</Label>
-
+            <Label htmlFor="participants">
+              Participants <Badge variant={"outline"}>Not Required</Badge>
+            </Label>
             {/* Email input row */}
             <div className="flex gap-2">
               <Input
@@ -406,7 +366,7 @@ export function CreateGroupDialog({
 
             {/* Participant list */}
             {participants.length > 0 && (
-              <ul className="space-y-2">
+              <ul className="space-y-2 max-h-[10vh] overflow-y-auto">
                 {participants.map((p) => (
                   <li
                     key={p.email}
@@ -450,8 +410,7 @@ export function CreateGroupDialog({
             <p className="text-sm text-destructive">{errors.root}</p>
           )}
         </div>
-
-        <DialogFooter>
+        <DialogFooter className="flex justify-between items-end">
           <Button
             variant="outline"
             onClick={handleClose}

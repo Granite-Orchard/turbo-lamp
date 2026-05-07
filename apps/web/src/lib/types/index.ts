@@ -102,6 +102,7 @@ export interface MeetingGroup {
   authorId: string;
   summary: string;
   description?: string;
+  magicLink?: string;
   location?: string;
   duration: number;
   after: string;
