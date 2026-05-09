@@ -4,7 +4,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
 import {
@@ -37,8 +36,6 @@ export class MeetingGroupsService {
     private readonly verificationsService: VerificationsService,
     @Inject(TokenService)
     private readonly tokenService: TokenService,
-    @Inject(ConfigService)
-    private readonly configService: ConfigService,
   ) {}
 
   private validateStatusTransition(
