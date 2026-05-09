@@ -60,7 +60,7 @@ export class MeetingCreatedHandler implements IEventHandler<MeetingCreatedEvent>
           summary: meetingGroup.summary,
           description: meetingGroup.description,
           attendees: participants
-            .filter((p) => p.userId !== meetingGroup.authorId)
+            .filter((p) => p.userId !== meetingGroup.authorId && p.user)
             .map((participant) => {
               return { email: participant.user.email };
             }),

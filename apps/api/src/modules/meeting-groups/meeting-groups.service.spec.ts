@@ -10,6 +10,7 @@ import { CreateMeetingGroupDto } from './dto/create-meeting-group.dto';
 import { UpdateMeetingGroupDto } from './dto/update-meeting-group.dto';
 import { MeetingGroup } from './entities/meeting-group.entity';
 import { MeetingGroupsService } from './meeting-groups.service';
+import { ConfigService } from '@nestjs/config';
 
 describe('MeetingGroupsService', () => {
   let service: MeetingGroupsService;
@@ -75,6 +76,10 @@ describe('MeetingGroupsService', () => {
         {
           provide: TokenService,
           useValue: mockTokenService,
+        },
+        {
+          provide: ConfigService,
+          useValue: { get: jest.fn().mockReturnValue('http://localhost:3001') },
         },
       ],
     }).compile();

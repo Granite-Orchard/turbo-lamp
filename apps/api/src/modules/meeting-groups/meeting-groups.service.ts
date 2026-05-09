@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
 import {
+  EnvironmentVariables,
   MeetingGroupStatus,
   SanitizedRoutes,
   VerificationType,
@@ -17,6 +18,7 @@ import { VerificationsService } from '../verifications/verifications.service';
 import { CreateMeetingGroupDto } from './dto/create-meeting-group.dto';
 import { UpdateMeetingGroupDto } from './dto/update-meeting-group.dto';
 import { MeetingGroup } from './entities/meeting-group.entity';
+import { ConfigService } from '@nestjs/config';
 
 const ALLOWED_STATUS_TRANSITIONS: Record<
   MeetingGroupStatus,
@@ -36,6 +38,7 @@ export class MeetingGroupsService {
     private readonly verificationsService: VerificationsService,
     @Inject(TokenService)
     private readonly tokenService: TokenService,
+    private readonly configService: ConfigService,
   ) {}
 
   private validateStatusTransition(
@@ -129,7 +132,7 @@ export class MeetingGroupsService {
     });
   }
 
-  async generateMagicLink(meetinGroupId: string): Promise<string> {
+  async generateMagicLink(meetingGroupId: string): Promise<string> {
     const value: VerificationValue = {
       type: VerificationType.MAGIC_LINK_INVITATION,
       id: '',
@@ -144,7 +147,10 @@ export class MeetingGroupsService {
       value: this.tokenService.sign(value, { expiresIn }),
       expiresAt,
     });
-    const url = `http://localhost:3001/api/core/v1/meeting-groups/${meetinGroupId}/accept?token=${encodeURIComponent(verification.identifier)}`;
+    const apiUrl = this.configService.get<string>(
+      EnvironmentVariables.BACKEND_URL,
+    );
+    const url = `${apiUrl}/api/core/v1/meeting-groups/${meetingGroupId}/accept?token=${encodeURIComponent(verification.identifier)}`;
     return url;
   }
 

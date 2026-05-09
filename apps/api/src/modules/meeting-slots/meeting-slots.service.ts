@@ -54,7 +54,7 @@ export class MeetingSlotsService {
     if (!meetingGroup.participants) throw new NotFoundException();
 
     const nonAuthorParticipants = meetingGroup.participants.filter(
-      (g) => g.userId !== authorId,
+      (g) => g.userId && g.userId !== authorId,
     );
     if (nonAuthorParticipants.length === 0) {
       return [];
