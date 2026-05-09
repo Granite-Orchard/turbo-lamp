@@ -78,7 +78,7 @@ export class MeetingCreatedHandler implements IEventHandler<MeetingCreatedEvent>
     const results = await Promise.allSettled(
       participants.map((participant) =>
         this.meetingAttendeesService.create({
-          userId: participant.userId,
+          userId: participant.userId!,
           meetingId: entity.id,
           externalEventId: externalEvent.id!,
           email: participant.user.email,

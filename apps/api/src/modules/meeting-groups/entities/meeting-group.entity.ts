@@ -23,16 +23,16 @@ export class MeetingGroup {
   id: string;
 
   @OneToOne(() => Meeting, (meeting) => meeting.meetingGroup)
-  meeting?: Meeting;
+  meeting: Meeting;
 
   @OneToMany(() => MeetingSlot, (slot) => slot.meetingGroup)
-  slots?: MeetingSlot[];
+  slots: MeetingSlot[];
 
   @OneToMany(
     () => MeetingParticipant,
     (meetingParticipant) => meetingParticipant.meetingGroup,
   )
-  participants?: MeetingParticipant[];
+  participants: MeetingParticipant[];
 
   @Column({
     type: 'enum',

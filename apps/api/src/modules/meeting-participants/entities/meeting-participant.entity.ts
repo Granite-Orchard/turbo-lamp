@@ -32,7 +32,7 @@ export class MeetingParticipant {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'userId' })
-  user?: User;
+  user: User;
 
   @Column()
   meetingGroupId: string;
