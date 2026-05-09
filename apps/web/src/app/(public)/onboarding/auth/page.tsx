@@ -9,9 +9,9 @@ export default function Page() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-  // if (!token) {
-  //   router.push("/login");
-  // }
+  if (!token) {
+    router.push("/login");
+  }
   return (
     <div className="relative flex min-h-screen">
       {/* Background pattern */}
@@ -72,7 +72,7 @@ export default function Page() {
               <Button
                 className="h-11"
                 onClick={() => {
-                  window.location.href = `http://localhost:3001/api/core/v1/auth/oauth/google?token=${token}`;
+                  window.location.href = `http://localhost:3001/api/core/v1/auth/oauth/register/google?token=${token}`;
                 }}
               >
                 <IconBrandGoogle />

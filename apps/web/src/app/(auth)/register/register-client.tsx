@@ -29,7 +29,7 @@ const benefits = [
 ];
 
 type Actions = {
-  register: (data: Register) => Promise<unknown>;
+  registerAction: (data: Register) => Promise<unknown>;
 };
 
 export default function RegisterClient({ actions }: { actions: Actions }) {
@@ -46,7 +46,7 @@ export default function RegisterClient({ actions }: { actions: Actions }) {
 
   async function onSubmit(data: z.infer<typeof registerSchema>) {
     try {
-      await actions.register({
+      await actions.registerAction({
         username: data.username,
         password: data.password,
         confirmPassword: data.confirmPassword,

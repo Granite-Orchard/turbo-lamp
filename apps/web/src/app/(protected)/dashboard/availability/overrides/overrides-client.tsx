@@ -35,14 +35,14 @@ import { TIMES } from "@/lib/constants";
 import type { AvailabilityOverride } from "@/lib/types";
 
 type Actions = {
-  createOverrideAction: (
+  createAvailabilityOverrideAction: (
     data: Partial<AvailabilityOverride>,
   ) => Promise<AvailabilityOverride>;
-  updateOverrideAction: (
+  updateAvailabilityOverrideAction: (
     id: string,
     data: Partial<AvailabilityOverride>,
   ) => Promise<AvailabilityOverride>;
-  deleteOverrideAction: (id: string) => Promise<unknown>;
+  deleteAvailabilityOverrideAction: (id: string) => Promise<unknown>;
 };
 
 function formatDate(dateString: string) {
@@ -85,7 +85,7 @@ export default function OverridesClient({
   const addOverride = async () => {
     if (!newOverride.date) return;
 
-    const override = await actions.createOverrideAction({
+    const override = await actions.createAvailabilityOverrideAction({
       ...newOverride,
       startTime: newOverride.isAvailable ? newOverride.startTime : "00:00",
       endTime: newOverride.isAvailable ? newOverride.endTime : "00:00",
@@ -102,7 +102,7 @@ export default function OverridesClient({
   };
 
   const removeOverride = async (id: string) => {
-    await actions.deleteOverrideAction(id);
+    await actions.deleteAvailabilityOverrideAction(id);
     setOverrides((prev) => prev.filter((o) => o.id !== id));
   };
 

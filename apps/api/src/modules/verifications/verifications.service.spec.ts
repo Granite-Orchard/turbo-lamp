@@ -219,7 +219,7 @@ service = module.get<VerificationsService>(VerificationsService);
       };
 
       const payload: VerificationValue = {
-        type: VerificationType.MEETING_INVITATION,
+        type: VerificationType.EMAIL_INVITATION,
         meetingGroupId: '123',
       };
 

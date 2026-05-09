@@ -37,13 +37,15 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { cn } from "../../lib/utils";
-import { Badge } from "../ui/badge";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "../../../../../components/ui/input";
+import { Label } from "../../../../../components/ui/label";
 
 type Actions = {
   listSlotsAction: (id: string) => Promise<MeetingSlot[]>;
   calculateSlotsAction: (id: string) => Promise<MeetingSlot[]>;
-  createMeetingAction: (data: Partial<MeetingSlot>) => Promise<Meeting>;
+  createMeetingAction: (data: Partial<Meeting>) => Promise<Meeting>;
 };
 
 interface MeetingGroupDetailProps {
@@ -112,12 +114,17 @@ export function MeetingGroupDetail({
   const statusConf = statusConfig[group.status];
 
   const activeParticipants = useMemo(
-    () => participants.filter((p) => p.invitationState !== "declined"),
+    () =>
+      participants.filter(
+        (p) =>
+          p.invitationState === "accepted" &&
+          ["authorized", "not_required"].includes(p.authState),
+      ),
     [participants],
   );
 
   const canSchedule = useMemo(() => {
-    return activeParticipants.length > 0;
+    return activeParticipants.length > 1;
   }, [activeParticipants]);
 
   async function loadSlots() {
@@ -168,7 +175,8 @@ export function MeetingGroupDetail({
     if (group.status !== "finalized") {
       loadSlots();
     }
-  }, [group.id, group.status]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [group.status]);
 
   function handleSelectSlot(slot: MeetingSlot) {
     if (!canSchedule) {
@@ -190,6 +198,7 @@ export function MeetingGroupDetail({
         meetingGroupId: group.id,
         start: selectedSlot.start,
         end: selectedSlot.end,
+        status: "scheduled",
       });
 
       toast.success("Meeting scheduled successfully");
@@ -212,6 +221,8 @@ export function MeetingGroupDetail({
         return acc;
       }, {});
   }, [slots]);
+
+  const magicLinkRef = useRef<HTMLInputElement>(null);
 
   return (
     <div className="space-y-6">
@@ -254,6 +265,35 @@ export function MeetingGroupDetail({
                   </div>
                 </div>
               </div>
+              {group.magicLink && (
+                <div className="flex flex-col gap-2 text-muted-foreground">
+                  <Label htmlFor="magic-link">Invitation link</Label>
+                  <div className="flex">
+                    <Input
+                      ref={magicLinkRef}
+                      id="magic-link"
+                      value={group.magicLink}
+                      disabled
+                      readOnly
+                    />
+                    <Button
+                      variant="secondary"
+                      className="shrink-0"
+                      onClick={async () => {
+                        console.log(magicLinkRef.current);
+                        if (magicLinkRef.current) {
+                          await navigator.clipboard.writeText(
+                            magicLinkRef.current.value,
+                          );
+                          toast.success(`Copied ${magicLinkRef.current.value}`);
+                        }
+                      }}
+                    >
+                      Copy Link
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               {group.location && (
                 <div className="flex items-center gap-2 text-muted-foreground">
@@ -336,7 +376,7 @@ export function MeetingGroupDetail({
                   variant="outline"
                   size="sm"
                   onClick={refreshSlots}
-                  disabled={slotsLoading}
+                  disabled={slotsLoading || !canSchedule}
                 >
                   <RefreshCw
                     className={`h-3.5 w-3.5 mr-1.5 ${

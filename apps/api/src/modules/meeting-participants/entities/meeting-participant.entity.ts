@@ -26,7 +26,7 @@ export class MeetingParticipant {
   id: string;
 
   @Column({ nullable: true })
-  userId: string;
+  userId?: string;
 
   @ManyToOne(() => User, (user) => user.participations, {
     onDelete: 'CASCADE',

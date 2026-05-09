@@ -1,29 +1,28 @@
-import { meetingGroupsApi } from "@/lib/api/meeting-groups";
-import { calendarsApi } from "@/lib/api/calendars";
+import { listCalendarsAction } from "@/lib/actions/calendars";
 import {
   createMeetingGroupAction,
-  createMeetingGroupParticipantAction,
   deleteMeetingGroupAction,
+  listMeetingGroupsAction,
   updateMeetingGroupAction,
-} from "./actions";
+} from "@/lib/actions/meeting-groups";
+import { createMeetingGroupParticipantsAction } from "./actions";
 import MeetingGroupsClient from "./meeting-groups-client";
 
 export default async function Page() {
-  const [initialData, calendars] = await Promise.all([
-    meetingGroupsApi.list(),
-    calendarsApi.list(),
+  const [meetingGroups, calendars] = await Promise.all([
+    listMeetingGroupsAction(),
+    listCalendarsAction(),
   ]);
 
   return (
     <MeetingGroupsClient
-      initialData={initialData}
-      calendars={calendars}
+      initialData={{ meetingGroups, calendars }}
       actions={{
         createMeetingGroupAction: createMeetingGroupAction,
         updateMeetingGroupAction: updateMeetingGroupAction,
         deleteMeetingGroupAction: deleteMeetingGroupAction,
-        createMeetingGroupParticipantAction:
-          createMeetingGroupParticipantAction,
+        createMeetingGroupParticipantsAction:
+          createMeetingGroupParticipantsAction,
       }}
     />
   );

@@ -28,6 +28,11 @@ export class CreateMeetingGroupDto {
   @IsString()
   description?: string;
 
+  @ApiProperty({ description: 'The magic link of the meeting group.' })
+  @IsOptional()
+  @IsString()
+  magicLink?: string;
+
   @ApiProperty({ description: 'The location of the meeting group.' })
   @IsOptional()
   @IsString()

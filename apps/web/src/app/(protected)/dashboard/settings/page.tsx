@@ -1,19 +1,25 @@
-import { calendarsApi } from "../../../../lib/api/calendars";
-import { createCalendarAction, toggleCalendarAction } from "./actions";
+import {
+  createCalendarAction,
+  listCalendarsAction,
+  listExternalCalendarsAction,
+  updateCalendarAction,
+} from "@/lib/actions/calendars";
 import SettingsClient from "./settings-client";
 
 export default async function Page() {
   const [externalCalendars, calendars] = await Promise.all([
-    calendarsApi.listExternal(),
-    calendarsApi.list(),
+    listExternalCalendarsAction(),
+    listCalendarsAction(),
   ]);
 
   return (
     <SettingsClient
-      initialCalendars={calendars}
-      initialExternalCalendars={externalCalendars}
+      initialData={{
+        calendars,
+        externalCalendars,
+      }}
       actions={{
-        toggleCalendarEnabledAction: toggleCalendarAction,
+        toggleCalendarEnabledAction: updateCalendarAction,
         createCalendarAction: createCalendarAction,
       }}
     />

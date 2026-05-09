@@ -12,7 +12,11 @@ export const meetingsApi = {
 
   create: async (data: Partial<Meeting>) => {
     const payload = createMeetingSchema.parse(data);
-    return await serverRequest<Meeting>("/meetings", "POST", payload);
+    return await serverRequest<Meeting>(
+      `/meetings?_rid=${crypto.randomUUID()}`,
+      "POST",
+      payload,
+    );
   },
 
   update: async (id: string, data: Partial<Meeting>) => {
@@ -23,4 +27,3 @@ export const meetingsApi = {
   delete: async (id: string) =>
     await serverRequest<void>(`/meetings/${id}`, "DELETE"),
 };
-

@@ -7,6 +7,8 @@ import { MeetingGroup } from './entities/meeting-group.entity';
 import { MeetingCreatedHandler } from './handlers/meeting-created.handler';
 import { MeetingGroupsController } from './meeting-groups.controller';
 import { MeetingGroupsService } from './meeting-groups.service';
+import { VerificationsModule } from '../verifications/verifications.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { MeetingGroupsService } from './meeting-groups.service';
     MeetingParticipantsModule,
     MeetingAttendeesModule,
     CalendarsModule,
+    VerificationsModule,
+    AuthModule,
   ],
   controllers: [MeetingGroupsController],
   providers: [MeetingGroupsService, MeetingCreatedHandler],

@@ -1,8 +1,9 @@
-import { meetingAttendeesApi } from "@/lib/api/meeting-attendees";
+import { listMeetingAttendeesAction } from "@/lib/actions/meeting-attendees";
 import { AttendeesClient } from "./attendees-client";
 
 export default async function Page() {
-  const attendees = await meetingAttendeesApi.list();
+  const attendees = await listMeetingAttendeesAction();
 
   return <AttendeesClient initialAttendees={attendees} />;
 }
+

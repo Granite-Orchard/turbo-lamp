@@ -20,7 +20,7 @@ export class InvitationsService {
       userId: user.userId,
       invitationState: ParticipantInvitationState.ACCEPTED,
       authState:
-        user.user.calendars.length > 0
+        user.user.calendars && user.user.calendars.length > 0
           ? ParticipantAuthState.AUTHORIZED
           : undefined,
     });

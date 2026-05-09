@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import { DAYS } from "@/lib/constants";
 import type {
   Availability,
   AvailabilityOverride,
@@ -14,7 +15,6 @@ import type {
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
-import { DAYS } from "@/lib/constants";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -29,31 +29,33 @@ type Step = 1 | 2 | 3;
 type ValidationError = string | null;
 
 type Props = {
-  externalCalendars: ExternalCalendar[];
-  calendars: Calendar[];
-  availabilities: Availability[];
-  overrides: AvailabilityOverride[];
-  saveCalendarsAction: (data: Calendar[]) => Promise<Calendar[]>;
-  saveAvailabilitiesAction: (data: Availability[]) => Promise<Availability[]>;
-  saveAvailabilityOverridesAction: (
-    data: AvailabilityOverride[],
-  ) => Promise<AvailabilityOverride[]>;
+  initialData: {
+    externalCalendars: ExternalCalendar[];
+    calendars: Calendar[];
+    availabilities: Availability[];
+    overrides: AvailabilityOverride[];
+  };
+  actions: {
+    saveCalendarsAction: (data: Calendar[]) => Promise<Calendar[]>;
+    saveAvailabilitiesAction: (
+      data: Partial<Availability>[],
+    ) => Promise<Availability[]>;
+    saveAvailabilityOverridesAction: (
+      data: AvailabilityOverride[],
+    ) => Promise<AvailabilityOverride[]>;
+  };
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function createDefaultAvailabilities(userId: string): Availability[] {
+function createDefaultAvailabilities(): Partial<Availability>[] {
   return DAYS.map((_, dayIndex) => {
     const isWeekend = [0, 6].includes(dayIndex);
     return {
-      id: crypto.randomUUID(),
-      userId,
       dayOfWeek: dayIndex,
       startTime: "09:00",
       endTime: "17:00",
       isAvailable: !isWeekend,
-      createdAt: "",
-      updatedAt: "",
     };
   });
 }
@@ -740,15 +742,14 @@ const STEP_SESSION_KEY = "onboarding-step";
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function OnboardingClient({
-  externalCalendars,
-  calendars,
-  availabilities,
-  overrides,
-  saveCalendarsAction: saveCalendars,
-  saveAvailabilitiesAction: saveAvailabilities,
-  saveAvailabilityOverridesAction: saveAvailabilityOverrides,
-}: Props) {
+export default function OnboardingClient({ initialData, actions }: Props) {
+  const { externalCalendars, calendars, availabilities, overrides } =
+    initialData;
+  const {
+    saveCalendarsAction,
+    saveAvailabilitiesAction,
+    saveAvailabilityOverridesAction,
+  } = actions;
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -790,12 +791,10 @@ export default function OnboardingClient({
   );
 
   const [localAvailabilities, setLocalAvailabilities] = useState<
-    Availability[]
+    Partial<Availability>[]
   >(() => {
     if (availabilities?.length) return availabilities;
-    // Always create the 7-day defaults. userId may be "" for brand-new users
-    // who have no records yet — that's fine, it gets filled server-side on save.
-    return createDefaultAvailabilities(userId);
+    return createDefaultAvailabilities();
   });
 
   const [localOverrides, setLocalOverrides] = useState<AvailabilityOverride[]>(
@@ -818,7 +817,7 @@ export default function OnboardingClient({
         setLocalAvailabilities(availabilities);
       } else {
         // Re-seed defaults if props change and there are still no saved availabilities.
-        setLocalAvailabilities(createDefaultAvailabilities(userId));
+        setLocalAvailabilities(createDefaultAvailabilities());
       }
     }
     process();
@@ -926,10 +925,10 @@ export default function OnboardingClient({
         return "Enable at least one day of availability.";
       }
       const invalid = enabled.find(
-        (a) => !isTimeRangeValid(a.startTime, a.endTime),
+        (a) => !isTimeRangeValid(a.startTime!, a.endTime!),
       );
       if (invalid) {
-        return `${DAYS[invalid.dayOfWeek]}: end time must be after start time.`;
+        return `${DAYS[invalid.dayOfWeek!]}: end time must be after start time.`;
       }
     }
     if (s === 3) {
@@ -964,15 +963,13 @@ export default function OnboardingClient({
             timezone: c.timezone ?? "UTC",
             enabled: true,
           })) as Calendar[];
-        await saveCalendars(payload);
-        const result = await saveAvailabilities(localAvailabilities);
+        await saveCalendarsAction(payload);
+        const result = await saveAvailabilitiesAction(localAvailabilities);
         setLocalAvailabilities(result);
         setStep(3);
         return;
       }
       if (step === 2) {
-        const result = await saveAvailabilities(localAvailabilities);
-        setLocalAvailabilities(result);
         setStep(3);
         return;
       }
@@ -983,7 +980,7 @@ export default function OnboardingClient({
           ? o
           : { ...o, startTime: ALL_DAY_START, endTime: ALL_DAY_END },
       );
-      await saveAvailabilityOverrides(overridePayload);
+      await saveAvailabilityOverridesAction(overridePayload);
       sessionStorage.removeItem(STEP_SESSION_KEY);
       router.push("/dashboard/meeting-groups");
     });
@@ -1029,7 +1026,7 @@ export default function OnboardingClient({
 
       {step === 2 && (
         <AvailabilityStep
-          availabilities={localAvailabilities}
+          availabilities={localAvailabilities as Availability[]}
           allDaysFilled={localAvailabilities.length >= 7}
           onAdd={addAvailability}
           onRemove={removeAvailability}

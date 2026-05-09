@@ -1,23 +1,26 @@
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { MeetingGroupsService } from './meeting-groups.service';
-import { MeetingGroup } from './entities/meeting-group.entity';
+import { MeetingGroupStatus } from '../../libs/constants';
+import { TokenService } from '../auth/token.service';
+import { Calendar } from '../calendars/entities/calendar.entity';
+import { User } from '../users/entities/user.entity';
+import { VerificationsService } from '../verifications/verifications.service';
 import { CreateMeetingGroupDto } from './dto/create-meeting-group.dto';
 import { UpdateMeetingGroupDto } from './dto/update-meeting-group.dto';
-import { MeetingGroupStatus } from '../../libs/constants';
+import { MeetingGroup } from './entities/meeting-group.entity';
+import { MeetingGroupsService } from './meeting-groups.service';
+import { ConfigService } from '@nestjs/config';
 
 describe('MeetingGroupsService', () => {
   let service: MeetingGroupsService;
-  let repository: Repository<MeetingGroup>;
 
   const mockMeetingGroup: MeetingGroup = {
     id: '123e4567-e89b-12d3-a456-426614174000',
     authorId: '123e4567-e89b-12d3-a456-426614174001',
-    author: {} as any,
+    author: {} as User,
     calendarId: '123e4567-e89b-12d3-a456-426614174002',
-    calendar: {} as any,
+    calendar: {} as Calendar,
     summary: 'Test Meeting Group',
     description: 'Test Description',
     location: 'Test Location',
@@ -47,6 +50,17 @@ describe('MeetingGroupsService', () => {
     softDelete: jest.fn(),
   };
 
+  const mockVerificationsService = {
+    create: jest.fn(),
+    findOneBy: jest.fn(),
+  };
+
+  const mockTokenService = {
+    randomHash: jest.fn(),
+    sign: jest.fn(),
+    verify: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -55,13 +69,22 @@ describe('MeetingGroupsService', () => {
           provide: getRepositoryToken(MeetingGroup),
           useValue: mockRepository,
         },
+        {
+          provide: VerificationsService,
+          useValue: mockVerificationsService,
+        },
+        {
+          provide: TokenService,
+          useValue: mockTokenService,
+        },
+        {
+          provide: ConfigService,
+          useValue: { get: jest.fn().mockReturnValue('http://localhost:3001') },
+        },
       ],
     }).compile();
 
     service = module.get<MeetingGroupsService>(MeetingGroupsService);
-    repository = module.get<Repository<MeetingGroup>>(
-      getRepositoryToken(MeetingGroup),
-    );
   });
 
   afterEach(() => {
@@ -98,7 +121,7 @@ describe('MeetingGroupsService', () => {
         relations: expect.objectContaining({
           participants: true,
           calendar: true,
-        }),
+        }) as { participants: boolean; calendar: boolean },
       });
       expect(result).toEqual([mockMeetingGroup]);
     });
@@ -107,11 +130,13 @@ describe('MeetingGroupsService', () => {
       const customRelations = { participants: true };
       mockRepository.find.mockResolvedValue([mockMeetingGroup]);
 
-      const result = await service.findAllBy({}, customRelations);
+      await service.findAllBy({}, customRelations);
 
       expect(mockRepository.find).toHaveBeenCalledWith({
         where: {},
-        relations: expect.objectContaining(customRelations),
+        relations: expect.objectContaining(customRelations) as {
+          participants: boolean;
+        },
       });
     });
   });

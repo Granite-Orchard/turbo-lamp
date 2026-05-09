@@ -10,14 +10,14 @@ export const meetingAttendeesApi = {
     await serverRequest<MeetingAttendee>(`/meeting-attendees/${id}`, "GET"),
 
   list: async () => {
-    return await serverRequest<MeetingAttendee[]>(`/meeting-attendees$`, "GET");
+    return await serverRequest<MeetingAttendee[]>(`/meeting-attendees`, "GET");
   },
 
   create: async (data: Partial<MeetingAttendee>) => {
     const payload = createMeetingAttendeeSchema.parse(data);
 
     return await serverRequest<MeetingAttendee>(
-      "/meeting-attendees",
+      `/meeting-attendees?_rid=${crypto.randomUUID()}`,
       "POST",
       payload,
     );
@@ -35,4 +35,3 @@ export const meetingAttendeesApi = {
   delete: async (id: string) =>
     await serverRequest<void>(`/meeting-attendees/${id}`, "DELETE"),
 };
-

@@ -60,7 +60,7 @@ export class MeetingCreatedHandler implements IEventHandler<MeetingCreatedEvent>
           summary: meetingGroup.summary,
           description: meetingGroup.description,
           attendees: participants
-            .filter((p) => p.userId !== meetingGroup.authorId)
+            .filter((p) => p.userId !== meetingGroup.authorId && p.user)
             .map((participant) => {
               return { email: participant.user.email };
             }),
@@ -78,10 +78,10 @@ export class MeetingCreatedHandler implements IEventHandler<MeetingCreatedEvent>
     const results = await Promise.allSettled(
       participants.map((participant) =>
         this.meetingAttendeesService.create({
-          userId: participant.userId,
+          userId: participant.userId!,
           meetingId: entity.id,
           externalEventId: externalEvent.id!,
-          email: participant.user.email,
+          email: participant.user ? participant.user.email : participant.email,
           createdBy: meetingGroup.authorId,
         }),
       ),

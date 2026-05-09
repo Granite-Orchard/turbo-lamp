@@ -1,16 +1,15 @@
-import { cookies } from "next/headers";
-import { registerAction } from "./actions";
-import RegisterClient from "./register-client";
+import { getProfileAction, registerAction } from "@/lib/actions/auth";
 import { redirect } from "next/navigation";
+import RegisterClient from "./register-client";
 export default async function page() {
-  const session = (await cookies()).get("session");
-  if (session) {
+  const profile = await getProfileAction().catch(() => null);
+  if (profile) {
     return redirect("/dashboard");
   }
   return (
     <RegisterClient
       actions={{
-        register: registerAction,
+        registerAction,
       }}
     />
   );

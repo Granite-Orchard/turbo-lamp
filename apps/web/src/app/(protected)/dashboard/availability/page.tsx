@@ -1,14 +1,16 @@
-import { availabilitiesApi } from "@/lib/api/availabilities";
-import { updateAvailabilityAction } from "./actions";
+import {
+  listAvailabilitiesAction,
+  updateAvailabilityAction,
+} from "@/lib/actions/availabilities";
 import AvailabilityClient from "./availability-client";
 
 export default async function Page() {
-  const result = await availabilitiesApi.list();
+  const result = await listAvailabilitiesAction();
   return (
     <AvailabilityClient
       initialData={result.sort((a, b) => a.dayOfWeek - b.dayOfWeek)}
       actions={{
-        update: updateAvailabilityAction,
+        updateAvailabilityAction,
       }}
     />
   );

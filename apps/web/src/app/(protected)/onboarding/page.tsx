@@ -1,32 +1,40 @@
-import { availabilitiesApi } from "@/lib/api/availabilities";
-import { availabilityOverridesApi } from "@/lib/api/availability-overrides";
-import { calendarsApi } from "@/lib/api/calendars";
-import OnboardingClient from "./onboarding-client";
-
+"use server";
+import { listAvailabilitiesAction } from "@/lib/actions/availabilities";
+import { listAvailabilityOverridesAction } from "@/lib/actions/availability-overrides";
 import {
-  saveAvailabilities,
-  saveAvailabilityOverrides,
-  saveCalendars,
+  listCalendarsAction,
+  listExternalCalendarsAction,
+} from "@/lib/actions/calendars";
+import {
+  saveAvailabilitiesAction,
+  saveAvailabilityOverridesAction,
+  saveCalendarsAction,
 } from "./actions";
+import OnboardingClient from "./onboarding-client";
+import { getProfileAction } from "@/lib/actions/auth";
+import { redirect } from "next/navigation";
 
 export default async function Page() {
+  const profile = await getProfileAction().catch(() => null);
+  if (!profile) {
+    return redirect("/login");
+  }
   const [externalCalendars, calendars, availabilities, overrides] =
     await Promise.all([
-      calendarsApi.listExternal(),
-      calendarsApi.list(),
-      availabilitiesApi.list(),
-      availabilityOverridesApi.list(),
+      listExternalCalendarsAction(),
+      listCalendarsAction(),
+      listAvailabilitiesAction(),
+      listAvailabilityOverridesAction(),
     ]);
 
   return (
     <OnboardingClient
-      externalCalendars={externalCalendars}
-      calendars={calendars}
-      availabilities={availabilities}
-      overrides={overrides}
-      saveCalendarsAction={saveCalendars}
-      saveAvailabilitiesAction={saveAvailabilities}
-      saveAvailabilityOverridesAction={saveAvailabilityOverrides}
+      initialData={{ externalCalendars, calendars, availabilities, overrides }}
+      actions={{
+        saveCalendarsAction,
+        saveAvailabilitiesAction,
+        saveAvailabilityOverridesAction,
+      }}
     />
   );
 }

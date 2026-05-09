@@ -2,6 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MeetingGroupsController } from './meeting-groups.controller';
 import { MeetingGroupsService } from './meeting-groups.service';
 import { MeetingParticipantsService } from '../meeting-participants/meeting-participants.service';
+import { VerificationsService } from '../verifications/verifications.service';
+import { TokenService } from '../auth/token.service';
+import { ConfigService } from '@nestjs/config';
 
 describe('MeetingGroupsController', () => {
   let controller: MeetingGroupsController;
@@ -20,7 +23,26 @@ describe('MeetingGroupsController', () => {
       controllers: [MeetingGroupsController],
       providers: [
         { provide: MeetingGroupsService, useValue: mockService },
-        { provide: MeetingParticipantsService, useValue: mockParticipantService },
+        {
+          provide: MeetingParticipantsService,
+          useValue: mockParticipantService,
+        },
+        {
+          provide: VerificationsService,
+          useValue: { findOneBy: jest.fn(), create: jest.fn() },
+        },
+        {
+          provide: TokenService,
+          useValue: {
+            randomHash: jest.fn(),
+            sign: jest.fn(),
+            verify: jest.fn(),
+          },
+        },
+        {
+          provide: ConfigService,
+          useValue: { get: jest.fn().mockReturnValue('http://localhost:3000') },
+        },
       ],
     }).compile();
 

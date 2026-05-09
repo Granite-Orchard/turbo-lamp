@@ -16,7 +16,7 @@ export const meetingGroupsApi = {
   create: async (data: Partial<MeetingGroup>) => {
     const payload = createMeetingGroupSchema.parse(data);
     return await serverRequest<MeetingGroup>(
-      "/meeting-groups",
+      `/meeting-groups?_rid=${crypto.randomUUID()}`,
       "POST",
       payload,
     );

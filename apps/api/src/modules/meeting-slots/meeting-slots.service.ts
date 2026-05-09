@@ -1,7 +1,11 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
-import { AccountProvider, ParticipantAuthState } from '../../libs/constants';
+import {
+  AccountProvider,
+  CalendarProvider,
+  ParticipantAuthState,
+} from '../../libs/constants';
 import {
   CalendarEvent,
   ExternalCalendarService,
@@ -50,7 +54,7 @@ export class MeetingSlotsService {
     if (!meetingGroup.participants) throw new NotFoundException();
 
     const nonAuthorParticipants = meetingGroup.participants.filter(
-      (g) => g.userId !== authorId,
+      (g) => g.userId && g.userId !== authorId,
     );
     if (nonAuthorParticipants.length === 0) {
       return [];
@@ -58,7 +62,7 @@ export class MeetingSlotsService {
 
     const allParticipants = meetingGroup.participants;
 
-    const participantAvailabilityWindows = allParticipants.map(
+    const allParticipantAvailabilityWindows = allParticipants.map(
       (participant) => ({
         availabilities: participant.user.availabilities,
         overrides: participant.user.availabilityOverrides,
@@ -71,22 +75,24 @@ export class MeetingSlotsService {
         const account = participant.user.accounts.find(
           (account) => account.providerId === AccountProvider.GOOGLE,
         )!;
-        return participant.user.calendars.map((calendar) =>
-          this.externalCalendarService.listEvents(
-            calendar.providerId as 'google',
-            {
-              account,
-              calendarId: calendar.externalId,
-              timeMin: meetingGroup.after.toISOString(),
-              timeMax: meetingGroup.before.toISOString(),
-            },
-          ),
-        );
+        return participant.user.calendars
+          .filter((c) => c.enabled && c.providerId === CalendarProvider.GOOGLE)
+          .map((calendar) =>
+            this.externalCalendarService.listEvents(
+              calendar.providerId as 'google',
+              {
+                account,
+                calendarId: calendar.externalId,
+                timeMin: meetingGroup.after.toISOString(),
+                timeMax: meetingGroup.before.toISOString(),
+              },
+            ),
+          );
       }),
     );
 
     const baseAvailableWindows = this.intersectParticipantAvailabilityWindows(
-      participantAvailabilityWindows,
+      allParticipantAvailabilityWindows,
       meetingGroup.after,
       meetingGroup.before,
     );
