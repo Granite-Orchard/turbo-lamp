@@ -26,13 +26,13 @@ export class MeetingParticipant {
   id: string;
 
   @Column({ nullable: true })
-  userId: string;
+  userId?: string;
 
   @ManyToOne(() => User, (user) => user.participations, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'userId' })
-  user: User;
+  user?: User;
 
   @Column()
   meetingGroupId: string;
