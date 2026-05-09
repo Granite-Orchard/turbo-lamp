@@ -62,7 +62,7 @@ export class MeetingSlotsService {
 
     const allParticipants = meetingGroup.participants;
 
-    const participantAvailabilityWindows = allParticipants.map(
+    const allParticipantAvailabilityWindows = allParticipants.map(
       (participant) => ({
         availabilities: participant.user.availabilities,
         overrides: participant.user.availabilityOverrides,
@@ -92,7 +92,7 @@ export class MeetingSlotsService {
     );
 
     const baseAvailableWindows = this.intersectParticipantAvailabilityWindows(
-      participantAvailabilityWindows,
+      allParticipantAvailabilityWindows,
       meetingGroup.after,
       meetingGroup.before,
     );

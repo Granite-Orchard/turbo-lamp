@@ -81,7 +81,7 @@ export class MeetingCreatedHandler implements IEventHandler<MeetingCreatedEvent>
           userId: participant.userId!,
           meetingId: entity.id,
           externalEventId: externalEvent.id!,
-          email: participant.user.email,
+          email: participant.user ? participant.user.email : participant.email,
           createdBy: meetingGroup.authorId,
         }),
       ),

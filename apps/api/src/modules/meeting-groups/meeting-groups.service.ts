@@ -149,7 +149,7 @@ export class MeetingGroupsService {
     });
     const apiUrl = this.configService.get<string>(
       EnvironmentVariables.BACKEND_URL,
-    );
+    )!;
     const url = `${apiUrl}/api/core/v1/meeting-groups/${meetingGroupId}/accept?token=${encodeURIComponent(verification.identifier)}`;
     return url;
   }
@@ -179,10 +179,7 @@ export class MeetingGroupsService {
       );
     }
 
-    return await this.repository.update(id, {
-      ...meetingGroup,
-      ...updateMeetingGroupDto,
-    });
+    return await this.repository.update(id, updateMeetingGroupDto);
   }
 
   async remove(id: string) {
