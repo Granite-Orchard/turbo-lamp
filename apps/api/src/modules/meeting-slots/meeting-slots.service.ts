@@ -283,7 +283,7 @@ export class MeetingSlotsService {
     const current = new Date(windowStart);
     current.setUTCHours(0, 0, 0, 0);
     const end = new Date(windowEnd);
-    end.setUTCHours(0, 0, 0, 0);
+    end.setUTCHours(23, 59, 59, 999);
 
     const intersected: { start: number; end: number }[] = [];
 

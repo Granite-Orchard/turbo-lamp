@@ -110,13 +110,6 @@ export class GoogleCalendarProvider implements CalendarProvider {
 
       const { timeMin, timeMax, calendarId = 'primary' } = params;
 
-      this.logger.debug(
-        timeMin,
-        timeMax,
-        calendarId,
-        accessToken,
-        params.account,
-      );
       const { data } = await firstValueFrom<{
         data: { items: GoogleCalendarEvent[] };
       }>(
@@ -131,18 +124,6 @@ export class GoogleCalendarProvider implements CalendarProvider {
             orderBy: 'startTime',
           },
         }),
-      );
-
-      this.logger.debug(
-        data.items.map((i) => ({
-          summary: i.summary,
-          start: i.start,
-          end: i.end,
-        })),
-      );
-      this.logger.debug(
-        `${data.items.length} number of events found for account`,
-        params.account.id,
       );
 
       return (data.items ?? []).map((e) => ({
@@ -160,7 +141,6 @@ export class GoogleCalendarProvider implements CalendarProvider {
         },
       }));
     } catch (err: any) {
-      this.logger.debug('List events experienced an error');
       throw new InternalServerErrorException(err);
     }
   }

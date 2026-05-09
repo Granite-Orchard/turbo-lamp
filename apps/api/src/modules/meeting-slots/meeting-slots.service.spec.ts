@@ -1,19 +1,19 @@
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, NotFoundException } from 'typeorm';
-import { MeetingSlotsService } from './meeting-slots.service';
-import { MeetingSlot } from './entities/meeting-slot.entity';
-import { MeetingGroupsService } from '../meeting-groups/meeting-groups.service';
 import { ExternalCalendarService } from '../calendars/external-calendar.service';
+import { MeetingGroup } from '../meeting-groups/entities/meeting-group.entity';
+import { MeetingGroupsService } from '../meeting-groups/meeting-groups.service';
+import { MeetingSlot } from './entities/meeting-slot.entity';
+import { MeetingSlotsService } from './meeting-slots.service';
 
 describe('MeetingSlotsService', () => {
   let service: MeetingSlotsService;
-  let repository: Repository<MeetingSlot>;
 
   const mockMeetingSlot: MeetingSlot = {
     id: '123e4567-e89b-12d3-a456-426614174000',
     meetingGroupId: '123e4567-e89b-12d3-a456-426614174001',
-    meetingGroup: {} as any,
+    meetingGroup: {} as MeetingGroup,
     start: new Date(Date.now() + 86400000),
     end: new Date(Date.now() + 90000000),
     rank: 0,
@@ -54,9 +54,6 @@ describe('MeetingSlotsService', () => {
     }).compile();
 
     service = module.get<MeetingSlotsService>(MeetingSlotsService);
-    repository = module.get<Repository<MeetingSlot>>(
-      getRepositoryToken(MeetingSlot),
-    );
   });
 
   afterEach(() => {
@@ -101,7 +98,7 @@ describe('MeetingSlotsService', () => {
       const relations = { meetingGroup: true };
       mockRepository.find.mockResolvedValue([mockMeetingSlot]);
 
-      const result = await service.findAllBy(where, relations);
+      await service.findAllBy(where, relations);
 
       expect(mockRepository.find).toHaveBeenCalledWith({
         where,

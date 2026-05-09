@@ -44,9 +44,10 @@ export class MeetingCreatedHandler implements IEventHandler<MeetingCreatedEvent>
     const participants = meetingGroup.participants;
 
     if (participants.length === 0) {
-      this.logger.log(
+      this.logger.warn(
         `No valid participants to invite for meeting ${entity.id}`,
       );
+      return;
     }
 
     const externalCalendarId = meetingGroup.calendar.externalId;
@@ -91,6 +92,7 @@ export class MeetingCreatedHandler implements IEventHandler<MeetingCreatedEvent>
     if (failed.length > 0) {
       this.logger.error(
         `Failed to create ${failed.length} attendees for meeting ${entity.id}`,
+        failed,
       );
     }
   }
