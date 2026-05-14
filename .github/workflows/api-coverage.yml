@@ -139,7 +139,7 @@ jobs:
             `| Branches   | ${fmt(total.branches.pct)}%   | ${ok(total.branches.pct)}   |`,
             '',
             '<details>',
-            '<summary>${rows.length} uncovered files</summary>',
+            `<summary>${rows.length} uncovered files</summary>`,
             '',
             '| File | Lines | Statements | Functions | Branches |',
             '|------|-------|------------|-----------|----------|',
