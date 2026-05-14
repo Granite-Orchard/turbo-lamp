@@ -6,12 +6,14 @@ import { MeetingSlot } from './entities/meeting-slot.entity';
 import { MeetingParticipantAuthorizedHandler } from './handlers/meeting-participant-authorized.handler';
 import { MeetingSlotsController } from './meeting-slots.controller';
 import { MeetingSlotsService } from './meeting-slots.service';
+import { MeetingsModule } from '../meetings/meetings.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([MeetingSlot]),
     forwardRef(() => MeetingGroupsModule),
     CalendarsModule,
+    MeetingsModule,
   ],
   controllers: [MeetingSlotsController],
   providers: [MeetingSlotsService, MeetingParticipantAuthorizedHandler],

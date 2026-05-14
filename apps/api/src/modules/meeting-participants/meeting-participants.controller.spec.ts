@@ -13,13 +13,18 @@ describe('MeetingParticipantsController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [MeetingParticipantsController],
-      providers: [{ provide: MeetingParticipantsService, useValue: mockService }],
+      providers: [
+        { provide: MeetingParticipantsService, useValue: mockService },
+      ],
     }).compile();
 
-    controller = module.get<MeetingParticipantsController>(MeetingParticipantsController);
+    controller = module.get<MeetingParticipantsController>(
+      MeetingParticipantsController,
+    );
   });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
 });
+
