@@ -104,6 +104,7 @@ export class MeetingSlotsService {
       5,
     );
 
+    // INFO: [] is also truthy. intentionally delete slots if no availability overlaps
     if (availabletimeSlots) {
       await this.repository.delete({ meetingGroupId: meetingGroup.id });
     }
@@ -181,11 +182,11 @@ export class MeetingSlotsService {
   }
 
   async remove(id: string) {
-    const group = await this.findOne(id);
-    if (!group) {
+    const slot = await this.findOne(id);
+    if (!slot) {
       throw new NotFoundException();
     }
-    return await this.repository.softDelete(group.id);
+    return await this.repository.softDelete(slot.id);
   }
 
   private getAvailableSlots(
