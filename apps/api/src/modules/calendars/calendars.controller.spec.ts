@@ -29,7 +29,10 @@ describe('CalendarsController', () => {
       providers: [
         { provide: CalendarsService, useValue: mockCalendarsService },
         { provide: AccountsService, useValue: mockAccountsService },
-        { provide: ExternalCalendarService, useValue: mockExternalCalendarService },
+        {
+          provide: ExternalCalendarService,
+          useValue: mockExternalCalendarService,
+        },
       ],
     })
       .overrideInterceptor(IdempotencyInterceptor)
@@ -43,3 +46,4 @@ describe('CalendarsController', () => {
     expect(controller).toBeDefined();
   });
 });
+

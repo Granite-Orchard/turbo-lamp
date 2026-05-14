@@ -1,4 +1,3 @@
-import { HttpService } from '@nestjs/axios';
 import {
   Injectable,
   InternalServerErrorException,
@@ -6,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { GoogleAuthManager } from '../../auth/managers/google-auth.manager';
+import { CustomHttpService } from '../../http/http.service';
 import {
   Calendar,
   CalendarEvent,
@@ -56,20 +56,21 @@ export class GoogleCalendarProvider implements CalendarProvider {
   private readonly baseUrl = 'https://www.googleapis.com/calendar/v3';
 
   constructor(
-    private readonly http: HttpService,
+    private readonly http: CustomHttpService,
     private readonly auth: GoogleAuthManager,
   ) {}
 
   async getTimezone(params: GetTimezoneParams): Promise<string> {
     const accessToken = await this.auth.getValidAccessToken(params.account);
-    const { data } = await firstValueFrom<{
-      data: GoogleCalendarSettingsResponse;
-    }>(
-      this.http.get(`${this.baseUrl}/users/me/settings/timezone`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
+    const { data } = await firstValueFrom(
+      this.http.get<GoogleCalendarSettingsResponse>(
+        `${this.baseUrl}/users/me/settings/timezone`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         },
-      }),
+      ),
     );
     return data.value;
   }
@@ -77,12 +78,15 @@ export class GoogleCalendarProvider implements CalendarProvider {
   async listCalendars(params: ListCalendarsParams): Promise<Calendar[]> {
     const accessToken = await this.auth.getValidAccessToken(params.account);
 
-    const { data } = await firstValueFrom<{ data: GoogleCalendarListResponse }>(
-      this.http.get(`${this.baseUrl}/users/me/calendarList`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
+    const { data } = await firstValueFrom(
+      this.http.get<GoogleCalendarListResponse>(
+        `${this.baseUrl}/users/me/calendarList`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         },
-      }),
+      ),
     );
 
     return (data.items ?? []).reduce<Calendar[]>((acc, c) => {
@@ -110,23 +114,24 @@ export class GoogleCalendarProvider implements CalendarProvider {
 
       const { timeMin, timeMax, calendarId = 'primary' } = params;
 
-      const { data } = await firstValueFrom<{
-        data: { items: GoogleCalendarEvent[] };
-      }>(
-        this.http.get(`${this.baseUrl}/calendars/${calendarId}/events`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
+      const { data } = await firstValueFrom(
+        this.http.get<GoogleCalendarEvent[]>(
+          `${this.baseUrl}/calendars/${calendarId}/events`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            params: {
+              timeMin,
+              timeMax,
+              singleEvents: true,
+              orderBy: 'startTime',
+            },
           },
-          params: {
-            timeMin,
-            timeMax,
-            singleEvents: true,
-            orderBy: 'startTime',
-          },
-        }),
+        ),
       );
 
-      return (data.items ?? []).map((e) => ({
+      return (data ?? []).map((e) => ({
         id: e.id,
         summary: e.summary,
         description: e.description,
@@ -150,8 +155,8 @@ export class GoogleCalendarProvider implements CalendarProvider {
 
     const { eventId, calendarId = 'primary' } = params;
 
-    const { data } = await firstValueFrom<{ data: GoogleCalendarEvent }>(
-      this.http.get(
+    const { data } = await firstValueFrom(
+      this.http.get<GoogleCalendarEvent>(
         `${this.baseUrl}/calendars/${calendarId}/events/${eventId}`,
         {
           headers: {
@@ -179,8 +184,8 @@ export class GoogleCalendarProvider implements CalendarProvider {
 
     const { calendarId = 'primary', event } = params;
 
-    const { data } = await firstValueFrom<{ data: GoogleCalendarEvent }>(
-      this.http.post(
+    const { data } = await firstValueFrom(
+      this.http.post<GoogleCalendarEvent>(
         `${this.baseUrl}/calendars/${calendarId}/events?sendUpdates=all`,
         event,
         {
@@ -215,8 +220,8 @@ export class GoogleCalendarProvider implements CalendarProvider {
 
     const { eventId, calendarId = 'primary', patch } = params;
 
-    const { data } = await firstValueFrom<{ data: GoogleCalendarEvent }>(
-      this.http.patch(
+    const { data } = await firstValueFrom(
+      this.http.patch<GoogleCalendarEvent>(
         `${this.baseUrl}/calendars/${calendarId}/events/${eventId}`,
         patch,
         {

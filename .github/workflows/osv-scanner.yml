@@ -1,0 +1,26 @@
+name: osv-scanner
+
+on:
+  pull_request:
+    branches: [master]
+  merge_group:
+    branches: [master]
+
+concurrency:
+  group: osv-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  actions: read
+  security-events: write
+  contents: read
+
+jobs:
+  osv-scanner:
+    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable-pr.yml@v2.3.8"
+    with:
+      upload-sarif: false
+    permissions:
+      actions: read
+      security-events: write
+      contents: read

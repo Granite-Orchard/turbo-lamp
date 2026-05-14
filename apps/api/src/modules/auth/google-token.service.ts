@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import { CustomHttpService } from '../http/http.service';
 
 @Injectable()
 export class GoogleTokenService {
-  constructor(private readonly http: HttpService) {}
+  constructor(private readonly http: CustomHttpService) {}
 
   async refreshAccessToken(params: {
     clientId: string;
@@ -13,13 +13,11 @@ export class GoogleTokenService {
   }): Promise<{ accessToken: string; expiresIn: number }> {
     const { clientId, clientSecret, refreshToken } = params;
 
-    const { data } = await firstValueFrom<{
-      data: {
+    const { data } = await firstValueFrom(
+      this.http.post<{
         access_token: string;
         expires_in: number;
-      };
-    }>(
-      this.http.post('https://oauth2.googleapis.com/token', null, {
+      }>('https://oauth2.googleapis.com/token', null, {
         params: {
           client_id: clientId,
           client_secret: clientSecret,

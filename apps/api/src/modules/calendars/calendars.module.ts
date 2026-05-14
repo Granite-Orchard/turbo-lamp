@@ -1,8 +1,8 @@
-import { HttpModule } from '@nestjs/axios';
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccountsModule } from '../accounts/accounts.module';
 import { AuthModule } from '../auth/auth.module';
+import { CustomHttpModule } from '../http/http.module';
 import { CalendarsController } from './calendars.controller';
 import { CalendarsService } from './calendars.service';
 import { Calendar } from './entities/calendar.entity';
@@ -14,7 +14,7 @@ import { GoogleCalendarProvider } from './providers/google-calendar.provider';
     TypeOrmModule.forFeature([Calendar]),
     forwardRef(() => AuthModule),
     AccountsModule,
-    HttpModule,
+    CustomHttpModule,
   ],
   controllers: [CalendarsController],
   providers: [

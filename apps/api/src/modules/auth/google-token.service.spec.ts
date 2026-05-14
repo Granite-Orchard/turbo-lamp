@@ -1,11 +1,11 @@
-import { HttpService } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
 import { of } from 'rxjs';
+import { CustomHttpService } from '../http/http.service';
 import { GoogleTokenService } from './google-token.service';
 
 describe('GoogleTokenService', () => {
   let service: GoogleTokenService;
-  let httpService: HttpService;
+  let httpService: CustomHttpService;
 
   const mockHttpService = {
     post: jest.fn(),
@@ -15,12 +15,12 @@ describe('GoogleTokenService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GoogleTokenService,
-        { provide: HttpService, useValue: mockHttpService },
+        { provide: CustomHttpService, useValue: mockHttpService },
       ],
     }).compile();
 
     service = module.get<GoogleTokenService>(GoogleTokenService);
-    httpService = module.get<HttpService>(HttpService);
+    httpService = module.get<CustomHttpService>(CustomHttpService);
   });
 
   afterEach(() => {

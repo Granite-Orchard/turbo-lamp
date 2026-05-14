@@ -1,6 +1,5 @@
 import KeyvRedis from '@keyv/redis';
 // import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
-import { HttpModule } from '@nestjs/axios';
 import { BullModule } from '@nestjs/bullmq';
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
@@ -29,6 +28,7 @@ import { AvailabilitiesModule } from './modules/availabilities/availabilities.mo
 import { AvailabilityOverridesModule } from './modules/availability-overrides/availability-overrides.module';
 import { CalendarsModule } from './modules/calendars/calendars.module';
 import { HealthModule } from './modules/health/health.module';
+import { CustomHttpModule } from './modules/http/http.module';
 import { MeetingAttendeesModule } from './modules/meeting-attendees/meeting-attendees.module';
 import { MeetingGroupsModule } from './modules/meeting-groups/meeting-groups.module';
 import { MeetingParticipantsModule } from './modules/meeting-participants/meeting-participants.module';
@@ -154,7 +154,7 @@ import { VerificationsModule } from './modules/verifications/verifications.modul
       },
     }),
     CqrsModule.forRoot(),
-    HttpModule,
+    CustomHttpModule,
     AuthModule,
     HealthModule,
     UsersModule,
