@@ -12,7 +12,7 @@ import {
 import { MeetingGroup } from '../../meeting-groups/entities/meeting-group.entity';
 
 @Entity('meeting_slots')
-@Unique(['meetingGroupId', 'start', 'end'])
+@Unique(['meetingGroupId', 'rank'])
 export class MeetingSlot {
   @PrimaryGeneratedColumn('uuid')
   id: string;

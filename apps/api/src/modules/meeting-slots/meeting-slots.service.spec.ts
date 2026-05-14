@@ -160,7 +160,7 @@ describe('MeetingSlotsService', () => {
 
       expect(mockRepository.upsert).toHaveBeenCalledWith(dto, {
         skipUpdateIfNoValuesChanged: true,
-        conflictPaths: ['meetingGroupId', 'start', 'end'],
+        conflictPaths: ['meetingGroupId', 'rank'],
       });
       expect(result).toEqual(mockMeetingSlot);
     });
@@ -215,14 +215,12 @@ describe('MeetingSlotsService', () => {
   describe('remove', () => {
     it('should soft delete a meeting slot', async () => {
       mockRepository.findOne.mockResolvedValue(mockMeetingSlot);
-      mockRepository.softDelete.mockResolvedValue({ affected: 1 });
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
 
       const result = await service.remove(mockMeetingSlot.id);
 
       expect(mockRepository.findOne).toHaveBeenCalled();
-      expect(mockRepository.softDelete).toHaveBeenCalledWith(
-        mockMeetingSlot.id,
-      );
+      expect(mockRepository.delete).toHaveBeenCalledWith(mockMeetingSlot.id);
       expect(result).toEqual({ affected: 1 });
     });
 

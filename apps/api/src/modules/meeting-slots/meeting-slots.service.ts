@@ -1,6 +1,11 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
+import {
+  DeleteResult,
+  FindOptionsRelations,
+  FindOptionsWhere,
+  Repository,
+} from 'typeorm';
 import {
   AccountProvider,
   CalendarProvider,
@@ -104,6 +109,19 @@ export class MeetingSlotsService {
       5,
     );
 
+    if (availabletimeSlots) {
+      const existingSlots = await this.findAllBy({
+        meetingGroupId: meetingGroup.id,
+      });
+      if (existingSlots) {
+        const deletePromises: Promise<DeleteResult>[] = [];
+        for (const slot of existingSlots) {
+          deletePromises.push(this.remove(slot.id));
+        }
+        await Promise.all(deletePromises);
+      }
+    }
+
     const createdMeetingSlots: Promise<MeetingSlot | null>[] = [];
     for (const [idx, slot] of availabletimeSlots.entries()) {
       createdMeetingSlots.push(
@@ -150,7 +168,7 @@ export class MeetingSlotsService {
   async upsert(createMeetingSlotDto: CreateMeetingSlotDto) {
     await this.repository.upsert(createMeetingSlotDto, {
       skipUpdateIfNoValuesChanged: true,
-      conflictPaths: ['meetingGroupId', 'start', 'end'],
+      conflictPaths: ['meetingGroupId', 'rank'],
     });
     return this.findOneBy({
       meetingGroupId: createMeetingSlotDto.meetingGroupId,
@@ -182,7 +200,7 @@ export class MeetingSlotsService {
     if (!meeting) {
       throw new NotFoundException();
     }
-    return await this.repository.softDelete(meeting.id);
+    return await this.repository.delete(meeting.id);
   }
 
   private getAvailableSlots(
