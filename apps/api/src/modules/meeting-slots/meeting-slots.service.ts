@@ -1,27 +1,22 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  DeleteResult,
-  FindOptionsRelations,
-  FindOptionsWhere,
-  Repository,
-} from 'typeorm';
+import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
 import {
   AccountProvider,
   CalendarProvider,
   ParticipantAuthState,
 } from '../../libs/constants';
+import { convertDateToTimezone } from '../../utils/helpers/datetimes';
+import { Availability } from '../availabilities/entities/availability.entity';
+import { AvailabilityOverride } from '../availability-overrides/entities/availability-override.entity';
 import {
   CalendarEvent,
   ExternalCalendarService,
 } from '../calendars/external-calendar.service';
-import { Availability } from '../availabilities/entities/availability.entity';
-import { AvailabilityOverride } from '../availability-overrides/entities/availability-override.entity';
 import { MeetingGroupsService } from '../meeting-groups/meeting-groups.service';
 import { CreateMeetingSlotDto } from './dto/create-meeting-slot.dto';
 import { UpdateMeetingSlotDto } from './dto/update-meeting-slot.dto';
 import { MeetingSlot } from './entities/meeting-slot.entity';
-import { convertDateToTimezone } from '../../utils/helpers/datetimes';
 
 @Injectable()
 export class MeetingSlotsService {
@@ -110,16 +105,7 @@ export class MeetingSlotsService {
     );
 
     if (availabletimeSlots) {
-      const existingSlots = await this.findAllBy({
-        meetingGroupId: meetingGroup.id,
-      });
-      if (existingSlots) {
-        const deletePromises: Promise<DeleteResult>[] = [];
-        for (const slot of existingSlots) {
-          deletePromises.push(this.remove(slot.id));
-        }
-        await Promise.all(deletePromises);
-      }
+      await this.repository.delete({ meetingGroupId: meetingGroup.id });
     }
 
     const createdMeetingSlots: Promise<MeetingSlot | null>[] = [];
@@ -172,8 +158,7 @@ export class MeetingSlotsService {
     });
     return this.findOneBy({
       meetingGroupId: createMeetingSlotDto.meetingGroupId,
-      start: createMeetingSlotDto.start,
-      end: createMeetingSlotDto.end,
+      rank: createMeetingSlotDto.rank,
     });
   }
 
@@ -196,11 +181,11 @@ export class MeetingSlotsService {
   }
 
   async remove(id: string) {
-    const meeting = await this.findOne(id);
-    if (!meeting) {
+    const group = await this.findOne(id);
+    if (!group) {
       throw new NotFoundException();
     }
-    return await this.repository.delete(meeting.id);
+    return await this.repository.softDelete(group.id);
   }
 
   private getAvailableSlots(

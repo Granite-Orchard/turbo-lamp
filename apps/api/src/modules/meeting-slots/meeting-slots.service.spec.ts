@@ -215,12 +215,14 @@ describe('MeetingSlotsService', () => {
   describe('remove', () => {
     it('should soft delete a meeting slot', async () => {
       mockRepository.findOne.mockResolvedValue(mockMeetingSlot);
-      mockRepository.delete.mockResolvedValue({ affected: 1 });
+      mockRepository.softDelete.mockResolvedValue({ affected: 1 });
 
       const result = await service.remove(mockMeetingSlot.id);
 
       expect(mockRepository.findOne).toHaveBeenCalled();
-      expect(mockRepository.delete).toHaveBeenCalledWith(mockMeetingSlot.id);
+      expect(mockRepository.softDelete).toHaveBeenCalledWith(
+        mockMeetingSlot.id,
+      );
       expect(result).toEqual({ affected: 1 });
     });
 
