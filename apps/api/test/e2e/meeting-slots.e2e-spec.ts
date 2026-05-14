@@ -4,6 +4,7 @@ import request from 'supertest';
 import { MeetingSlotsController } from '../../src/modules/meeting-slots/meeting-slots.controller';
 import { MeetingSlotsService } from '../../src/modules/meeting-slots/meeting-slots.service';
 import { JwtAuthGuard } from '../../src/guards/jwt-auth.guard';
+import { MeetingsService } from '../../src/modules/meetings/meetings.service';
 
 describe('MeetingSlotsController (e2e)', () => {
   let app: INestApplication;
@@ -14,6 +15,10 @@ describe('MeetingSlotsController (e2e)', () => {
     calculateSlots: jest.fn().mockResolvedValue([{ id: '1' }]),
   };
 
+  const mockMeetingsService = {
+    findOneBy: jest.fn().mockResolvedValue({ id: '1' }),
+  };
+
   const mockJwtAuthGuard = {
     canActivate: jest.fn().mockReturnValue(true),
   };
@@ -22,6 +27,7 @@ describe('MeetingSlotsController (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [MeetingSlotsController],
       providers: [
+        { provide: MeetingsService, useValue: mockMeetingsService },
         { provide: MeetingSlotsService, useValue: mockMeetingSlotsService },
       ],
     })
@@ -58,3 +64,4 @@ describe('MeetingSlotsController (e2e)', () => {
     });
   });
 });
+
