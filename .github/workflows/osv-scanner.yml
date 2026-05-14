@@ -3,23 +3,22 @@ name: osv-scanner
 on:
   pull_request:
     branches: [master]
+  merge_group:
+    branches: [master]
 
 concurrency:
   group: osv-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
+  actions: read
+  security-events: write
   contents: read
 
 jobs:
   osv-scanner:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: osv-scanner
-        uses: google/osv-scanner-action@v2.3.8
-        with:
-          scan-args: |-
-            --recursive
+    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable-pr.yml@v2.3.8"
+    permissions:
+      actions: read
+      security-events: write
+      contents: read
