@@ -25,7 +25,7 @@ export class MeetingParticipantAuthorizedHandler implements IEventHandler<Meetin
 
     if (meetingGroup.authorId === entity.userId) return;
 
-    const hasValidContext = await this.validateUserContext(entity.userId);
+    const hasValidContext = await this.validateUserContext(entity.userId!);
     if (!hasValidContext) {
       return;
     }
