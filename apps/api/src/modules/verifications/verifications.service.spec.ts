@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { DataSource, FindOptionsRelations } from 'typeorm';
 import { EventBus } from '@nestjs/cqrs';
 import { NotFoundException } from '@nestjs/common';
 import { VerificationsService } from './verifications.service';
@@ -8,7 +8,11 @@ import { Verification } from './entities/verification.entity';
 import { CreateVerificationDto } from './dto/create-verification.dto';
 import { UpdateVerificationDto } from './dto/update-verification.dto';
 import { TokenService } from '../auth/token.service';
-import { VerificationType, VerificationValue } from '../../libs/constants';
+import {
+  SanitizedRoutes,
+  VerificationType,
+  VerificationValue,
+} from '../../libs/constants';
 
 describe('VerificationsService', () => {
   let service: VerificationsService;
@@ -105,7 +109,10 @@ describe('VerificationsService', () => {
       const relations = { user: true };
       mockRepository.find.mockResolvedValue([mockVerification]);
 
-      await service.findAllBy(where, relations);
+      await service.findAllBy(
+        where,
+        relations as FindOptionsRelations<Verification>,
+      );
 
       expect(mockRepository.find).toHaveBeenCalledWith({
         where,
@@ -220,7 +227,9 @@ describe('VerificationsService', () => {
 
       const payload: VerificationValue = {
         type: VerificationType.EMAIL_INVITATION,
-        meetingGroupId: '123',
+        id: '123',
+        to: '',
+        after: SanitizedRoutes.DASHBOARD,
       };
 
       mockRepository.create.mockReturnValue(mockVerification);

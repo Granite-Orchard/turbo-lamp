@@ -106,8 +106,7 @@ export class MeetingSlotsService {
         }
         return true;
       })
-      .map((result) => result.value)
-      .flat();
+      .map((result) => result.value);
 
     const baseAvailableWindows = this.intersectParticipantAvailabilityWindows(
       allParticipantAvailabilityWindows,
@@ -122,10 +121,7 @@ export class MeetingSlotsService {
       5,
     );
 
-    // INFO: [] is also truthy. intentionally delete slots if no availability overlaps
-    if (availabletimeSlots) {
-      await this.repository.delete({ meetingGroupId: meetingGroup.id });
-    }
+    await this.repository.delete({ meetingGroupId: meetingGroup.id });
 
     const createdMeetingSlots: Promise<MeetingSlot | null>[] = [];
     for (const [idx, slot] of availabletimeSlots.entries()) {
