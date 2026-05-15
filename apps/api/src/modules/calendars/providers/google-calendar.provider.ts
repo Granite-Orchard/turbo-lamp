@@ -117,9 +117,8 @@ export class GoogleCalendarProvider implements CalendarProvider {
       const accessToken = await this.auth.getValidAccessToken(params.account);
 
       const { timeMin, timeMax, calendarId = 'primary' } = params;
-
       const { data } = await firstValueFrom(
-        this.http.get<GoogleCalendarEvent[]>(
+        this.http.get<{ items: GoogleCalendarEvent[] }>(
           `${this.baseUrl}/calendars/${calendarId}/events`,
           {
             headers: {
@@ -134,8 +133,7 @@ export class GoogleCalendarProvider implements CalendarProvider {
           },
         ),
       );
-
-      return (data ?? []).map((e) => ({
+      return (data.items ?? []).map((e) => ({
         id: e.id,
         summary: e.summary,
         description: e.description,
