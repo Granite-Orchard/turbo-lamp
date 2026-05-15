@@ -46,4 +46,3 @@ describe('CalendarsController', () => {
     expect(controller).toBeDefined();
   });
 });
-

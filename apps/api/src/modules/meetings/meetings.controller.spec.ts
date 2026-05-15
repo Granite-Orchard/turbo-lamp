@@ -23,9 +23,7 @@ describe('MeetingsController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [MeetingsController],
-      providers: [
-        { provide: MeetingsService, useValue: mockMeetingsService },
-      ],
+      providers: [{ provide: MeetingsService, useValue: mockMeetingsService }],
     })
       .overrideGuard(JwtAuthGuard)
       .useValue(mockJwtAuthGuard)

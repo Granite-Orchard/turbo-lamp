@@ -16,7 +16,9 @@ describe('MeetingAttendeesController', () => {
       providers: [{ provide: MeetingAttendeesService, useValue: mockService }],
     }).compile();
 
-    controller = module.get<MeetingAttendeesController>(MeetingAttendeesController);
+    controller = module.get<MeetingAttendeesController>(
+      MeetingAttendeesController,
+    );
   });
 
   it('should be defined', () => {

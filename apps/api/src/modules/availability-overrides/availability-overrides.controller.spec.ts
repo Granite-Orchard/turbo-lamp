@@ -13,10 +13,14 @@ describe('AvailabilityOverridesController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AvailabilityOverridesController],
-      providers: [{ provide: AvailabilityOverridesService, useValue: mockService }],
+      providers: [
+        { provide: AvailabilityOverridesService, useValue: mockService },
+      ],
     }).compile();
 
-    controller = module.get<AvailabilityOverridesController>(AvailabilityOverridesController);
+    controller = module.get<AvailabilityOverridesController>(
+      AvailabilityOverridesController,
+    );
   });
 
   it('should be defined', () => {

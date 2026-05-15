@@ -76,4 +76,3 @@ describe('AccountsController (e2e)', () => {
     });
   });
 });
-

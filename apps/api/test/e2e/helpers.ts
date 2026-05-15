@@ -12,17 +12,18 @@ export interface TestApp {
 }
 
 export async function bootstrapTestApp(): Promise<TestApp> {
-  process.env.DATABASE_URL = 'postgresql://postgres:postgres@127.0.0.1:5432/core';
+  process.env.DATABASE_URL =
+    'postgresql://postgres:postgres@127.0.0.1:5432/core';
   process.env.REDIS_CACHE_URL = 'redis://default@127.0.0.1:6379/0';
   process.env.REDIS_QUEUE_URL = 'redis://default@127.0.0.1:6379/1';
   process.env.REDIS_THROTTLE_URL = 'redis://default@127.0.0.1:6379/2';
-  
+
   const app = await NestFactory.create(AppModule, {
     logger: false,
   });
 
   const httpServer = app.getHttpServer();
-  
+
   const dataSource = app.get<DataSource>('DataSource');
 
   return { app, httpServer, dataSource };

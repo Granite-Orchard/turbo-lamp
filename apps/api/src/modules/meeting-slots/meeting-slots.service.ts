@@ -1,22 +1,29 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
+import {
+  DataSource,
+  FindOptionsRelations,
+  FindOptionsWhere,
+  Repository,
+} from 'typeorm';
+import { MeetingGroup } from '../meeting-groups/entities/meeting-group.entity';
 import {
   AccountProvider,
   CalendarProvider,
   ParticipantAuthState,
 } from '../../libs/constants';
+import { convertDateToTimezone } from '../../utils/helpers/datetimes';
+import { Availability } from '../availabilities/entities/availability.entity';
+import { AvailabilityOverride } from '../availability-overrides/entities/availability-override.entity';
 import {
   CalendarEvent,
   ExternalCalendarService,
 } from '../calendars/external-calendar.service';
-import { Availability } from '../availabilities/entities/availability.entity';
-import { AvailabilityOverride } from '../availability-overrides/entities/availability-override.entity';
+import { CalendarNotFoundException } from '../calendars/exceptions/calendar.exception';
 import { MeetingGroupsService } from '../meeting-groups/meeting-groups.service';
 import { CreateMeetingSlotDto } from './dto/create-meeting-slot.dto';
 import { UpdateMeetingSlotDto } from './dto/update-meeting-slot.dto';
 import { MeetingSlot } from './entities/meeting-slot.entity';
-import { convertDateToTimezone } from '../../utils/helpers/datetimes';
 
 @Injectable()
 export class MeetingSlotsService {
@@ -28,6 +35,7 @@ export class MeetingSlotsService {
     private readonly meetingGroupService: MeetingGroupsService,
     @Inject(ExternalCalendarService)
     private readonly externalCalendarService: ExternalCalendarService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async calculate(meetingGroupId: string, authorId: string) {
@@ -70,11 +78,12 @@ export class MeetingSlotsService {
       }),
     );
 
-    const flattenedCalendarEvents = await Promise.all(
+    const flattenedCalendarEventsResults = await Promise.allSettled(
       allParticipants.flatMap((participant) => {
         const account = participant.user.accounts.find(
           (account) => account.providerId === AccountProvider.GOOGLE,
-        )!;
+        );
+        if (!account) return [];
         return participant.user.calendars
           .filter((c) => c.enabled && c.providerId === CalendarProvider.GOOGLE)
           .map((calendar) =>
@@ -91,6 +100,21 @@ export class MeetingSlotsService {
       }),
     );
 
+    const flattenedCalendarEvents = flattenedCalendarEventsResults
+      .filter((result): result is PromiseFulfilledResult<CalendarEvent[]> => {
+        if (result.status === 'rejected') {
+          const error = result.reason as Error;
+          if (!(error instanceof CalendarNotFoundException)) {
+            this.logger.warn(
+              `Failed to fetch calendar events: ${error.message}`,
+            );
+          }
+          return false;
+        }
+        return true;
+      })
+      .map((result) => result.value);
+
     const baseAvailableWindows = this.intersectParticipantAvailabilityWindows(
       allParticipantAvailabilityWindows,
       meetingGroup.after,
@@ -104,19 +128,38 @@ export class MeetingSlotsService {
       5,
     );
 
-    const createdMeetingSlots: Promise<MeetingSlot | null>[] = [];
-    for (const [idx, slot] of availabletimeSlots.entries()) {
-      createdMeetingSlots.push(
-        this.upsert({
-          meetingGroupId: meetingGroup.id,
-          start: slot.start,
-          end: slot.end,
-          rank: idx,
-        }),
-      );
-    }
+    return this.dataSource.transaction(async (manager) => {
+      await manager.findOne(MeetingGroup, {
+        where: { id: meetingGroup.id },
+        lock: { mode: 'pessimistic_write' },
+      });
 
-    return await Promise.all(createdMeetingSlots);
+      await manager.delete(MeetingSlot, { meetingGroupId: meetingGroup.id });
+
+      const createdMeetingSlots: MeetingSlot[] = [];
+      for (const [idx, slot] of availabletimeSlots.entries()) {
+        await manager.upsert(
+          MeetingSlot,
+          {
+            meetingGroupId: meetingGroup.id,
+            start: slot.start,
+            end: slot.end,
+            rank: idx,
+          },
+          {
+            skipUpdateIfNoValuesChanged: true,
+            conflictPaths: ['meetingGroupId', 'rank'],
+          },
+        );
+
+        const created = await manager.findOne(MeetingSlot, {
+          where: { meetingGroupId: meetingGroup.id, rank: idx },
+        });
+        if (created) createdMeetingSlots.push(created);
+      }
+
+      return createdMeetingSlots;
+    });
   }
 
   async findAll() {
@@ -150,12 +193,11 @@ export class MeetingSlotsService {
   async upsert(createMeetingSlotDto: CreateMeetingSlotDto) {
     await this.repository.upsert(createMeetingSlotDto, {
       skipUpdateIfNoValuesChanged: true,
-      conflictPaths: ['meetingGroupId', 'start', 'end'],
+      conflictPaths: ['meetingGroupId', 'rank'],
     });
     return this.findOneBy({
       meetingGroupId: createMeetingSlotDto.meetingGroupId,
-      start: createMeetingSlotDto.start,
-      end: createMeetingSlotDto.end,
+      rank: createMeetingSlotDto.rank,
     });
   }
 
@@ -178,11 +220,11 @@ export class MeetingSlotsService {
   }
 
   async remove(id: string) {
-    const meeting = await this.findOne(id);
-    if (!meeting) {
+    const slot = await this.findOne(id);
+    if (!slot) {
       throw new NotFoundException();
     }
-    return await this.repository.softDelete(meeting.id);
+    return await this.repository.softDelete(slot.id);
   }
 
   private getAvailableSlots(

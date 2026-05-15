@@ -27,4 +27,3 @@ describe('MeetingParticipantsController', () => {
     expect(controller).toBeDefined();
   });
 });
-

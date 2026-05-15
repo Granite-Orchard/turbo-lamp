@@ -29,9 +29,7 @@ describe('MeetingsController (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [MeetingsController],
-      providers: [
-        { provide: MeetingsService, useValue: mockMeetingsService },
-      ],
+      providers: [{ provide: MeetingsService, useValue: mockMeetingsService }],
     })
       .overrideGuard(JwtAuthGuard)
       .useValue(mockJwtAuthGuard)

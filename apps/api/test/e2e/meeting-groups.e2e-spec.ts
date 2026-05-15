@@ -124,4 +124,3 @@ describe('MeetingGroupsController (e2e)', () => {
     });
   });
 });
-

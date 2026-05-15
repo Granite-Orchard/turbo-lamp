@@ -20,9 +20,7 @@ describe('UsersController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
-      providers: [
-        { provide: UsersService, useValue: mockUsersService },
-      ],
+      providers: [{ provide: UsersService, useValue: mockUsersService }],
     })
       .overrideGuard(JwtAuthGuard)
       .useValue(mockJwtAuthGuard)
@@ -38,7 +36,9 @@ describe('UsersController', () => {
 
   describe('profile', () => {
     it('should return user profile', () => {
-      const req = { user: { userId: '123', email: 'test@example.com', name: 'Test' } } as any;
+      const req = {
+        user: { userId: '123', email: 'test@example.com', name: 'Test' },
+      } as any;
       const result = controller.profile(req);
       expect(result).toHaveProperty('userId');
     });
@@ -53,7 +53,9 @@ describe('UsersController', () => {
 
     it('should throw when updating other user', async () => {
       const req = { user: { userId: '123' } } as any;
-      await expect(controller.update(req, '456', { name: 'Hacker' })).rejects.toThrow(ForbiddenException);
+      await expect(
+        controller.update(req, '456', { name: 'Hacker' }),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 
@@ -66,7 +68,9 @@ describe('UsersController', () => {
 
     it('should throw when deleting other user', async () => {
       const req = { user: { userId: '123' } } as any;
-      await expect(controller.remove(req, '456')).rejects.toThrow(ForbiddenException);
+      await expect(controller.remove(req, '456')).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 });

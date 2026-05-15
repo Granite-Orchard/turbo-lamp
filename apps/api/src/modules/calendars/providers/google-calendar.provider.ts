@@ -3,6 +3,10 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
+import {
+  CalendarNotFoundException,
+  CalendarAccessDeniedException,
+} from '../exceptions/calendar.exception';
 import { firstValueFrom } from 'rxjs';
 import { GoogleAuthManager } from '../../auth/managers/google-auth.manager';
 import { CustomHttpService } from '../../http/http.service';
@@ -145,7 +149,18 @@ export class GoogleCalendarProvider implements CalendarProvider {
           timeZone: e.start?.timeZone ?? '',
         },
       }));
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { status?: number } };
+      if (error.response?.status === 404) {
+        throw new CalendarNotFoundException(
+          'Calendar not found or has been deleted',
+        );
+      }
+      if (error.response?.status === 403) {
+        throw new CalendarAccessDeniedException(
+          'Insufficient permissions to access calendar',
+        );
+      }
       throw new InternalServerErrorException(err);
     }
   }
