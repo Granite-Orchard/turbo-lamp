@@ -47,7 +47,10 @@ describe('CalendarsController (e2e)', () => {
       providers: [
         { provide: CalendarsService, useValue: mockCalendarsService },
         { provide: AccountsService, useValue: mockAccountsService },
-        { provide: ExternalCalendarService, useValue: mockExternalCalendarService },
+        {
+          provide: ExternalCalendarService,
+          useValue: mockExternalCalendarService,
+        },
       ],
     })
       .overrideGuard(JwtAuthGuard)

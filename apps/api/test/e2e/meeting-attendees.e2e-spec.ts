@@ -25,7 +25,10 @@ describe('MeetingAttendeesController (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [MeetingAttendeesController],
       providers: [
-        { provide: MeetingAttendeesService, useValue: mockMeetingAttendeesService },
+        {
+          provide: MeetingAttendeesService,
+          useValue: mockMeetingAttendeesService,
+        },
       ],
     })
       .overrideGuard(JwtAuthGuard)

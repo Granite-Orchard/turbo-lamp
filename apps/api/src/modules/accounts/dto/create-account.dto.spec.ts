@@ -27,4 +27,3 @@ describe('CreateAccountDto', () => {
     expect(errors.length).toBe(0);
   });
 });
-

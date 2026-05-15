@@ -2,6 +2,7 @@ import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ExternalCalendarService } from '../calendars/external-calendar.service';
+import { CalendarNotFoundException } from '../calendars/exceptions/calendar.exception';
 import { MeetingGroup } from '../meeting-groups/entities/meeting-group.entity';
 import { MeetingGroupsService } from '../meeting-groups/meeting-groups.service';
 import { MeetingSlot } from './entities/meeting-slot.entity';
@@ -232,6 +233,116 @@ describe('MeetingSlotsService', () => {
       await expect(service.remove('non-existent-id')).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  describe('calculate', () => {
+    const mockMeetingGroup = {
+      id: 'group-123',
+      authorId: 'author-user-id',
+      after: new Date('2024-01-01T00:00:00Z'),
+      before: new Date('2024-01-31T23:59:59Z'),
+      duration: 60,
+      participants: [
+        {
+          userId: 'author-user-id',
+          user: {
+            accounts: [{ providerId: 'google' }],
+            calendars: [
+              {
+                enabled: true,
+                providerId: 'google',
+                externalId: 'cal-1',
+                timezone: 'UTC',
+              },
+            ],
+            availabilities: [
+              {
+                dayOfWeek: 1,
+                startTime: '09:00',
+                endTime: '17:00',
+                isAvailable: true,
+              },
+            ],
+            availabilityOverrides: [],
+          },
+        },
+        {
+          userId: 'participant-1',
+          user: {
+            accounts: [{ providerId: 'google' }],
+            calendars: [
+              {
+                enabled: true,
+                providerId: 'google',
+                externalId: 'cal-2',
+                timezone: 'UTC',
+              },
+            ],
+            availabilities: [
+              {
+                dayOfWeek: 1,
+                startTime: '09:00',
+                endTime: '17:00',
+                isAvailable: true,
+              },
+            ],
+            availabilityOverrides: [],
+          },
+        },
+      ],
+    };
+
+    it('should continue calculation when calendar returns 404', async () => {
+      mockMeetingGroupService.findOneBy.mockResolvedValue(mockMeetingGroup);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+      mockRepository.find.mockResolvedValue([]);
+      mockRepository.create.mockReturnValue(mockMeetingSlot);
+      mockRepository.save.mockResolvedValue(mockMeetingSlot);
+      mockRepository.findOne.mockResolvedValue(mockMeetingSlot);
+      mockRepository.upsert.mockResolvedValue({ affected: 1 });
+
+      mockExternalCalendarService.listEvents
+        .mockRejectedValueOnce(
+          new CalendarNotFoundException('Calendar not found'),
+        )
+        .mockResolvedValueOnce([
+          {
+            id: 'event-1',
+            start: { dateTime: '2024-01-15T10:00:00Z' },
+            end: { dateTime: '2024-01-15T11:00:00Z' },
+          },
+        ]);
+
+      const result = await service.calculate('group-123', 'author-user-id');
+
+      expect(result).toBeDefined();
+      expect(mockExternalCalendarService.listEvents).toHaveBeenCalledTimes(2);
+    });
+
+    it('should log warning for non-404 errors but continue calculation', async () => {
+      mockMeetingGroupService.findOneBy.mockResolvedValue(mockMeetingGroup);
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+      mockRepository.find.mockResolvedValue([]);
+      mockRepository.create.mockReturnValue(mockMeetingSlot);
+      mockRepository.save.mockResolvedValue(mockMeetingSlot);
+      mockRepository.findOne.mockResolvedValue(mockMeetingSlot);
+      mockRepository.upsert.mockResolvedValue({ affected: 1 });
+
+      const error = new Error('Network error');
+      mockExternalCalendarService.listEvents
+        .mockRejectedValueOnce(error)
+        .mockResolvedValueOnce([
+          {
+            id: 'event-1',
+            start: { dateTime: '2024-01-15T10:00:00Z' },
+            end: { dateTime: '2024-01-15T11:00:00Z' },
+          },
+        ]);
+
+      const result = await service.calculate('group-123', 'author-user-id');
+
+      expect(result).toBeDefined();
     });
   });
 });

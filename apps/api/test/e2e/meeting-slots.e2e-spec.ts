@@ -64,4 +64,3 @@ describe('MeetingSlotsController (e2e)', () => {
     });
   });
 });
-

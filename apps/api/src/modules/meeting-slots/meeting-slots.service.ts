@@ -13,6 +13,7 @@ import {
   CalendarEvent,
   ExternalCalendarService,
 } from '../calendars/external-calendar.service';
+import { CalendarNotFoundException } from '../calendars/exceptions/calendar.exception';
 import { MeetingGroupsService } from '../meeting-groups/meeting-groups.service';
 import { CreateMeetingSlotDto } from './dto/create-meeting-slot.dto';
 import { UpdateMeetingSlotDto } from './dto/update-meeting-slot.dto';
@@ -70,11 +71,12 @@ export class MeetingSlotsService {
       }),
     );
 
-    const flattenedCalendarEvents = await Promise.all(
+    const flattenedCalendarEventsResults = await Promise.allSettled(
       allParticipants.flatMap((participant) => {
         const account = participant.user.accounts.find(
           (account) => account.providerId === AccountProvider.GOOGLE,
-        )!;
+        );
+        if (!account) return [];
         return participant.user.calendars
           .filter((c) => c.enabled && c.providerId === CalendarProvider.GOOGLE)
           .map((calendar) =>
@@ -90,6 +92,22 @@ export class MeetingSlotsService {
           );
       }),
     );
+
+    const flattenedCalendarEvents = flattenedCalendarEventsResults
+      .filter((result): result is PromiseFulfilledResult<CalendarEvent[]> => {
+        if (result.status === 'rejected') {
+          const error = result.reason as Error;
+          if (!(error instanceof CalendarNotFoundException)) {
+            this.logger.warn(
+              `Failed to fetch calendar events: ${error.message}`,
+            );
+          }
+          return false;
+        }
+        return true;
+      })
+      .map((result) => result.value)
+      .flat();
 
     const baseAvailableWindows = this.intersectParticipantAvailabilityWindows(
       allParticipantAvailabilityWindows,

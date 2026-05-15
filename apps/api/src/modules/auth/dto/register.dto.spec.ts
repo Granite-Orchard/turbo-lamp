@@ -5,4 +5,3 @@ describe('RegisterDto', () => {
     expect(RegisterDto).toBeDefined();
   });
 });
-

@@ -23,7 +23,9 @@ describe('OAuthRegisterInitiationGuard', () => {
       ],
     }).compile();
 
-    guard = module.get<OAuthRegisterInitiationGuard>(OAuthRegisterInitiationGuard);
+    guard = module.get<OAuthRegisterInitiationGuard>(
+      OAuthRegisterInitiationGuard,
+    );
   });
 
   it('should be defined', () => {

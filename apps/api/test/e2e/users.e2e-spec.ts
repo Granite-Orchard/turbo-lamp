@@ -67,4 +67,3 @@ describe('UsersController (e2e)', () => {
     });
   });
 });
-

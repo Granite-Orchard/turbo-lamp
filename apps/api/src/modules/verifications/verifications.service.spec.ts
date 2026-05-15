@@ -60,7 +60,7 @@ describe('VerificationsService', () => {
       ],
     }).compile();
 
-service = module.get<VerificationsService>(VerificationsService);
+    service = module.get<VerificationsService>(VerificationsService);
   });
 
   afterEach(() => {

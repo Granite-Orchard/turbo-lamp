@@ -85,12 +85,36 @@ export type GetTimezoneParams = {
 };
 
 export interface CalendarProvider {
+  /**
+   * Gets the user's timezone setting.
+   */
   getTimezone(params: GetTimezoneParams): Promise<string>;
+  /**
+   * Lists all calendars accessible by the user.
+   */
   listCalendars(params: ListCalendarsParams): Promise<Calendar[]>;
+  /**
+   * Lists events from an external calendar.
+   * @throws CalendarNotFoundException - When calendar doesn't exist (404)
+   * @throws CalendarAccessDeniedException - When access denied (403)
+   * @throws InternalServerErrorException - For other errors
+   */
   listEvents(params: ListEventsParams): Promise<CalendarEvent[]>;
+  /**
+   * Gets a single event by ID.
+   */
   getEvent(params: GetEventParams): Promise<CalendarEvent>;
+  /**
+   * Creates a new calendar event.
+   */
   createEvent(params: CreateEventParams): Promise<CalendarEvent>;
+  /**
+   * Updates an existing calendar event.
+   */
   updateEvent(params: UpdateEventParams): Promise<CalendarEvent>;
+  /**
+   * Deletes a calendar event.
+   */
   deleteEvent(params: DeleteEventParams): Promise<{ success: true }>;
 }
 

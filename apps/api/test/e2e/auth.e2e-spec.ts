@@ -16,9 +16,13 @@ describe('AuthController (e2e)', () => {
   let httpServer: ReturnType<typeof request>;
 
   const mockAuthService = {
-    register: jest.fn().mockResolvedValue({ user: { id: '123' }, sessionToken: 'token' }),
+    register: jest
+      .fn()
+      .mockResolvedValue({ user: { id: '123' }, sessionToken: 'token' }),
     validateUser: jest.fn().mockResolvedValue({ id: '123' }),
-    login: jest.fn().mockResolvedValue({ user: { id: '123' }, sessionToken: 'token' }),
+    login: jest
+      .fn()
+      .mockResolvedValue({ user: { id: '123' }, sessionToken: 'token' }),
   };
 
   const mockTokenService = {
@@ -83,9 +87,11 @@ describe('AuthController (e2e)', () => {
 
   describe('POST /auth/register', () => {
     it('should register a new user', async () => {
-      const response = await httpServer
-        .post('/auth/register')
-        .send({ username: 'test@test.com', password: 'Pass123!', confirmPassword: 'Pass123!' });
+      const response = await httpServer.post('/auth/register').send({
+        username: 'test@test.com',
+        password: 'Pass123!',
+        confirmPassword: 'Pass123!',
+      });
 
       expect(response.status).toBeDefined();
     });
