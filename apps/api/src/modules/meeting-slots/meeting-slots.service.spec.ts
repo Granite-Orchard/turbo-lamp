@@ -1,6 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { ExternalCalendarService } from '../calendars/external-calendar.service';
 import { CalendarNotFoundException } from '../calendars/exceptions/calendar.exception';
 import { MeetingGroup } from '../meeting-groups/entities/meeting-group.entity';
@@ -41,6 +42,17 @@ describe('MeetingSlotsService', () => {
     listEvents: jest.fn(),
   };
 
+  const mockDataSource = {
+    transaction: jest.fn((callback) => {
+      const mockManager = {
+        findOne: jest.fn().mockResolvedValue({}),
+        delete: jest.fn().mockResolvedValue({}),
+        upsert: jest.fn().mockResolvedValue({}),
+      };
+      return callback(mockManager);
+    }),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -51,6 +63,7 @@ describe('MeetingSlotsService', () => {
           provide: ExternalCalendarService,
           useValue: mockExternalCalendarService,
         },
+        { provide: DataSource, useValue: mockDataSource },
       ],
     }).compile();
 

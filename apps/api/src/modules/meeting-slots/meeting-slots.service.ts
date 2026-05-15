@@ -1,6 +1,12 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
+import {
+  DataSource,
+  FindOptionsRelations,
+  FindOptionsWhere,
+  Repository,
+} from 'typeorm';
+import { MeetingGroup } from '../meeting-groups/entities/meeting-group.entity';
 import {
   AccountProvider,
   CalendarProvider,
@@ -29,6 +35,7 @@ export class MeetingSlotsService {
     private readonly meetingGroupService: MeetingGroupsService,
     @Inject(ExternalCalendarService)
     private readonly externalCalendarService: ExternalCalendarService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async calculate(meetingGroupId: string, authorId: string) {
@@ -121,21 +128,38 @@ export class MeetingSlotsService {
       5,
     );
 
-    await this.repository.delete({ meetingGroupId: meetingGroup.id });
+    return this.dataSource.transaction(async (manager) => {
+      await manager.findOne(MeetingGroup, {
+        where: { id: meetingGroup.id },
+        lock: { mode: 'pessimistic_write' },
+      });
 
-    const createdMeetingSlots: Promise<MeetingSlot | null>[] = [];
-    for (const [idx, slot] of availabletimeSlots.entries()) {
-      createdMeetingSlots.push(
-        this.upsert({
-          meetingGroupId: meetingGroup.id,
-          start: slot.start,
-          end: slot.end,
-          rank: idx,
-        }),
-      );
-    }
+      await manager.delete(MeetingSlot, { meetingGroupId: meetingGroup.id });
 
-    return await Promise.all(createdMeetingSlots);
+      const createdMeetingSlots: MeetingSlot[] = [];
+      for (const [idx, slot] of availabletimeSlots.entries()) {
+        await manager.upsert(
+          MeetingSlot,
+          {
+            meetingGroupId: meetingGroup.id,
+            start: slot.start,
+            end: slot.end,
+            rank: idx,
+          },
+          {
+            skipUpdateIfNoValuesChanged: true,
+            conflictPaths: ['meetingGroupId', 'rank'],
+          },
+        );
+
+        const created = await manager.findOne(MeetingSlot, {
+          where: { meetingGroupId: meetingGroup.id, rank: idx },
+        });
+        if (created) createdMeetingSlots.push(created);
+      }
+
+      return createdMeetingSlots;
+    });
   }
 
   async findAll() {
