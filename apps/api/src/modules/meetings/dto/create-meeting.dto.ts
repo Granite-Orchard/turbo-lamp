@@ -1,11 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsDateString,
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 import { MeetingStatus } from '../../../libs/constants';
-import { IsDateString, IsEnum, IsUUID } from 'class-validator';
 
 export class CreateMeetingDto {
   @ApiProperty({ description: 'The ID of the meeting group.' })
   @IsUUID()
   meetingGroupId: string;
+
+  @IsString()
+  @IsOptional()
+  externalEventId?: string;
 
   @ApiProperty({
     description: 'the meetings start time.',

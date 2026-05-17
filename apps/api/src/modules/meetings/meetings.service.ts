@@ -11,6 +11,7 @@ import { UpdateMeetingDto } from './dto/update-meeting.dto';
 import { Meeting } from './entities/meeting.entity';
 import { MeetingCreatedEvent } from './events/meeting-created.event';
 import { MeetingStatus } from '../../libs/constants';
+import { MeetingDeletedEvent } from './events/meeting-deleted.event';
 
 const ALLOWED_MEETING_STATUS_TRANSITIONS: Record<
   MeetingStatus,
@@ -137,10 +138,16 @@ export class MeetingsService {
   }
 
   async remove(id: string) {
-    const meeting = await this.findOne(id);
+    const meeting = await this.findOne(id, {
+      meetingGroup: { calendar: { account: true } },
+    });
     if (!meeting) {
       throw new NotFoundException();
     }
-    return await this.repository.softDelete(meeting.id);
+    const result = await this.repository.softDelete(meeting.id);
+    if (result.affected) {
+      await this.eventBus.publish(new MeetingDeletedEvent(meeting));
+    }
+    return result;
   }
 }

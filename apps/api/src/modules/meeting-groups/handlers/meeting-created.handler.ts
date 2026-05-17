@@ -4,12 +4,15 @@ import { ExternalCalendarService } from '../../calendars/external-calendar.servi
 import { MeetingAttendeesService } from '../../meeting-attendees/meeting-attendees.service';
 import { MeetingCreatedEvent } from '../../meetings/events/meeting-created.event';
 import { MeetingGroupsService } from '../meeting-groups.service';
+import { MeetingsService } from '../../meetings/meetings.service';
 
 @EventsHandler(MeetingCreatedEvent)
 export class MeetingCreatedHandler implements IEventHandler<MeetingCreatedEvent> {
   private readonly logger = new Logger(MeetingCreatedHandler.name);
 
   constructor(
+    @Inject(MeetingsService)
+    private readonly meetingService: MeetingsService,
     @Inject(MeetingGroupsService)
     private readonly meetingGroupsService: MeetingGroupsService,
     @Inject(MeetingAttendeesService)
@@ -25,6 +28,7 @@ export class MeetingCreatedHandler implements IEventHandler<MeetingCreatedEvent>
       {
         participants: { user: { accounts: true } },
         calendar: { account: true },
+        meeting: true,
       },
     );
     if (!meetingGroup) {
@@ -76,12 +80,15 @@ export class MeetingCreatedHandler implements IEventHandler<MeetingCreatedEvent>
       },
     );
 
+    await this.meetingService.update(meetingGroup.meeting.id, {
+      externalEventId: externalEvent.id,
+    });
+
     const results = await Promise.allSettled(
       participants.map((participant) =>
         this.meetingAttendeesService.create({
           userId: participant.userId!,
           meetingId: entity.id,
-          externalEventId: externalEvent.id!,
           email: participant.user ? participant.user.email : participant.email,
           createdBy: meetingGroup.authorId,
         }),

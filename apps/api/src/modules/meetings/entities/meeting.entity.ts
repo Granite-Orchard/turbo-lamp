@@ -20,6 +20,9 @@ export class Meeting {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ nullable: true })
+  externalEventId?: string;
+
   @OneToMany(
     () => MeetingAttendee,
     (meetingAttendee) => meetingAttendee.meeting,
