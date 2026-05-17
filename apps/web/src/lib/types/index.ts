@@ -165,6 +165,7 @@ export type CalculatedSlots = MeetingSlot[];
 // Meeting types
 export interface Meeting {
   id: string;
+  externalEventId: string;
   meetingGroupId: string;
   start: string;
   end: string;
@@ -185,7 +186,6 @@ export interface MeetingAttendee {
   id: string;
   userId: string;
   user?: User;
-  externalEventId: string;
   email: string;
   meetingId: string;
   meeting?: Meeting;
@@ -196,7 +196,6 @@ export interface MeetingAttendee {
 export interface CreateMeetingAttendeePayload {
   meetingId: string;
   userId: string;
-  externalEventId: string;
   email: string;
 }
 
