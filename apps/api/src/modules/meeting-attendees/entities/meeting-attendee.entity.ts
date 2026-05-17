@@ -37,9 +37,6 @@ export class MeetingAttendee {
   meeting: Meeting;
 
   @Column()
-  externalEventId: string;
-
-  @Column()
   email: string;
 
   @CreateDateColumn()

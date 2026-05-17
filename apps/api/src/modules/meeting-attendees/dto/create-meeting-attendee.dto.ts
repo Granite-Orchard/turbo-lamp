@@ -10,10 +10,6 @@ export class CreateMeetingAttendeeDto {
   @IsUUID()
   meetingId: string;
 
-  @ApiProperty({ description: 'The ID of the external event.' })
-  @IsUUID()
-  externalEventId: string;
-
   @ApiProperty({ description: 'The email address of the attendee.' })
   @IsEmail()
   email: string;

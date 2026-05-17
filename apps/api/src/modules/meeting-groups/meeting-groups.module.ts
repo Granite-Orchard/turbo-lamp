@@ -9,6 +9,7 @@ import { MeetingGroupsController } from './meeting-groups.controller';
 import { MeetingGroupsService } from './meeting-groups.service';
 import { VerificationsModule } from '../verifications/verifications.module';
 import { AuthModule } from '../auth/auth.module';
+import { MeetingsModule } from '../meetings/meetings.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AuthModule } from '../auth/auth.module';
     CalendarsModule,
     VerificationsModule,
     AuthModule,
+    MeetingsModule,
   ],
   controllers: [MeetingGroupsController],
   providers: [MeetingGroupsService, MeetingCreatedHandler],

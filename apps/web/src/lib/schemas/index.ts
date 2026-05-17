@@ -174,7 +174,6 @@ export const meetingAttendeeSchema = z.object({
   id: z.uuid().optional(),
   meetingId: z.uuid(),
   userId: z.uuid().nullable().optional(),
-  externalEventId: z.string().min(1),
   email: z.email(),
   createdAt: isoDateTimeSchema.optional(),
   updatedAt: isoDateTimeSchema.optional(),

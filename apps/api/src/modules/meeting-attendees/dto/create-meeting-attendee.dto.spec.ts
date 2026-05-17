@@ -7,7 +7,6 @@ describe('CreateMeetingAttendeeDto', () => {
     const dto = plainToInstance(CreateMeetingAttendeeDto, {
       userId: '123e4567-e89b-12d3-a456-426614174000',
       meetingId: '123e4567-e89b-12d3-a456-426614174001',
-      externalEventId: '123e4567-e89b-12d3-a456-426614174002',
       email: 'attendee@example.com',
     });
 
@@ -19,7 +18,6 @@ describe('CreateMeetingAttendeeDto', () => {
     const dto = plainToInstance(CreateMeetingAttendeeDto, {
       userId: 'invalid-uuid',
       meetingId: '123e4567-e89b-12d3-a456-426614174001',
-      externalEventId: '123e4567-e89b-12d3-a456-426614174002',
       email: 'attendee@example.com',
     });
 
@@ -31,7 +29,6 @@ describe('CreateMeetingAttendeeDto', () => {
     const dto = plainToInstance(CreateMeetingAttendeeDto, {
       userId: '123e4567-e89b-12d3-a456-426614174000',
       meetingId: '123e4567-e89b-12d3-a456-426614174001',
-      externalEventId: '123e4567-e89b-12d3-a456-426614174002',
       email: 'not-email',
     });
 

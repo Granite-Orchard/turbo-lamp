@@ -193,39 +193,45 @@ export class GoogleCalendarProvider implements CalendarProvider {
   }
 
   async createEvent(params: CreateEventParams): Promise<CalendarEvent> {
-    const accessToken = await this.auth.getValidAccessToken(params.account);
+    try {
+      const accessToken = await this.auth.getValidAccessToken(params.account);
 
-    const { calendarId = 'primary', event } = params;
+      const { calendarId = 'primary', event } = params;
 
-    const { data } = await firstValueFrom(
-      this.http.post<GoogleCalendarEvent>(
-        `${this.baseUrl}/calendars/${calendarId}/events?sendUpdates=all`,
-        event,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
+      const { data } = await firstValueFrom(
+        this.http.post<GoogleCalendarEvent>(
+          `${this.baseUrl}/calendars/${calendarId}/events?sendUpdates=all`,
+          event,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
           },
-        },
-      ),
-    );
+        ),
+      );
 
-    return {
-      id: data.id,
-      summary: data.summary,
-      description: data.description,
-      location: data.location,
-      attendees: data.attendees,
-      reminders: {
-        useDefault: true,
-      },
-      start: {
-        dateTime: data.start.dateTime,
-      },
-      end: {
-        dateTime: data.end.dateTime,
-      },
-    };
+      return {
+        id: data.id,
+        summary: data.summary,
+        description: data.description,
+        location: data.location,
+        attendees: data.attendees,
+        reminders: {
+          useDefault: true,
+        },
+        start: {
+          dateTime: data.start.dateTime,
+        },
+        end: {
+          dateTime: data.end.dateTime,
+        },
+      };
+    } catch (err: unknown) {
+      const error = err as { response?: { status?: number } };
+      this.logger.error('create event encountered and exception', error);
+      throw new InternalServerErrorException(err);
+    }
   }
 
   async updateEvent(params: UpdateEventParams): Promise<CalendarEvent> {
@@ -260,21 +266,30 @@ export class GoogleCalendarProvider implements CalendarProvider {
   }
 
   async deleteEvent(params: DeleteEventParams): Promise<{ success: true }> {
-    const accessToken = await this.auth.getValidAccessToken(params.account);
+    try {
+      const accessToken = await this.auth.getValidAccessToken(params.account);
 
-    const { eventId, calendarId = 'primary' } = params;
+      const { eventId, calendarId = 'primary' } = params;
 
-    await firstValueFrom(
-      this.http.delete(
-        `${this.baseUrl}/calendars/${calendarId}/events/${eventId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
+      await firstValueFrom(
+        this.http.delete(
+          `${this.baseUrl}/calendars/${calendarId}/events/${eventId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            params: {
+              sendUpdates: 'all',
+            },
           },
-        },
-      ),
-    );
+        ),
+      );
 
-    return { success: true };
+      return { success: true };
+    } catch (err: unknown) {
+      const error = err as { response?: { status?: number } };
+      this.logger.error('delete event experienced an error', error);
+      throw new InternalServerErrorException(err);
+    }
   }
 }
