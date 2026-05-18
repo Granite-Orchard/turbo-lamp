@@ -14,7 +14,7 @@ import { User } from '../users/entities/user.entity';
 import { DataSource } from 'typeorm';
 
 jest.mock('bcrypt', () => ({
-  hashSync: jest.fn((pwd: string) => `hashed-${pwd}`),
+  hash: jest.fn((pwd: string) => `hashed-${pwd}`),
   compare: jest.fn(() => true),
 }));
 

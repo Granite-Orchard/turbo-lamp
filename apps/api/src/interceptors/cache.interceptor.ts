@@ -11,9 +11,12 @@ export class UseCacheInterceptor extends CacheInterceptor {
       .switchToHttp()
       .getRequest();
 
-    const userId = request.user?.id;
+    if (request.method !== 'GET') return '';
 
-    if (!userId || request.method !== 'GET') return ''; // Only cache GET
+    if (!request.user) return '';
+
+    const userId = request.user.id;
+    if (!userId) return '';
 
     const queryHash = request.query
       ? createHash('sha256')

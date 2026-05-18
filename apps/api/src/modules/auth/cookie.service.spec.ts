@@ -38,9 +38,8 @@ describe('CookieService', () => {
         'abc123',
         expect.objectContaining({
           httpOnly: true,
-          sameSite: 'lax',
+          sameSite: 'strict',
           secure: false,
-          domain: 'localhost',
           path: '/',
         }),
       );
@@ -61,9 +60,8 @@ describe('CookieService', () => {
         'value',
         expect.objectContaining({
           httpOnly: true,
-          sameSite: 'lax',
+          sameSite: 'strict',
           secure: false,
-          domain: 'localhost',
           path: '/',
           maxAge: 86400000,
         }),
@@ -78,9 +76,8 @@ describe('CookieService', () => {
         'value',
         expect.objectContaining({
           httpOnly: true,
-          sameSite: 'lax',
+          sameSite: 'strict',
           secure: false,
-          domain: 'localhost',
           path: '/',
           maxAge: 3600,
         }),

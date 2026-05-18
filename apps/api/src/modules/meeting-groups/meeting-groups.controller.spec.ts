@@ -5,6 +5,7 @@ import { MeetingParticipantsService } from '../meeting-participants/meeting-part
 import { VerificationsService } from '../verifications/verifications.service';
 import { TokenService } from '../auth/token.service';
 import { ConfigService } from '@nestjs/config';
+import { DataSource } from 'typeorm';
 
 describe('MeetingGroupsController', () => {
   let controller: MeetingGroupsController;
@@ -18,10 +19,15 @@ describe('MeetingGroupsController', () => {
     findOneBy: jest.fn().mockResolvedValue({}),
   };
 
+  const mockDataSource = {
+    transaction: jest.fn(async (cb) => cb(mockManager)),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [MeetingGroupsController],
       providers: [
+        { provide: DataSource, useValue: mockDataSource },
         { provide: MeetingGroupsService, useValue: mockService },
         {
           provide: MeetingParticipantsService,
