@@ -28,6 +28,7 @@ export class CacheHealthIndicator {
           message: 'Cache value mismatch',
         });
       }
+      await this.cacheManager.del(testKey);
 
       return indicator.up();
     } catch (error) {

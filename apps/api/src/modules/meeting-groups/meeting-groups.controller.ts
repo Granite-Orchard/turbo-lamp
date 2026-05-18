@@ -20,7 +20,7 @@ import { ConfigService } from '@nestjs/config';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import express from 'express';
-import { DataSource } from 'typeorm';
+import { DataSource, Equal } from 'typeorm';
 import { NIL } from 'uuid';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import {
@@ -121,8 +121,8 @@ export class MeetingGroupsController {
   ): Promise<MeetingGroupResponseDto[]> {
     const results = await this.meetingGroupsService.findAllBy(
       [
-        { authorId: req.user.userId },
-        { participants: { userId: req.user.userId } },
+        { authorId: Equal(req.user.userId) },
+        { participants: { userId: Equal(req.user.userId) } },
       ],
       {
         participants: { user: true },
@@ -210,7 +210,7 @@ export class MeetingGroupsController {
     @Param('id') id: string,
   ): Promise<MeetingGroupResponseDto> {
     const result = await this.meetingGroupsService.findOneBy(
-      { id },
+      { id, participants: { userId: Equal(req.user.userId) } },
       {
         participants: { user: true },
       },
@@ -229,7 +229,7 @@ export class MeetingGroupsController {
     @Body() updateMeetingGroupDto: UpdateMeetingGroupDto,
   ): Promise<MeetingGroupResponseDto> {
     const found = await this.meetingGroupsService.findOneBy([
-      { id, authorId: req.user.userId },
+      { id, authorId: Equal(req.user.userId) },
     ]);
     if (!found) {
       throw new NotFoundException();
@@ -251,7 +251,7 @@ export class MeetingGroupsController {
     @Param('id') id: string,
   ): Promise<MeetingGroupResponseDto> {
     const found = await this.meetingGroupsService.findOneBy([
-      { id, authorId: req.user.userId },
+      { id, authorId: Equal(req.user.userId) },
     ]);
     if (!found) {
       throw new NotFoundException();
