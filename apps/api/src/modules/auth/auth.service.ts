@@ -49,10 +49,10 @@ export class AuthService {
       },
       { user: true },
     );
-    const hashToCompare =
-      account?.password ??
-      (await bcrypt.hash(crypto.randomUUID(), await bcrypt.genSalt(10)));
-    const isMatch = await bcrypt.compare(password ?? '', hashToCompare);
+    if (!account?.password) {
+      return null;
+    }
+    const isMatch = await bcrypt.compare(password!, account.password);
 
     if (!isMatch) {
       return null;

@@ -3,6 +3,7 @@ import {
   CallHandler,
   ExecutionContext,
   Injectable,
+  Logger,
   NestInterceptor,
 } from '@nestjs/common';
 import { Observable, from, of } from 'rxjs';
@@ -18,6 +19,7 @@ export const IDEMPOTENCY_TTL_SECONDS = 24 * 60 * 60; // 24 hours
 
 @Injectable()
 export class IdempotencyInterceptor implements NestInterceptor {
+  private readonly logger: Logger = new Logger(IdempotencyInterceptor.name);
   constructor(
     @Inject(CACHE_MANAGER)
     private readonly cacheManager: Cache,
@@ -55,7 +57,9 @@ export class IdempotencyInterceptor implements NestInterceptor {
           tap((response) => {
             this.cacheManager
               .set(cacheKey, JSON.stringify(response), IDEMPOTENCY_TTL_SECONDS)
-              .catch(() => {});
+              .catch((err: unknown) => {
+                this.logger.error('idempotency interceptor exception', err);
+              });
           }),
         );
       }),

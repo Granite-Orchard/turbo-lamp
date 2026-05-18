@@ -108,7 +108,7 @@ export class MeetingGroupsController {
       await meetingGroupsRepo.update(group.id, { magicLink });
       await meetingParticipantsRepo.save({
         createdBy: req.user.userId,
-        meetingGroupId: result.id,
+        meetingGroupId: group.id,
         email: req.user.user.email,
         userId: req.user.userId,
         required: true,

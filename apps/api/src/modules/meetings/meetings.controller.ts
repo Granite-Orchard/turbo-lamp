@@ -38,7 +38,7 @@ export class MeetingsController {
     @Req() req: Request & { user: Account },
   ): Promise<MeetingResponseDto[]> {
     const results = await this.meetingsService.findAllBy({
-      meetingGroup: { participants: { userId: req.user.userId } },
+      attendees: { userId: Equal(req.user.userId) },
     });
     return results.map((result) =>
       plainToInstance(MeetingResponseDto, result, {
@@ -90,7 +90,7 @@ export class MeetingsController {
   ): Promise<MeetingResponseDto> {
     const found = await this.meetingsService.findOneBy({
       id,
-      meetingGroup: { authorId: req.user.userId },
+      meetingGroup: { authorId: Equal(req.user.userId) },
     });
     if (!found) throw new NotFoundException();
     const result = await this.meetingsService.update(id, updateMeetingDto);
@@ -106,7 +106,7 @@ export class MeetingsController {
   ): Promise<MeetingResponseDto> {
     const found = await this.meetingsService.findOneBy({
       id,
-      meetingGroup: { authorId: req.user.userId },
+      meetingGroup: { authorId: Equal(req.user.userId) },
     });
     if (!found) throw new NotFoundException();
     const result = await this.meetingsService.remove(id);

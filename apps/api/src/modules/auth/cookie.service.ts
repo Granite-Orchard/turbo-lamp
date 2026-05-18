@@ -16,17 +16,13 @@ export class CookieService {
   ) {
     const isProduction =
       this.config.get(EnvironmentVariables.NODE_ENV) === 'production';
-    const frontendUrl = this.config.get<string>(
-      EnvironmentVariables.FRONTEND_URL,
-    )!;
-    const domain = isProduction ? new URL(frontendUrl).hostname : 'localhost';
     response.cookie(name, value, {
       ...options,
       httpOnly: true,
-      sameSite: isProduction ? 'strict' : 'lax',
       secure: isProduction,
-      domain,
       path: '/',
+      sameSite: 'none',
+      domain: undefined,
     });
   }
 }

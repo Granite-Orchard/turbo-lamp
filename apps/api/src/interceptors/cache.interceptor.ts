@@ -2,6 +2,7 @@ import { CacheInterceptor } from '@nestjs/cache-manager';
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { Account } from '../modules/accounts/entities/account.entity';
+import { createHash } from 'crypto';
 
 @Injectable()
 export class UseCacheInterceptor extends CacheInterceptor {
@@ -11,10 +12,17 @@ export class UseCacheInterceptor extends CacheInterceptor {
       .getRequest();
 
     const userId = request.user?.id;
-    const url = request.url;
 
-    if (!userId) return url;
+    if (!userId || request.method !== 'GET') return ''; // Only cache GET
 
-    return `${userId}:${request.method}:${url}:${JSON.stringify(request.query)}:${JSON.stringify(request.params)}:${JSON.stringify(request.body)}`;
+    // Use stable hash of body for POST/PUT with body
+    const bodyHash = request.body
+      ? createHash('sha256')
+          .update(JSON.stringify(request.body))
+          .digest('hex')
+          .substring(0, 8)
+      : '';
+
+    return `${userId}:${request.method}:${request.path}:${JSON.stringify(request.query)}:${bodyHash}`;
   }
 }
