@@ -168,6 +168,13 @@ export class MeetingGroupsController {
     if (value.type !== VerificationType.MAGIC_LINK_INVITATION) {
       throw new BadRequestException();
     }
+    if (id !== value.id) {
+      this.logger.error('meeting group id does not match verification', {
+        id,
+        value,
+      });
+      throw new BadRequestException();
+    }
 
     const result = await this.dataSource.transaction(async (manager) => {
       const meetingParticipantsRepo = manager.getRepository(MeetingParticipant);
