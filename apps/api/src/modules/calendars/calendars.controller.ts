@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Inject,
+  InternalServerErrorException,
   Logger,
   NotFoundException,
   Param,
@@ -16,11 +17,15 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { plainToInstance } from 'class-transformer';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { IdempotencyInterceptor } from '../../interceptors/idempotency.interceptor';
 import { Account } from '../accounts/entities/account.entity';
 import { CalendarsService } from './calendars.service';
+import { CalendarResponseDto } from './dto/calendar.response.dto';
 import { CreateCalendarDto } from './dto/create-calendar.dto';
+import { ExternalCalendarEventResponseDto } from './dto/external-calendar-event.response.dto';
+import { ExternalCalendarResponseDto } from './dto/external-calendar.response.dto';
 import { UpdateCalendarDto } from './dto/update-calendar.dto';
 import { ExternalCalendarService } from './external-calendar.service';
 
@@ -37,13 +42,20 @@ export class CalendarsController {
   ) {}
 
   @Get('external')
-  async findAllExternal(@Req() req: Request & { user: Account }) {
+  async findAllExternal(
+    @Req() req: Request & { user: Account },
+  ): Promise<ExternalCalendarResponseDto[]> {
     const { providerId } = req.user;
-    return await this.externalCalendarService.listCalendars(
+    const results = await this.externalCalendarService.listCalendars(
       providerId as 'google',
       {
         account: req.user,
       },
+    );
+    return results.map((result) =>
+      plainToInstance(ExternalCalendarResponseDto, result, {
+        excludeExtraneousValues: true,
+      }),
     );
   }
 
@@ -51,15 +63,15 @@ export class CalendarsController {
   async events(
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
-    @Query('after') after: Date,
-    @Query('before') before: Date,
+    @Query('after') after: string,
+    @Query('before') before: string,
   ) {
     const calendar = await this.calendarService.findOneBy({
       id,
       userId: req.user.userId,
     });
     if (!calendar) throw new NotFoundException();
-    return await this.externalCalendarService.listEvents(
+    const results = await this.externalCalendarService.listEvents(
       req.user.providerId as 'google',
       {
         account: req.user,
@@ -68,22 +80,39 @@ export class CalendarsController {
         timeMax: before.toString(),
       },
     );
+    return results.map((result) =>
+      plainToInstance(ExternalCalendarEventResponseDto, result, {
+        excludeExtraneousValues: true,
+      }),
+    );
   }
 
   @Get()
-  async findAll(@Req() req: Request & { user: Account }) {
-    return await this.calendarService.findAllBy({ userId: req.user.userId });
+  async findAll(
+    @Req() req: Request & { user: Account },
+  ): Promise<CalendarResponseDto[]> {
+    const results = await this.calendarService.findAllBy({
+      userId: req.user.userId,
+    });
+
+    return results.map((result) =>
+      plainToInstance(CalendarResponseDto, result, {
+        excludeExtraneousValues: true,
+      }),
+    );
   }
 
   @Get(':id')
   async findOne(
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
-  ) {
+  ): Promise<CalendarResponseDto> {
     const calendar = await this.calendarService.findOne(id);
     if (!calendar) throw new NotFoundException();
     if (calendar.userId !== req.user.userId) throw new UnauthorizedException();
-    return calendar;
+    return plainToInstance(CalendarResponseDto, calendar, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @Post('upsert')
@@ -91,12 +120,16 @@ export class CalendarsController {
   async upsert(
     @Req() req: Request & { user: Account },
     @Body() createCalendarDto: CreateCalendarDto,
-  ) {
-    return await this.calendarService.upsert({
+  ): Promise<CalendarResponseDto> {
+    const calendar = await this.calendarService.upsert({
       ...createCalendarDto,
       accountId: req.user.id,
       userId: req.user.userId,
       createdBy: req.user.userId,
+    });
+
+    return plainToInstance(CalendarResponseDto, calendar, {
+      excludeExtraneousValues: true,
     });
   }
 
@@ -104,12 +137,15 @@ export class CalendarsController {
   async create(
     @Req() req: Request & { user: Account },
     @Body() createCalendarDto: CreateCalendarDto,
-  ) {
-    return await this.calendarService.create({
+  ): Promise<CalendarResponseDto> {
+    const calendar = await this.calendarService.create({
       ...createCalendarDto,
       accountId: req.user.id,
       userId: req.user.userId,
       createdBy: req.user.userId,
+    });
+    return plainToInstance(CalendarResponseDto, calendar, {
+      excludeExtraneousValues: true,
     });
   }
 
@@ -117,7 +153,7 @@ export class CalendarsController {
   async upsertBatch(
     @Req() req: Request & { user: Account },
     @Body() createCalendarDto: CreateCalendarDto[],
-  ) {
+  ): Promise<CalendarResponseDto[]> {
     const promises = createCalendarDto.map((dto) =>
       this.calendarService.upsert({
         ...dto,
@@ -126,14 +162,19 @@ export class CalendarsController {
         createdBy: req.user.userId,
       }),
     );
-    return await Promise.all(promises);
+    const results = await Promise.all(promises);
+    return results.map((calendar) => {
+      return plainToInstance(CalendarResponseDto, calendar, {
+        excludeExtraneousValues: true,
+      });
+    });
   }
 
   @Post('batch')
   async createBatch(
     @Req() req: Request & { user: Account },
     @Body() createCalendarDto: CreateCalendarDto[],
-  ) {
+  ): Promise<CalendarResponseDto[]> {
     const promises = createCalendarDto.map((dto) =>
       this.calendarService.create({
         ...dto,
@@ -142,7 +183,13 @@ export class CalendarsController {
         createdBy: req.user.userId,
       }),
     );
-    return await Promise.all(promises);
+    const results = await Promise.all(promises);
+
+    return results.map((calendar) =>
+      plainToInstance(CalendarResponseDto, calendar, {
+        excludeExtraneousValues: true,
+      }),
+    );
   }
 
   @Patch(':id')
@@ -150,13 +197,17 @@ export class CalendarsController {
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
     @Body() updateCalendarDto: UpdateCalendarDto,
-  ) {
+  ): Promise<CalendarResponseDto> {
     const calendar = await this.calendarService.findOneBy({ id });
     if (!calendar) throw new NotFoundException();
     if (calendar.userId !== req.user.userId) throw new UnauthorizedException();
-    return await this.calendarService.update(id, {
+    const result = await this.calendarService.update(id, {
       ...updateCalendarDto,
       userId: req.user.userId,
+    });
+
+    return plainToInstance(CalendarResponseDto, result, {
+      excludeExtraneousValues: true,
     });
   }
 
@@ -164,10 +215,17 @@ export class CalendarsController {
   async remove(
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
-  ) {
+  ): Promise<CalendarResponseDto> {
     const calendar = await this.calendarService.findOneBy({ id });
     if (!calendar) throw new NotFoundException();
     if (calendar.userId !== req.user.userId) throw new UnauthorizedException();
-    return await this.calendarService.remove(id);
+    const result = await this.calendarService.remove(id);
+    if (!result.affected) {
+      throw new InternalServerErrorException();
+    }
+
+    return plainToInstance(CalendarResponseDto, calendar, {
+      excludeExtraneousValues: true,
+    });
   }
 }

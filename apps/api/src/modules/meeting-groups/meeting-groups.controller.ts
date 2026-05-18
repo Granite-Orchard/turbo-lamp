@@ -5,6 +5,8 @@ import {
   Delete,
   Get,
   Inject,
+  InternalServerErrorException,
+  Logger,
   NotFoundException,
   Param,
   Patch,
@@ -14,10 +16,11 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { plainToInstance } from 'class-transformer';
 import express from 'express';
+import { DataSource, Equal } from 'typeorm';
 import { NIL } from 'uuid';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import {
@@ -31,10 +34,13 @@ import {
 import { convertDateToTimezone } from '../../utils/helpers/datetimes';
 import { Account } from '../accounts/entities/account.entity';
 import { TokenService } from '../auth/token.service';
-import { MeetingParticipantsService } from '../meeting-participants/meeting-participants.service';
+import { MeetingParticipant } from '../meeting-participants/entities/meeting-participant.entity';
+import { Verification } from '../verifications/entities/verification.entity';
 import { VerificationsService } from '../verifications/verifications.service';
 import { CreateMeetingGroupDto } from './dto/create-meeting-group.dto';
+import { MeetingGroupResponseDto } from './dto/meeting-group.response.dto';
 import { UpdateMeetingGroupDto } from './dto/update-meeting-group.dto';
+import { MeetingGroup } from './entities/meeting-group.entity';
 import { MeetingGroupsService } from './meeting-groups.service';
 
 @ApiBearerAuth()
@@ -42,10 +48,9 @@ import { MeetingGroupsService } from './meeting-groups.service';
 export class MeetingGroupsController {
   private readonly logger = new Logger(MeetingGroupsController.name);
   constructor(
+    private readonly dataSource: DataSource,
     @Inject(MeetingGroupsService)
     private readonly meetingGroupsService: MeetingGroupsService,
-    @Inject(MeetingParticipantsService)
-    private readonly meetingParticipantService: MeetingParticipantsService,
     @Inject(VerificationsService)
     private readonly verificationService: VerificationsService,
     @Inject(TokenService)
@@ -59,62 +64,76 @@ export class MeetingGroupsController {
   async create(
     @Req() req: Request & { user: Account },
     @Body() createMeetingGroupDto: CreateMeetingGroupDto,
-  ) {
-    const calendar = req.user.calendars.find(
-      (c) => c.id === createMeetingGroupDto.calendarId,
-    );
-    if (!calendar) {
-      throw new BadRequestException();
-    }
+  ): Promise<MeetingGroupResponseDto> {
     const sanitizedAfter = new Date(createMeetingGroupDto.after);
     const sanitizedBefore = new Date(createMeetingGroupDto.before);
     const timezonedAfter = convertDateToTimezone(
       sanitizedAfter,
-      calendar.timezone,
+      createMeetingGroupDto.timezone!,
     );
     const timezonedBefore = convertDateToTimezone(
       sanitizedBefore,
-      calendar.timezone,
+      createMeetingGroupDto.timezone!,
     );
-    const result = await this.meetingGroupsService.create({
+
+    const meetingGroupInput = {
       ...createMeetingGroupDto,
       after: timezonedAfter,
       before: timezonedBefore,
-      timezone: calendar.timezone,
       authorId: req.user.userId,
       createdBy: req.user.userId,
-    });
-    const magicLink = await this.meetingGroupsService.generateMagicLink(
-      result.id,
-    );
-    await this.meetingGroupsService.update(result.id, { magicLink });
+    };
 
-    await this.meetingParticipantService.create({
-      createdBy: req.user.userId,
-      meetingGroupId: result.id,
-      email: req.user.user.email,
-      userId: req.user.userId,
-      required: true,
-      authState: ParticipantAuthState.AUTHORIZED,
-      invitationState: ParticipantInvitationState.ACCEPTED,
+    const result = await this.dataSource.transaction(async (manager) => {
+      const meetingGroupsRepo = manager.getRepository(MeetingGroup);
+      const meetingParticipantsRepo = manager.getRepository(MeetingParticipant);
+
+      this.meetingGroupsService.validateMeetingGroupConstraints(
+        meetingGroupInput,
+      );
+      const group = await meetingGroupsRepo.save(meetingGroupInput);
+
+      const magicLink = await this.meetingGroupsService.generateMagicLink(
+        group.id,
+      );
+      await meetingGroupsRepo.update(group.id, { magicLink });
+      await meetingParticipantsRepo.save({
+        createdBy: req.user.userId,
+        meetingGroupId: group.id,
+        email: req.user.user.email,
+        userId: req.user.userId,
+        required: true,
+        authState: ParticipantAuthState.AUTHORIZED,
+        invitationState: ParticipantInvitationState.ACCEPTED,
+      });
+      return group;
     });
 
-    return result;
+    return plainToInstance(MeetingGroupResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  async findAll(@Req() req: Request & { user: Account }) {
-    const result = await this.meetingGroupsService.findAllBy(
+  async findAll(
+    @Req() req: Request & { user: Account },
+  ): Promise<MeetingGroupResponseDto[]> {
+    const results = await this.meetingGroupsService.findAllBy(
       [
-        { authorId: req.user.userId },
-        { participants: { userId: req.user.userId } },
+        { authorId: Equal(req.user.userId) },
+        { participants: { userId: Equal(req.user.userId) } },
       ],
       {
         participants: { user: true },
       },
     );
-    return result;
+
+    return results.map((result) =>
+      plainToInstance(MeetingGroupResponseDto, result, {
+        excludeExtraneousValues: true,
+      }),
+    );
   }
 
   @Get(':id/accept')
@@ -139,34 +158,48 @@ export class MeetingGroupsController {
     if (value.type !== VerificationType.MAGIC_LINK_INVITATION) {
       throw new BadRequestException();
     }
+    if (id !== value.id) {
+      this.logger.error('meeting group id does not match verification', {
+        id,
+        value,
+      });
+      throw new BadRequestException();
+    }
 
-    const participant = await this.meetingParticipantService.create({
-      createdBy: NIL,
-      meetingGroupId: id,
-      required: false,
-      email: `${this.tokenService.randomHash()}@anonymous.com`,
-      authState: ParticipantAuthState.UNAUTHORIZED,
-      invitationState: ParticipantInvitationState.PENDING,
-    });
-    const newValue: VerificationValue = {
-      type: VerificationType.MAGIC_LINK_INVITATION,
-      id: participant.id,
-      to: '',
-      after: SanitizedRoutes.MEETING_INVITATION_ACCEPTED,
-    };
-    // 5 minutes
-    const expiresIn = 300000;
-    const expiresAt = new Date(Date.now() + expiresIn);
-    const newVerification = await this.verificationService.create({
-      identifier: this.tokenService.randomHash(),
-      value: this.tokenService.sign(newValue, { expiresIn }),
-      expiresAt,
+    const result = await this.dataSource.transaction(async (manager) => {
+      const meetingParticipantsRepo = manager.getRepository(MeetingParticipant);
+      const verificationRepo = manager.getRepository(Verification);
+
+      const participant = await meetingParticipantsRepo.save({
+        createdBy: NIL,
+        meetingGroupId: id,
+        required: false,
+        email: `${this.tokenService.randomHash()}@anonymous.com`,
+        authState: ParticipantAuthState.UNAUTHORIZED,
+        invitationState: ParticipantInvitationState.PENDING,
+      });
+
+      const newValue: VerificationValue = {
+        type: VerificationType.MAGIC_LINK_INVITATION,
+        id: participant.id,
+        to: '',
+        after: SanitizedRoutes.MEETING_INVITATION_ACCEPTED,
+      };
+      // 5 minutes
+      const expiresIn = 300000;
+      const expiresAt = new Date(Date.now() + expiresIn);
+      const newVerification = await verificationRepo.save({
+        identifier: this.tokenService.randomHash(),
+        value: this.tokenService.sign(newValue, { expiresIn }),
+        expiresAt,
+      });
+      return newVerification;
     });
     const frontendUrl = this.configService.get<string>(
       EnvironmentVariables.FRONTEND_URL,
     )!;
     res.redirect(
-      `${frontendUrl}/${value.after}?token=${encodeURIComponent(newVerification.identifier)}`,
+      `${frontendUrl}/${value.after}?token=${encodeURIComponent(result.identifier)}`,
     );
   }
 
@@ -175,14 +208,17 @@ export class MeetingGroupsController {
   async findOne(
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
-  ) {
+  ): Promise<MeetingGroupResponseDto> {
     const result = await this.meetingGroupsService.findOneBy(
-      { id },
+      { id, participants: { userId: Equal(req.user.userId) } },
       {
         participants: { user: true },
       },
     );
-    return result;
+
+    return plainToInstance(MeetingGroupResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @UseGuards(JwtAuthGuard)
@@ -191,14 +227,21 @@ export class MeetingGroupsController {
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
     @Body() updateMeetingGroupDto: UpdateMeetingGroupDto,
-  ) {
+  ): Promise<MeetingGroupResponseDto> {
     const found = await this.meetingGroupsService.findOneBy([
-      { id, authorId: req.user.userId },
+      { id, authorId: Equal(req.user.userId) },
     ]);
     if (!found) {
       throw new NotFoundException();
     }
-    return await this.meetingGroupsService.update(id, updateMeetingGroupDto);
+    const result = await this.meetingGroupsService.update(
+      id,
+      updateMeetingGroupDto,
+    );
+
+    return plainToInstance(MeetingGroupResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @UseGuards(JwtAuthGuard)
@@ -206,13 +249,20 @@ export class MeetingGroupsController {
   async remove(
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
-  ) {
+  ): Promise<MeetingGroupResponseDto> {
     const found = await this.meetingGroupsService.findOneBy([
-      { id, authorId: req.user.userId },
+      { id, authorId: Equal(req.user.userId) },
     ]);
     if (!found) {
       throw new NotFoundException();
     }
-    return await this.meetingGroupsService.remove(id);
+    const result = await this.meetingGroupsService.remove(id);
+    if (!result.affected) {
+      throw new InternalServerErrorException();
+    }
+
+    return plainToInstance(MeetingGroupResponseDto, found, {
+      excludeExtraneousValues: true,
+    });
   }
 }

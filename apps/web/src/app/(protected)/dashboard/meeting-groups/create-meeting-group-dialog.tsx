@@ -184,6 +184,8 @@ export function CreateGroupDialog({
         after: new Date(result.data.after).toISOString(),
         before: new Date(result.data.before).toISOString(),
         calendarId: result.data.calendarId,
+        timezone: calendars.find((c) => c.id === result.data.calendarId)!
+          .timezone,
         status: "open",
         participants: [],
         createdAt: now,

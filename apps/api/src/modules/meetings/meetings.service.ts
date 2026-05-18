@@ -62,7 +62,7 @@ export class MeetingsService {
   }
 
   async findAllBy(
-    where?: FindOptionsWhere<Meeting>,
+    where: FindOptionsWhere<Meeting> | FindOptionsWhere<Meeting>[],
     relations?: FindOptionsRelations<Meeting>,
   ) {
     const defaultRelations: FindOptionsRelations<Meeting> = {
@@ -83,7 +83,7 @@ export class MeetingsService {
   }
 
   async findOneBy(
-    where: FindOptionsWhere<Meeting>,
+    where: FindOptionsWhere<Meeting> | FindOptionsWhere<Meeting>[],
     relations?: FindOptionsRelations<Meeting>,
   ) {
     return await this.repository.findOne({

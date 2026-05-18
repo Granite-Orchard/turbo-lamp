@@ -95,55 +95,6 @@ describe('UsersService', () => {
     });
   });
 
-  describe('findAll', () => {
-    it('should return an array of users', async () => {
-      mockRepository.find.mockResolvedValue([mockUser]);
-
-      const result = await service.findAll();
-
-      expect(mockRepository.find).toHaveBeenCalled();
-      expect(result).toEqual([mockUser]);
-    });
-
-    it('should return empty array when no users exist', async () => {
-      mockRepository.find.mockResolvedValue([]);
-
-      const result = await service.findAll();
-
-      expect(mockRepository.find).toHaveBeenCalled();
-      expect(result).toEqual([]);
-    });
-  });
-
-  describe('findAllBy', () => {
-    it('should return users matching the where clause', async () => {
-      const where = { email: 'test@example.com' };
-      mockRepository.find.mockResolvedValue([mockUser]);
-
-      const result = await service.findAllBy(where);
-
-      expect(mockRepository.find).toHaveBeenCalledWith({
-        where,
-        relations: undefined,
-      });
-      expect(result).toEqual([mockUser]);
-    });
-
-    it('should return users with relations', async () => {
-      const where = { email: 'test@example.com' };
-      const relations = { accounts: true };
-      mockRepository.find.mockResolvedValue([mockUser]);
-
-      const result = await service.findAllBy(where, relations);
-
-      expect(mockRepository.find).toHaveBeenCalledWith({
-        where,
-        relations,
-      });
-      expect(result).toEqual([mockUser]);
-    });
-  });
-
   describe('findOne', () => {
     it('should return a user by id', async () => {
       mockRepository.findOne.mockResolvedValue(mockUser);

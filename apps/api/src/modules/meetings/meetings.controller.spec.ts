@@ -74,8 +74,10 @@ describe('MeetingsController', () => {
 
   describe('remove', () => {
     it('should delete meeting', async () => {
-      const req = { user: { userId: 'user-123' } } as any;
+      const req = { user: { id: 'user-123' } } as any;
+      mockMeetingsService.remove.mockReturnValueOnce({ affected: 1 });
       const result = await controller.remove(req, '1');
+      console.log(result);
       expect(result).toHaveProperty('id');
     });
   });

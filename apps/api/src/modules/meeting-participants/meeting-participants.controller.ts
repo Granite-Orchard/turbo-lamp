@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Inject,
+  InternalServerErrorException,
   NotFoundException,
   Param,
   Patch,
@@ -17,6 +18,8 @@ import { Account } from '../accounts/entities/account.entity';
 import { CreateMeetingParticipantDto } from './dto/create-meeting-participant.dto';
 import { UpdateMeetingParticipantDto } from './dto/update-meeting-participant.dto';
 import { MeetingParticipantsService } from './meeting-participants.service';
+import { MeetingParticipantResponseDto } from './dto/meeting-participant.response.dto';
+import { plainToInstance } from 'class-transformer';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -31,32 +34,47 @@ export class MeetingParticipantsController {
   async create(
     @Req() req: Request & { user: Account },
     @Body() createMeetingParticipantDto: CreateMeetingParticipantDto,
-  ) {
-    return await this.meetingParticipantsService.create({
+  ): Promise<MeetingParticipantResponseDto> {
+    const result = await this.meetingParticipantsService.create({
       ...createMeetingParticipantDto,
       createdBy: req.user.userId,
+    });
+    return plainToInstance(MeetingParticipantResponseDto, result, {
+      excludeExtraneousValues: true,
     });
   }
 
   @Get()
-  async findAll(@Req() req: Request & { user: Account }) {
-    return await this.meetingParticipantsService.findAllBy([
+  async findAll(
+    @Req() req: Request & { user: Account },
+  ): Promise<MeetingParticipantResponseDto[]> {
+    const results = await this.meetingParticipantsService.findAllBy([
       { userId: req.user.userId },
       { email: req.user.user.email },
       { createdBy: req.user.userId },
     ]);
+
+    return results.map((result) =>
+      plainToInstance(MeetingParticipantResponseDto, result, {
+        excludeExtraneousValues: true,
+      }),
+    );
   }
 
   @Get(':id')
   async findOne(
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
-  ) {
-    return await this.meetingParticipantsService.findOneBy([
+  ): Promise<MeetingParticipantResponseDto> {
+    const result = await this.meetingParticipantsService.findOneBy([
       { id, userId: req.user.userId },
       { id, email: req.user.user.email },
       { id, createdBy: req.user.userId },
     ]);
+
+    return plainToInstance(MeetingParticipantResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @Patch(':id')
@@ -64,7 +82,7 @@ export class MeetingParticipantsController {
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
     @Body() updateMeetingParticipantDto: UpdateMeetingParticipantDto,
-  ) {
+  ): Promise<MeetingParticipantResponseDto> {
     const found = await this.meetingParticipantsService.findOneBy([
       { id, userId: req.user.userId },
       { id, email: req.user.user.email },
@@ -77,14 +95,16 @@ export class MeetingParticipantsController {
       id,
       updateMeetingParticipantDto,
     );
-    return result;
+    return plainToInstance(MeetingParticipantResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @Delete(':id')
   async remove(
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
-  ) {
+  ): Promise<MeetingParticipantResponseDto> {
     const found = await this.meetingParticipantsService.findOneBy([
       { id, userId: req.user.userId },
       { id, email: req.user.user.email },
@@ -93,6 +113,13 @@ export class MeetingParticipantsController {
     if (!found) {
       throw new NotFoundException();
     }
-    return await this.meetingParticipantsService.remove(id);
+    const result = await this.meetingParticipantsService.remove(id);
+    if (!result.affected) {
+      throw new InternalServerErrorException();
+    }
+
+    return plainToInstance(MeetingParticipantResponseDto, found, {
+      excludeExtraneousValues: true,
+    });
   }
 }

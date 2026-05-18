@@ -18,13 +18,14 @@ describe('UseCacheInterceptor', () => {
         getRequest: () => ({
           user: { id: 'user-123' },
           url: '/api/users',
+          path: '/api/users',
           method: 'GET',
         }),
       }),
     } as unknown as ExecutionContext;
 
     const result = interceptor.trackBy(mockContext);
-    expect(result).toBe('user-123:GET:/api/users');
+    expect(result).toBe('user-123:GET:/api/users::');
   });
 
   it('should track by url when no user', () => {
@@ -33,12 +34,13 @@ describe('UseCacheInterceptor', () => {
         getRequest: () => ({
           user: undefined,
           url: '/api/users',
+          path: '/api/users',
           method: 'GET',
         }),
       }),
     } as unknown as ExecutionContext;
 
     const result = interceptor.trackBy(mockContext);
-    expect(result).toBe('/api/users');
+    expect(result).toBe('');
   });
 });

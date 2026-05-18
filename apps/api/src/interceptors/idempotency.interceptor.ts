@@ -1,7 +1,9 @@
 import {
+  BadRequestException,
   CallHandler,
   ExecutionContext,
   Injectable,
+  Logger,
   NestInterceptor,
 } from '@nestjs/common';
 import { Observable, from, of } from 'rxjs';
@@ -17,6 +19,7 @@ export const IDEMPOTENCY_TTL_SECONDS = 24 * 60 * 60; // 24 hours
 
 @Injectable()
 export class IdempotencyInterceptor implements NestInterceptor {
+  private readonly logger: Logger = new Logger(IdempotencyInterceptor.name);
   constructor(
     @Inject(CACHE_MANAGER)
     private readonly cacheManager: Cache,
@@ -32,6 +35,15 @@ export class IdempotencyInterceptor implements NestInterceptor {
       return next.handle();
     }
 
+    if (
+      typeof idempotencyKey !== 'string' ||
+      idempotencyKey.length < 16 ||
+      idempotencyKey.length > 128 ||
+      !/^[a-zA-Z0-9-]+$/.test(idempotencyKey)
+    ) {
+      throw new BadRequestException('Invalid idempotency key');
+    }
+
     const userId = request.user?.userId ?? 'anonymous';
     const cacheKey = `idempotency:${userId}:${idempotencyKey}`;
 
@@ -45,7 +57,9 @@ export class IdempotencyInterceptor implements NestInterceptor {
           tap((response) => {
             this.cacheManager
               .set(cacheKey, JSON.stringify(response), IDEMPOTENCY_TTL_SECONDS)
-              .catch(() => {});
+              .catch((err: unknown) => {
+                this.logger.error('idempotency interceptor exception', err);
+              });
           }),
         );
       }),

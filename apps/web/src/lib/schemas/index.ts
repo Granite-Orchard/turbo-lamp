@@ -184,7 +184,6 @@ export const createMeetingGroupSchema = z
   .omit({
     id: true,
     magicLink: true,
-    timezone: true,
     creatorId: true,
     createdAt: true,
     updatedAt: true,

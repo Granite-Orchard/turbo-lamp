@@ -1,18 +1,5 @@
 import { Exclude, Expose, Type } from 'class-transformer';
-
-@Exclude()
-export class UserResponseDto {
-  @Expose()
-  id: string;
-  @Expose()
-  name: string;
-  @Expose()
-  email: string;
-  @Expose()
-  emailVerified: string;
-  @Expose()
-  image?: string;
-}
+import { UserResponseDto } from '../../users/dto/user.response.dto';
 
 @Exclude()
 export class ProfileResponseDto {

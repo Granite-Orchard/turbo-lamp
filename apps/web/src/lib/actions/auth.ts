@@ -6,6 +6,8 @@ import {
   Profile,
   Register as RegisterData,
 } from "@/lib/types";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 export async function getProfileAction(): Promise<Profile> {
   return await authApi.profile();
@@ -16,7 +18,9 @@ export async function loginAction(data: LoginData) {
 }
 
 export async function logoutAction() {
-  return await authApi.logout();
+  await authApi.logout();
+  revalidatePath("/login");
+  redirect("/login");
 }
 
 export async function registerAction(data: RegisterData) {

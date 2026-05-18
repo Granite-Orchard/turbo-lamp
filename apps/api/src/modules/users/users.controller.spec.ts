@@ -35,7 +35,7 @@ describe('UsersController', () => {
   });
 
   describe('profile', () => {
-    it('should return user profile', () => {
+    it('should return user profile', async () => {
       const req = {
         user: { userId: '123', email: 'test@example.com', name: 'Test' },
       } as any;

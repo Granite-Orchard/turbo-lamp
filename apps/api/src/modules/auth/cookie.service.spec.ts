@@ -40,7 +40,6 @@ describe('CookieService', () => {
           httpOnly: true,
           sameSite: 'lax',
           secure: false,
-          domain: 'localhost',
           path: '/',
         }),
       );
@@ -63,7 +62,6 @@ describe('CookieService', () => {
           httpOnly: true,
           sameSite: 'lax',
           secure: false,
-          domain: 'localhost',
           path: '/',
           maxAge: 86400000,
         }),
@@ -80,7 +78,6 @@ describe('CookieService', () => {
           httpOnly: true,
           sameSite: 'lax',
           secure: false,
-          domain: 'localhost',
           path: '/',
           maxAge: 3600,
         }),

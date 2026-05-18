@@ -17,6 +17,8 @@ import { Account } from '../accounts/entities/account.entity';
 import { AvailabilitiesService } from './availabilities.service';
 import { CreateAvailabilityDto } from './dto/create-availability.dto';
 import { UpdateAvailabilityDto } from './dto/update-availability.dto';
+import { AvailabilityResponseDto } from './dto/availability.response.dto';
+import { plainToInstance } from 'class-transformer';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -29,7 +31,7 @@ export class AvailabilitiesController {
   async upsertBatch(
     @Req() req: Request & { user: Account },
     @Body() createAvailabilityDto: CreateAvailabilityDto[] & { userId: string },
-  ) {
+  ): Promise<AvailabilityResponseDto[]> {
     const promises = createAvailabilityDto.map((dto) => {
       return this.availabilitiesService.upsert({
         ...dto,
@@ -37,18 +39,27 @@ export class AvailabilitiesController {
         createdBy: req.user.userId,
       });
     });
-    return await Promise.all(promises);
+    const results = await Promise.all(promises);
+    return results.map((result) => {
+      return plainToInstance(AvailabilityResponseDto, result, {
+        excludeExtraneousValues: true,
+      });
+    });
   }
 
   @Post('upsert')
   async upsert(
     @Req() req: Request & { user: Account },
     @Body() createAvailabilityDto: CreateAvailabilityDto & { userId: string },
-  ) {
-    return await this.availabilitiesService.upsert({
+  ): Promise<AvailabilityResponseDto> {
+    const result = await this.availabilitiesService.upsert({
       ...createAvailabilityDto,
       userId: req.user.userId,
       createdBy: req.user.userId,
+    });
+
+    return plainToInstance(AvailabilityResponseDto, result, {
+      excludeExtraneousValues: true,
     });
   }
 
@@ -56,29 +67,44 @@ export class AvailabilitiesController {
   async create(
     @Req() req: Request & { user: Account },
     @Body() createAvailabilityDto: CreateAvailabilityDto & { userId: string },
-  ) {
-    return await this.availabilitiesService.create({
+  ): Promise<AvailabilityResponseDto> {
+    const result = await this.availabilitiesService.create({
       ...createAvailabilityDto,
       userId: req.user.userId,
       createdBy: req.user.userId,
     });
+
+    return plainToInstance(AvailabilityResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @Get()
-  async findAll(@Req() req: Request & { user: Account }) {
-    return await this.availabilitiesService.findAllBy({
+  async findAll(
+    @Req() req: Request & { user: Account },
+  ): Promise<AvailabilityResponseDto[]> {
+    const results = await this.availabilitiesService.findAllBy({
       userId: req.user.userId,
     });
+    return results.map((result) =>
+      plainToInstance(AvailabilityResponseDto, result, {
+        excludeExtraneousValues: true,
+      }),
+    );
   }
 
   @Get(':id')
   async findOne(
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
-  ) {
-    return await this.availabilitiesService.findOneBy({
+  ): Promise<AvailabilityResponseDto> {
+    const result = await this.availabilitiesService.findOneBy({
       id,
       userId: req.user.userId,
+    });
+
+    return plainToInstance(AvailabilityResponseDto, result, {
+      excludeExtraneousValues: true,
     });
   }
 
@@ -87,7 +113,7 @@ export class AvailabilitiesController {
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
     @Body() updateAvailabilityDto: UpdateAvailabilityDto,
-  ) {
+  ): Promise<AvailabilityResponseDto> {
     const existing = await this.availabilitiesService.findOneBy({
       id,
       userId: req.user.userId,
@@ -95,14 +121,21 @@ export class AvailabilitiesController {
     if (!existing) {
       throw new NotFoundException();
     }
-    return await this.availabilitiesService.update(id, updateAvailabilityDto);
+    const result = await this.availabilitiesService.update(
+      id,
+      updateAvailabilityDto,
+    );
+
+    return plainToInstance(AvailabilityResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @Delete(':id')
   async remove(
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
-  ) {
+  ): Promise<AvailabilityResponseDto> {
     const existing = await this.availabilitiesService.findOneBy({
       id,
       userId: req.user.userId,
@@ -110,6 +143,10 @@ export class AvailabilitiesController {
     if (!existing) {
       throw new NotFoundException();
     }
-    return await this.availabilitiesService.remove(id);
+    const result = await this.availabilitiesService.remove(id);
+
+    return plainToInstance(AvailabilityResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 }

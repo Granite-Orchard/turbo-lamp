@@ -3,30 +3,33 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  InternalServerErrorException,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import { DataSource } from 'typeorm';
 import { AccountProvider, EnvironmentVariables } from '../../libs/constants';
 import { AccountsService } from '../accounts/accounts.service';
 import { Account } from '../accounts/entities/account.entity';
 import { Session } from '../sessions/entities/session.entity';
 import { SessionsService } from '../sessions/sessions.service';
-import { UsersService } from '../users/users.service';
+import { User } from '../users/entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { TokenSchema, TokenService } from './token.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger: Logger = new Logger(AuthService.name);
   constructor(
+    private readonly dataSource: DataSource,
     @Inject(TokenService)
     private tokenService: TokenService,
     @Inject(ConfigService)
     private readonly configService: ConfigService,
     @Inject(AccountsService)
     private readonly accountService: AccountsService,
-    @Inject(UsersService)
-    private readonly userService: UsersService,
     @Inject(SessionsService)
     private readonly sessionService: SessionsService,
   ) {}
@@ -46,18 +49,19 @@ export class AuthService {
       },
       { user: true },
     );
-
     if (!account) {
       return null;
     }
 
-    if (!password) {
-      return account;
-    }
+    if (provider === AccountProvider.CREDENTIALS) {
+      if (!account.password) {
+        return null;
+      }
+      const isMatch = await bcrypt.compare(password!, account.password);
 
-    const isMatch = await bcrypt.compare(password, account.password!);
-    if (!isMatch) {
-      throw new UnauthorizedException();
+      if (!isMatch) {
+        return null;
+      }
     }
 
     return account;
@@ -68,12 +72,12 @@ export class AuthService {
     metadata?: { userAgent: string | undefined; ip: string | undefined },
   ): Promise<Session> {
     const { username, password, confirmPassword, timezone } = register;
-    const hashedPassword = bcrypt.hashSync(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     const isMatch = await bcrypt.compare(confirmPassword, hashedPassword);
     if (!isMatch) {
       throw new BadRequestException();
     }
-    let validated = await this.validateUser(
+    const validated = await this.validateUser(
       register.username,
       AccountProvider.CREDENTIALS,
       register.password,
@@ -82,20 +86,29 @@ export class AuthService {
       throw new ConflictException();
     }
 
-    const user = await this.userService.create({
-      name: username,
-      email: username,
-      emailVerified: false,
-      timezone,
-    });
-    validated = await this.accountService.create({
-      userId: user.id,
-      accountId: user.id,
-      providerId: AccountProvider.CREDENTIALS,
-      password: hashedPassword,
-    });
-    validated.user = user;
-    return await this.login(validated, metadata);
+    try {
+      const account = await this.dataSource.transaction(async (manager) => {
+        const userRepository = manager.getRepository(User);
+        const accountRepository = manager.getRepository(Account);
+        const user = await userRepository.save({
+          name: username,
+          email: username,
+          emailVerified: false,
+          timezone,
+        });
+        const account = await accountRepository.save({
+          userId: user.id,
+          accountId: user.id,
+          providerId: AccountProvider.CREDENTIALS,
+          password: hashedPassword,
+        });
+        return { ...account, user };
+      });
+      return await this.login(account, metadata);
+    } catch (err: unknown) {
+      this.logger.error('register encountered an exception', err);
+      throw new InternalServerErrorException();
+    }
   }
 
   async login(

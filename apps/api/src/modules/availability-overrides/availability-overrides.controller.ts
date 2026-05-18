@@ -17,6 +17,8 @@ import { Account } from '../accounts/entities/account.entity';
 import { AvailabilityOverridesService } from './availability-overrides.service';
 import { CreateAvailabilityOverrideDto } from './dto/create-availability-override.dto';
 import { UpdateAvailabilityOverrideDto } from './dto/update-availability-override.dto';
+import { AvailabilityOverrideResponseDto } from './dto/availability-override.response.dto';
+import { plainToInstance } from 'class-transformer';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -31,11 +33,15 @@ export class AvailabilityOverridesController {
   async upsert(
     @Req() req: Request & { user: Account },
     @Body() createAvailabilityOverrideDto: CreateAvailabilityOverrideDto,
-  ) {
-    return await this.availabilityOverridesService.upsert({
+  ): Promise<AvailabilityOverrideResponseDto> {
+    const result = await this.availabilityOverridesService.upsert({
       ...createAvailabilityOverrideDto,
       createdBy: req.user.userId,
       userId: req.user.userId,
+    });
+
+    return plainToInstance(AvailabilityOverrideResponseDto, result, {
+      excludeExtraneousValues: true,
     });
   }
 
@@ -43,29 +49,45 @@ export class AvailabilityOverridesController {
   async create(
     @Req() req: Request & { user: Account },
     @Body() createAvailabilityOverrideDto: CreateAvailabilityOverrideDto,
-  ) {
-    return await this.availabilityOverridesService.create({
+  ): Promise<AvailabilityOverrideResponseDto> {
+    const result = await this.availabilityOverridesService.create({
       ...createAvailabilityOverrideDto,
       createdBy: req.user.userId,
       userId: req.user.userId,
     });
+
+    return plainToInstance(AvailabilityOverrideResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @Get()
-  async findAll(@Req() req: Request & { user: Account }) {
-    return await this.availabilityOverridesService.findAllBy({
+  async findAll(
+    @Req() req: Request & { user: Account },
+  ): Promise<AvailabilityOverrideResponseDto[]> {
+    const results = await this.availabilityOverridesService.findAllBy({
       userId: req.user.userId,
     });
+
+    return results.map((result) =>
+      plainToInstance(AvailabilityOverrideResponseDto, result, {
+        excludeExtraneousValues: true,
+      }),
+    );
   }
 
   @Get(':id')
   async findOne(
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
-  ) {
-    return await this.availabilityOverridesService.findOneBy({
+  ): Promise<AvailabilityOverrideResponseDto> {
+    const result = await this.availabilityOverridesService.findOneBy({
       id,
       userId: req.user.userId,
+    });
+
+    return plainToInstance(AvailabilityOverrideResponseDto, result, {
+      excludeExtraneousValues: true,
     });
   }
 
@@ -74,7 +96,7 @@ export class AvailabilityOverridesController {
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
     @Body() updateAvailabilityOverrideDto: UpdateAvailabilityOverrideDto,
-  ) {
+  ): Promise<AvailabilityOverrideResponseDto> {
     const existing = await this.availabilityOverridesService.findOneBy({
       id,
       userId: req.user.userId,
@@ -82,17 +104,21 @@ export class AvailabilityOverridesController {
     if (!existing) {
       throw new NotFoundException();
     }
-    return await this.availabilityOverridesService.update(
+    const result = await this.availabilityOverridesService.update(
       id,
       updateAvailabilityOverrideDto,
     );
+
+    return plainToInstance(AvailabilityOverrideResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @Delete(':id')
   async remove(
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
-  ) {
+  ): Promise<AvailabilityOverrideResponseDto> {
     const existing = await this.availabilityOverridesService.findOneBy({
       id,
       userId: req.user.userId,
@@ -100,6 +126,10 @@ export class AvailabilityOverridesController {
     if (!existing) {
       throw new NotFoundException();
     }
-    return await this.availabilityOverridesService.remove(id);
+    const result = await this.availabilityOverridesService.remove(id);
+
+    return plainToInstance(AvailabilityOverrideResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 }

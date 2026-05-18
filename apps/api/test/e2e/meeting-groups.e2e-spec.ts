@@ -8,6 +8,7 @@ import { MeetingParticipantsService } from '../../src/modules/meeting-participan
 import { VerificationsService } from '../../src/modules/verifications/verifications.service';
 import { TokenService } from '../../src/modules/auth/token.service';
 import { JwtAuthGuard } from '../../src/guards/jwt-auth.guard';
+import { DataSource } from 'typeorm';
 
 describe('MeetingGroupsController (e2e)', () => {
   let app: INestApplication;
@@ -37,10 +38,15 @@ describe('MeetingGroupsController (e2e)', () => {
     canActivate: jest.fn().mockReturnValue(true),
   };
 
+  const mockDataSource = {
+    transaction: jest.fn(async (cb) => cb(mockManager)),
+  };
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [MeetingGroupsController],
       providers: [
+        { provide: DataSource, useValue: mockDataSource },
         { provide: MeetingGroupsService, useValue: mockMeetingGroupsService },
         {
           provide: MeetingParticipantsService,
