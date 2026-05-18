@@ -46,8 +46,11 @@ async function bootstrap() {
   const origin = configService.get<string>(
     EnvironmentVariables.ALLOWED_ORIGINS,
   );
+  if (!origin) {
+    throw new Error('ALLOWED_ORIGINS environment variable is required');
+  }
   app.enableCors({
-    origin,
+    origin: origin.split(',').map((o) => o.trim()),
     credentials: true,
   });
   app.set('trust proxy', true);

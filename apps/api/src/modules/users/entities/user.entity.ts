@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -17,6 +18,7 @@ import { AvailabilityOverride } from '../../availability-overrides/entities/avai
 import { Availability } from '../../availabilities/entities/availability.entity';
 
 @Entity('users')
+@Index(['email'])
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;

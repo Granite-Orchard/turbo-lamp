@@ -42,6 +42,7 @@ export class AuthService {
     if (provider === AccountProvider.CREDENTIALS && !password) {
       throw new UnauthorizedException();
     }
+    const dummyHash = '$2b$10$abcdefghijklmnopqrstuvwxyz';
     const account = await this.accountService.findOneBy(
       {
         providerId: provider,
@@ -49,18 +50,11 @@ export class AuthService {
       },
       { user: true },
     );
+    const hashToCompare = account?.password ?? dummyHash;
+    const isMatch = await bcrypt.compare(password ?? '', hashToCompare);
 
-    if (!account) {
-      return null;
-    }
-
-    if (!password) {
-      return account;
-    }
-
-    const isMatch = await bcrypt.compare(password, account.password!);
     if (!isMatch) {
-      throw new UnauthorizedException();
+      return null;
     }
 
     return account;
