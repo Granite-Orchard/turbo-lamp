@@ -42,6 +42,7 @@ import { plainToInstance } from 'class-transformer';
 import { DataSource } from 'typeorm';
 import { MeetingGroup } from './entities/meeting-group.entity';
 import { MeetingParticipant } from '../meeting-participants/entities/meeting-participant.entity';
+import { Verification } from '../verifications/entities/verification.entity';
 
 @ApiBearerAuth()
 @Controller({ path: 'meeting-groups', version: '1' })
@@ -117,28 +118,6 @@ export class MeetingGroupsController {
       });
       return group;
     });
-    // const result = await this.meetingGroupsService.create({
-    //   ...createMeetingGroupDto,
-    //   after: timezonedAfter,
-    //   before: timezonedBefore,
-    //   timezone: calendar.timezone,
-    //   authorId: req.user.userId,
-    //   createdBy: req.user.userId,
-    // });
-    // const magicLink = await this.meetingGroupsService.generateMagicLink(
-    //   result.id,
-    // );
-    // await this.meetingGroupsService.update(result.id, { magicLink });
-    //
-    // await this.meetingParticipantService.create({
-    //   createdBy: req.user.userId,
-    //   meetingGroupId: result.id,
-    //   email: req.user.user.email,
-    //   userId: req.user.userId,
-    //   required: true,
-    //   authState: ParticipantAuthState.AUTHORIZED,
-    //   invitationState: ParticipantInvitationState.ACCEPTED,
-    // });
 
     return plainToInstance(MeetingGroupResponseDto, result, {
       excludeExtraneousValues: true,
@@ -190,34 +169,40 @@ export class MeetingGroupsController {
       throw new BadRequestException();
     }
 
-    // TODO:... another transaction needed here
-    const participant = await this.meetingParticipantService.create({
-      createdBy: NIL,
-      meetingGroupId: id,
-      required: false,
-      email: `${this.tokenService.randomHash()}@anonymous.com`,
-      authState: ParticipantAuthState.UNAUTHORIZED,
-      invitationState: ParticipantInvitationState.PENDING,
-    });
-    const newValue: VerificationValue = {
-      type: VerificationType.MAGIC_LINK_INVITATION,
-      id: participant.id,
-      to: '',
-      after: SanitizedRoutes.MEETING_INVITATION_ACCEPTED,
-    };
-    // 5 minutes
-    const expiresIn = 300000;
-    const expiresAt = new Date(Date.now() + expiresIn);
-    const newVerification = await this.verificationService.create({
-      identifier: this.tokenService.randomHash(),
-      value: this.tokenService.sign(newValue, { expiresIn }),
-      expiresAt,
+    const result = await this.dataSource.transaction(async (manager) => {
+      const meetingParticipantsRepo = manager.getRepository(MeetingParticipant);
+      const verificationRepo = manager.getRepository(Verification);
+
+      const participant = await meetingParticipantsRepo.save({
+        createdBy: NIL,
+        meetingGroupId: id,
+        required: false,
+        email: `${this.tokenService.randomHash()}@anonymous.com`,
+        authState: ParticipantAuthState.UNAUTHORIZED,
+        invitationState: ParticipantInvitationState.PENDING,
+      });
+
+      const newValue: VerificationValue = {
+        type: VerificationType.MAGIC_LINK_INVITATION,
+        id: participant.id,
+        to: '',
+        after: SanitizedRoutes.MEETING_INVITATION_ACCEPTED,
+      };
+      // 5 minutes
+      const expiresIn = 300000;
+      const expiresAt = new Date(Date.now() + expiresIn);
+      const newVerification = await verificationRepo.save({
+        identifier: this.tokenService.randomHash(),
+        value: this.tokenService.sign(newValue, { expiresIn }),
+        expiresAt,
+      });
+      return newVerification;
     });
     const frontendUrl = this.configService.get<string>(
       EnvironmentVariables.FRONTEND_URL,
     )!;
     res.redirect(
-      `${frontendUrl}/${value.after}?token=${encodeURIComponent(newVerification.identifier)}`,
+      `${frontendUrl}/${value.after}?token=${encodeURIComponent(result.identifier)}`,
     );
   }
 

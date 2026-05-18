@@ -12,10 +12,6 @@ export class AccountsService {
     private readonly repository: Repository<Account>,
   ) {}
 
-  async findAll() {
-    return await this.repository.find();
-  }
-
   async findAllBy(
     where: FindOptionsWhere<Account>,
     relations?: FindOptionsRelations<Account>,

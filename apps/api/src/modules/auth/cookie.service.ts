@@ -21,8 +21,7 @@ export class CookieService {
       httpOnly: true,
       secure: isProduction,
       path: '/',
-      sameSite: 'none',
-      domain: undefined,
+      sameSite: 'strict',
     });
   }
 }

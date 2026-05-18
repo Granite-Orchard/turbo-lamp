@@ -11,11 +11,11 @@ import 'class-transformer';
 import 'class-validator';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
+import { json, urlencoded } from 'express';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
-import { EnvironmentVariables } from './libs/constants';
 import { GlobalExceptionFilter } from './filters/global-exception.filter';
-import { json, urlencoded } from 'express';
+import { EnvironmentVariables } from './libs/constants';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -68,6 +68,8 @@ async function bootstrap() {
     SwaggerModule.setup('api', app, documentFactory);
   }
 
-  await app.listen(process.env.PORT ?? 3001);
+  const server = await app.listen(process.env.PORT ?? 3001);
+  // global request timeout: 30 seconds
+  server.setTimeout(30_000);
 }
 void bootstrap();

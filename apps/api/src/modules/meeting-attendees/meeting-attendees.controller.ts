@@ -47,7 +47,6 @@ export class MeetingAttendeesController {
     const results = await this.attendeeService.findAllBy([
       { createdBy: req.user.userId },
       { userId: req.user.userId },
-      { meeting: { meetingGroup: { authorId: req.user.userId } } },
     ]);
 
     return results.map((result) =>
@@ -65,7 +64,6 @@ export class MeetingAttendeesController {
     const result = await this.attendeeService.findOneBy([
       { id, createdBy: req.user.userId },
       { id, userId: req.user.userId },
-      { id, meeting: { meetingGroup: { authorId: req.user.userId } } },
     ]);
     if (!result) {
       throw new NotFoundException();
@@ -83,7 +81,6 @@ export class MeetingAttendeesController {
   ): Promise<MeetingAttendeeResponseDto> {
     const found = await this.attendeeService.findOneBy([
       { id, createdBy: req.user.userId },
-      { id, meeting: { meetingGroup: { authorId: req.user.userId } } },
     ]);
     if (!found) {
       throw new NotFoundException();
@@ -105,7 +102,6 @@ export class MeetingAttendeesController {
   ): Promise<MeetingAttendeeResponseDto> {
     const found = await this.attendeeService.findOneBy([
       { id, createdBy: req.user.userId },
-      { id, meeting: { meetingGroup: { authorId: req.user.userId } } },
     ]);
     if (!found) {
       throw new NotFoundException();

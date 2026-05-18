@@ -63,26 +63,6 @@ describe('AccountsService', () => {
     jest.clearAllMocks();
   });
 
-  describe('findAll', () => {
-    it('should return an array of accounts', async () => {
-      mockRepository.find.mockResolvedValue([mockAccount]);
-
-      const result = await service.findAll();
-
-      expect(mockRepository.find).toHaveBeenCalled();
-      expect(result).toEqual([mockAccount]);
-    });
-
-    it('should return empty array when no accounts exist', async () => {
-      mockRepository.find.mockResolvedValue([]);
-
-      const result = await service.findAll();
-
-      expect(mockRepository.find).toHaveBeenCalled();
-      expect(result).toEqual([]);
-    });
-  });
-
   describe('findAllBy', () => {
     it('should return accounts matching the where clause', async () => {
       const where = { userId: mockAccount.userId };

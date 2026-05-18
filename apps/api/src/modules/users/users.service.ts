@@ -15,20 +15,6 @@ export class UsersService {
     return await this.repository.save(this.repository.create(createUserDto));
   }
 
-  async findAll() {
-    return await this.repository.find();
-  }
-
-  async findAllBy(
-    where: FindOptionsWhere<User>,
-    relations?: FindOptionsRelations<User>,
-  ) {
-    return await this.repository.find({
-      where,
-      relations,
-    });
-  }
-
   async findOne(id: string, relations?: FindOptionsRelations<User>) {
     return await this.findOneBy({ id }, relations);
   }

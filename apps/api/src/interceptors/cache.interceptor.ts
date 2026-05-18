@@ -15,6 +15,13 @@ export class UseCacheInterceptor extends CacheInterceptor {
 
     if (!userId || request.method !== 'GET') return ''; // Only cache GET
 
+    const queryHash = request.query
+      ? createHash('sha256')
+          .update(JSON.stringify(request.query))
+          .digest('hex')
+          .substring(0, 8)
+      : '';
+
     // Use stable hash of body for POST/PUT with body
     const bodyHash = request.body
       ? createHash('sha256')
@@ -23,6 +30,6 @@ export class UseCacheInterceptor extends CacheInterceptor {
           .substring(0, 8)
       : '';
 
-    return `${userId}:${request.method}:${request.path}:${JSON.stringify(request.query)}:${bodyHash}`;
+    return `${userId}:${request.method}:${request.path}:${queryHash}:${bodyHash}`;
   }
 }
