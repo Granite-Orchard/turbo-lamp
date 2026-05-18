@@ -14,9 +14,9 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Throttle } from '@nestjs/throttler';
 import { plainToInstance } from 'class-transformer';
-import type { Request } from 'express';
-import express from 'express';
+import type { Request, Response } from 'express';
 import { LocalAuthGuard } from '../../guards/local-auth.guard';
 import { OAuthGuard } from '../../guards/oauth-auth.guard';
 import { OAuthInitiationGuard } from '../../guards/oauth-initiation.guard';
@@ -38,7 +38,6 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { SessionResponseDto } from './dto/session.response.dto';
 import { TokenService } from './token.service';
-import { Throttle } from '@nestjs/throttler';
 
 @Throttle({ default: { limit: 3, ttl: 60_000 } })
 @Controller({ path: 'auth', version: '1' })
@@ -116,7 +115,7 @@ export class AuthController {
     @Query('state') state: string,
     @Req() req: Request & { user: Account },
     @Ip() ip: string,
-    @Res() res: express.Response,
+    @Res() res: Response,
   ) {
     const verification = await this.verificationService.consume(state);
 
@@ -137,7 +136,6 @@ export class AuthController {
       if (!base) throw new UnauthorizedException();
 
       redirect = `${base}`;
-      // TODO:... abstract to invitation service for better handling?
       if (base === SanitizedRoutes.MEETING_INVITATION_ACCEPTED) {
         await this.invitationsService.acceptInvitation(payload.id, req.user);
         redirect = SanitizedRoutes.ONBOARDING;
@@ -154,6 +152,10 @@ export class AuthController {
     const frontendUrl = this.configService.get<string>(
       EnvironmentVariables.FRONTEND_URL,
     )!;
+    this.logger.debug('callback complete, cookie set, redirecting', {
+      frontendUrl,
+      redirect,
+    });
     res.redirect(`${frontendUrl}/${redirect}`);
   }
 }

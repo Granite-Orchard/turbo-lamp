@@ -6,6 +6,7 @@ import {
   Get,
   Inject,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
   Param,
   Patch,
@@ -15,10 +16,11 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { plainToInstance } from 'class-transformer';
 import express from 'express';
+import { DataSource } from 'typeorm';
 import { NIL } from 'uuid';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import {
@@ -32,17 +34,14 @@ import {
 import { convertDateToTimezone } from '../../utils/helpers/datetimes';
 import { Account } from '../accounts/entities/account.entity';
 import { TokenService } from '../auth/token.service';
-import { MeetingParticipantsService } from '../meeting-participants/meeting-participants.service';
-import { VerificationsService } from '../verifications/verifications.service';
-import { CreateMeetingGroupDto } from './dto/create-meeting-group.dto';
-import { UpdateMeetingGroupDto } from './dto/update-meeting-group.dto';
-import { MeetingGroupsService } from './meeting-groups.service';
-import { MeetingGroupResponseDto } from './dto/meeting-group.response.dto';
-import { plainToInstance } from 'class-transformer';
-import { DataSource } from 'typeorm';
-import { MeetingGroup } from './entities/meeting-group.entity';
 import { MeetingParticipant } from '../meeting-participants/entities/meeting-participant.entity';
 import { Verification } from '../verifications/entities/verification.entity';
+import { VerificationsService } from '../verifications/verifications.service';
+import { CreateMeetingGroupDto } from './dto/create-meeting-group.dto';
+import { MeetingGroupResponseDto } from './dto/meeting-group.response.dto';
+import { UpdateMeetingGroupDto } from './dto/update-meeting-group.dto';
+import { MeetingGroup } from './entities/meeting-group.entity';
+import { MeetingGroupsService } from './meeting-groups.service';
 
 @ApiBearerAuth()
 @Controller({ path: 'meeting-groups', version: '1' })
@@ -52,8 +51,6 @@ export class MeetingGroupsController {
     private readonly dataSource: DataSource,
     @Inject(MeetingGroupsService)
     private readonly meetingGroupsService: MeetingGroupsService,
-    @Inject(MeetingParticipantsService)
-    private readonly meetingParticipantService: MeetingParticipantsService,
     @Inject(VerificationsService)
     private readonly verificationService: VerificationsService,
     @Inject(TokenService)
@@ -68,28 +65,21 @@ export class MeetingGroupsController {
     @Req() req: Request & { user: Account },
     @Body() createMeetingGroupDto: CreateMeetingGroupDto,
   ): Promise<MeetingGroupResponseDto> {
-    const calendar = req.user.calendars.find(
-      (c) => c.id === createMeetingGroupDto.calendarId,
-    );
-    if (!calendar) {
-      throw new BadRequestException();
-    }
     const sanitizedAfter = new Date(createMeetingGroupDto.after);
     const sanitizedBefore = new Date(createMeetingGroupDto.before);
     const timezonedAfter = convertDateToTimezone(
       sanitizedAfter,
-      calendar.timezone,
+      createMeetingGroupDto.timezone!,
     );
     const timezonedBefore = convertDateToTimezone(
       sanitizedBefore,
-      calendar.timezone,
+      createMeetingGroupDto.timezone!,
     );
 
     const meetingGroupInput = {
       ...createMeetingGroupDto,
       after: timezonedAfter,
       before: timezonedBefore,
-      timezone: calendar.timezone,
       authorId: req.user.userId,
       createdBy: req.user.userId,
     };

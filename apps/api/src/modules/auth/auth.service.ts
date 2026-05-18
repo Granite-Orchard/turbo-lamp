@@ -49,13 +49,19 @@ export class AuthService {
       },
       { user: true },
     );
-    if (!account?.password) {
+    if (!account) {
       return null;
     }
-    const isMatch = await bcrypt.compare(password!, account.password);
 
-    if (!isMatch) {
-      return null;
+    if (provider === AccountProvider.CREDENTIALS) {
+      if (!account.password) {
+        return null;
+      }
+      const isMatch = await bcrypt.compare(password!, account.password);
+
+      if (!isMatch) {
+        return null;
+      }
     }
 
     return account;

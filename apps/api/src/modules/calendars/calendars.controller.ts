@@ -18,7 +18,6 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
-import { IsDateString } from 'class-validator';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { IdempotencyInterceptor } from '../../interceptors/idempotency.interceptor';
 import { Account } from '../accounts/entities/account.entity';
@@ -64,8 +63,8 @@ export class CalendarsController {
   async events(
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
-    @Query('after') @IsDateString() after: string,
-    @Query('before') @IsDateString() before: string,
+    @Query('after') after: string,
+    @Query('before') before: string,
   ) {
     const calendar = await this.calendarService.findOneBy({
       id,
