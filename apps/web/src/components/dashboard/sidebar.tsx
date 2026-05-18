@@ -113,8 +113,9 @@ export function AppSidebar({ actions }: { actions: Actions }) {
   async function handleLogout() {
     try {
       await actions.logoutAction();
-    } catch {}
-    router.push("/login");
+    } catch (err: unknown) {
+      console.log("Could not log out", err);
+    }
   }
 
   return (

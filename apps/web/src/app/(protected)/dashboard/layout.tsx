@@ -28,6 +28,7 @@ async function validateSession() {
     return profile;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
+    console.log("get profile action failed", err);
     redirect("/login");
   }
 }
