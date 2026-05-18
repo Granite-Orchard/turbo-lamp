@@ -1,18 +1,16 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import {
   INestApplication,
-  ValidationPipe,
   ServiceUnavailableException,
+  ValidationPipe,
 } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import request, { SuperTest, Test as SupertestRequest } from 'supertest';
 
 import { HealthController } from '../../src/modules/health/health.controller';
 import { CacheHealthIndicator } from '../../src/modules/health/indicators/cache-health.indicator';
 
 import {
-  DiskHealthIndicator,
   HealthCheckService,
-  MemoryHealthIndicator,
   TerminusModule,
   TypeOrmHealthIndicator,
 } from '@nestjs/terminus';
