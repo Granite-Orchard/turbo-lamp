@@ -1,7 +1,5 @@
 import {
-  DiskHealthIndicator,
   HealthCheckService,
-  MemoryHealthIndicator,
   TerminusModule,
   TypeOrmHealthIndicator,
 } from '@nestjs/terminus';
@@ -13,8 +11,6 @@ describe('HealthController', () => {
   let controller: HealthController;
 
   const mockDb = { pingCheck: jest.fn() };
-  const mockDisk = { checkStorage: jest.fn() };
-  const mockMemory = { checkHeap: jest.fn() };
   const mockCache = { isHealthy: jest.fn() };
   const mockHealthCheck = { check: jest.fn() };
 
@@ -26,8 +22,6 @@ describe('HealthController', () => {
       controllers: [HealthController],
       providers: [
         { provide: TypeOrmHealthIndicator, useValue: mockDb },
-        { provide: DiskHealthIndicator, useValue: mockDisk },
-        { provide: MemoryHealthIndicator, useValue: mockMemory },
         { provide: CacheHealthIndicator, useValue: mockCache },
         { provide: HealthCheckService, useValue: mockHealthCheck },
       ],
@@ -45,8 +39,6 @@ describe('HealthController', () => {
       status: 'ok',
       info: {
         database: { status: 'up' },
-        disk: { status: 'up' },
-        memory_heap: { status: 'up' },
         cache: { status: 'up' },
       },
     });
@@ -57,8 +49,6 @@ describe('HealthController', () => {
       status: 'ok',
       info: {
         database: { status: 'up' },
-        disk: { status: 'up' },
-        memory_heap: { status: 'up' },
         cache: { status: 'up' },
       },
     });

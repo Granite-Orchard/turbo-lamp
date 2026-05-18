@@ -15,6 +15,6 @@ export class UseCacheInterceptor extends CacheInterceptor {
 
     if (!userId) return url;
 
-    return `${userId}:${request.method}:${url}`;
+    return `${userId}:${request.method}:${url}:${JSON.stringify(request.query)}:${JSON.stringify(request.params)}:${JSON.stringify(request.body)}`;
   }
 }

@@ -22,16 +22,16 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
+    const correlationId = crypto.randomUUID();
     const message =
       exception instanceof HttpException
         ? exception.getResponse()
         : 'Internal server error';
 
-    const isProduction = process.env.NODE_ENV === 'production';
-
     this.logger.error(
-      `${request.method} ${request.url} - ${status}`,
+      `${correlationId} - ${request.method} ${request.url} - ${status}`,
       exception instanceof Error ? exception.stack : undefined,
+      { correlationId },
     );
 
     response.status(status).json({
@@ -39,7 +39,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
       path: request.url,
       method: request.method,
-      ...(isProduction ? {} : { message }),
+      message,
+      correlationId,
     });
   }
 }

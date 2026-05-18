@@ -23,7 +23,7 @@ export class CookieService {
     response.cookie(name, value, {
       ...options,
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: isProduction ? 'strict' : 'lax',
       secure: isProduction,
       domain,
       path: '/',

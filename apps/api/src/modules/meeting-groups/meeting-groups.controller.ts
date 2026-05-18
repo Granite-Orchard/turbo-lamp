@@ -39,12 +39,16 @@ import { UpdateMeetingGroupDto } from './dto/update-meeting-group.dto';
 import { MeetingGroupsService } from './meeting-groups.service';
 import { MeetingGroupResponseDto } from './dto/meeting-group.response.dto';
 import { plainToInstance } from 'class-transformer';
+import { DataSource } from 'typeorm';
+import { MeetingGroup } from './entities/meeting-group.entity';
+import { MeetingParticipant } from '../meeting-participants/entities/meeting-participant.entity';
 
 @ApiBearerAuth()
 @Controller({ path: 'meeting-groups', version: '1' })
 export class MeetingGroupsController {
   private readonly logger = new Logger(MeetingGroupsController.name);
   constructor(
+    private readonly dataSource: DataSource,
     @Inject(MeetingGroupsService)
     private readonly meetingGroupsService: MeetingGroupsService,
     @Inject(MeetingParticipantsService)
@@ -79,29 +83,62 @@ export class MeetingGroupsController {
       sanitizedBefore,
       calendar.timezone,
     );
-    // TODO:... transaction for these writes
-    const result = await this.meetingGroupsService.create({
+
+    const meetingGroupInput = {
       ...createMeetingGroupDto,
       after: timezonedAfter,
       before: timezonedBefore,
       timezone: calendar.timezone,
       authorId: req.user.userId,
       createdBy: req.user.userId,
-    });
-    const magicLink = await this.meetingGroupsService.generateMagicLink(
-      result.id,
-    );
-    await this.meetingGroupsService.update(result.id, { magicLink });
+    };
 
-    await this.meetingParticipantService.create({
-      createdBy: req.user.userId,
-      meetingGroupId: result.id,
-      email: req.user.user.email,
-      userId: req.user.userId,
-      required: true,
-      authState: ParticipantAuthState.AUTHORIZED,
-      invitationState: ParticipantInvitationState.ACCEPTED,
+    const result = await this.dataSource.transaction(async (manager) => {
+      const meetingGroupsRepo = manager.getRepository(MeetingGroup);
+      const meetingParticipantsRepo = manager.getRepository(MeetingParticipant);
+
+      this.meetingGroupsService.validateMeetingGroupConstraints(
+        meetingGroupInput,
+      );
+      const group = await meetingGroupsRepo.save(meetingGroupInput);
+
+      const magicLink = await this.meetingGroupsService.generateMagicLink(
+        group.id,
+      );
+      await meetingGroupsRepo.update(group.id, { magicLink });
+      await meetingParticipantsRepo.save({
+        createdBy: req.user.userId,
+        meetingGroupId: result.id,
+        email: req.user.user.email,
+        userId: req.user.userId,
+        required: true,
+        authState: ParticipantAuthState.AUTHORIZED,
+        invitationState: ParticipantInvitationState.ACCEPTED,
+      });
+      return group;
     });
+    // const result = await this.meetingGroupsService.create({
+    //   ...createMeetingGroupDto,
+    //   after: timezonedAfter,
+    //   before: timezonedBefore,
+    //   timezone: calendar.timezone,
+    //   authorId: req.user.userId,
+    //   createdBy: req.user.userId,
+    // });
+    // const magicLink = await this.meetingGroupsService.generateMagicLink(
+    //   result.id,
+    // );
+    // await this.meetingGroupsService.update(result.id, { magicLink });
+    //
+    // await this.meetingParticipantService.create({
+    //   createdBy: req.user.userId,
+    //   meetingGroupId: result.id,
+    //   email: req.user.user.email,
+    //   userId: req.user.userId,
+    //   required: true,
+    //   authState: ParticipantAuthState.AUTHORIZED,
+    //   invitationState: ParticipantInvitationState.ACCEPTED,
+    // });
 
     return plainToInstance(MeetingGroupResponseDto, result, {
       excludeExtraneousValues: true,

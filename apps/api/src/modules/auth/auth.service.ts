@@ -42,7 +42,6 @@ export class AuthService {
     if (provider === AccountProvider.CREDENTIALS && !password) {
       throw new UnauthorizedException();
     }
-    const dummyHash = '$2b$10$abcdefghijklmnopqrstuvwxyz';
     const account = await this.accountService.findOneBy(
       {
         providerId: provider,
@@ -50,7 +49,9 @@ export class AuthService {
       },
       { user: true },
     );
-    const hashToCompare = account?.password ?? dummyHash;
+    const hashToCompare =
+      account?.password ??
+      (await bcrypt.hash(crypto.randomUUID(), await bcrypt.genSalt(10)));
     const isMatch = await bcrypt.compare(password ?? '', hashToCompare);
 
     if (!isMatch) {
@@ -65,7 +66,7 @@ export class AuthService {
     metadata?: { userAgent: string | undefined; ip: string | undefined },
   ): Promise<Session> {
     const { username, password, confirmPassword, timezone } = register;
-    const hashedPassword = bcrypt.hashSync(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     const isMatch = await bcrypt.compare(confirmPassword, hashedPassword);
     if (!isMatch) {
       throw new BadRequestException();
@@ -100,7 +101,7 @@ export class AuthService {
       return await this.login(account, metadata);
     } catch (err: unknown) {
       this.logger.error('register encountered an exception', err);
-      throw new InternalServerErrorException(err);
+      throw new InternalServerErrorException();
     }
   }
 

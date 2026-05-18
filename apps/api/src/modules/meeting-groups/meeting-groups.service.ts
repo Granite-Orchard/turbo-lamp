@@ -41,7 +41,7 @@ export class MeetingGroupsService {
     private readonly configService: ConfigService,
   ) {}
 
-  private validateStatusTransition(
+  public validateStatusTransition(
     current: MeetingGroupStatus,
     next: MeetingGroupStatus,
   ): void {
@@ -59,7 +59,7 @@ export class MeetingGroupsService {
     }
   }
 
-  private validateMeetingGroupConstraints(
+  public validateMeetingGroupConstraints(
     createMeetingGroupDto: CreateMeetingGroupDto & { createdBy: string },
   ): void {
     if (createMeetingGroupDto.after >= createMeetingGroupDto.before) {

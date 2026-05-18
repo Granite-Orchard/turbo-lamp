@@ -25,14 +25,6 @@ describe('HealthController (integration)', () => {
     pingCheck: jest.fn(),
   };
 
-  const mockDisk = {
-    checkStorage: jest.fn(),
-  };
-
-  const mockMemory = {
-    checkHeap: jest.fn(),
-  };
-
   const mockCache = {
     isHealthy: jest.fn(),
   };
@@ -49,8 +41,6 @@ describe('HealthController (integration)', () => {
       controllers: [HealthController],
       providers: [
         { provide: TypeOrmHealthIndicator, useValue: mockDb },
-        { provide: DiskHealthIndicator, useValue: mockDisk },
-        { provide: MemoryHealthIndicator, useValue: mockMemory },
         { provide: CacheHealthIndicator, useValue: mockCache },
         { provide: HealthCheckService, useValue: mockHealthCheck },
       ],
@@ -83,8 +73,6 @@ describe('HealthController (integration)', () => {
         status: 'ok',
         info: {
           database: { status: 'up' },
-          disk: { status: 'up' },
-          memory_heap: { status: 'up' },
           cache: { status: 'up' },
         },
       });
@@ -96,8 +84,6 @@ describe('HealthController (integration)', () => {
         status: 'ok',
         info: {
           database: { status: 'up' },
-          disk: { status: 'up' },
-          memory_heap: { status: 'up' },
           cache: { status: 'up' },
         },
       });

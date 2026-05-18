@@ -22,6 +22,7 @@ import { UpdateMeetingDto } from './dto/update-meeting.dto';
 import { MeetingsService } from './meetings.service';
 import { MeetingResponseDto } from './dto/meeting.response.dto';
 import { plainToInstance } from 'class-transformer';
+import { Equal } from 'typeorm';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -54,8 +55,12 @@ export class MeetingsController {
     const result = await this.meetingsService.findOneBy(
       {
         id,
+        attendees: { userId: Equal(req.user.userId) },
       },
-      { attendees: true, meetingGroup: true },
+      {
+        attendees: true,
+        meetingGroup: true,
+      },
     );
     if (!result) {
       throw new NotFoundException();
