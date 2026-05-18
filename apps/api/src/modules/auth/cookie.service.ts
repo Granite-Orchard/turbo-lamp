@@ -2,6 +2,7 @@ import express from 'express';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CookieOptions } from 'express';
+import { EnvironmentVariables } from '../../libs/constants';
 
 @Injectable()
 export class CookieService {
@@ -13,13 +14,18 @@ export class CookieService {
     value: string,
     options?: CookieOptions,
   ) {
-    // TODO: leverage config service to create production appropriate cookies.
+    const isProduction =
+      this.config.get(EnvironmentVariables.NODE_ENV) === 'production';
+    const frontendUrl = this.config.get<string>(
+      EnvironmentVariables.FRONTEND_URL,
+    )!;
+    const domain = isProduction ? new URL(frontendUrl).hostname : 'localhost';
     response.cookie(name, value, {
       ...options,
       httpOnly: true,
       sameSite: 'lax',
-      secure: false,
-      domain: 'localhost',
+      secure: isProduction,
+      domain,
       path: '/',
     });
   }

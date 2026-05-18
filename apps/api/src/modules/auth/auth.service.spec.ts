@@ -11,6 +11,7 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { TokenService } from './token.service';
 import { User } from '../users/entities/user.entity';
+import { DataSource } from 'typeorm';
 
 jest.mock('bcrypt', () => ({
   hashSync: jest.fn((pwd: string) => `hashed-${pwd}`),
@@ -90,6 +91,7 @@ describe('AuthService', () => {
 
   const mockAccountsService = {
     findOneBy: jest.fn((where) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (where.user?.email === 'nonexistent@example.com') return null;
       return mockAccount;
     }),
@@ -104,10 +106,24 @@ describe('AuthService', () => {
     create: jest.fn(),
   };
 
+  const mockManager = {
+    getRepository: jest.fn(() => ({
+      save: jest.fn(async (x) => ({
+        ...x,
+        id: x.id ?? 'generated-user-id',
+      })),
+    })),
+  };
+
+  const mockDataSource = {
+    transaction: jest.fn(async (cb) => cb(mockManager)),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
+        { provide: DataSource, useValue: mockDataSource },
         { provide: TokenService, useValue: mockTokenService },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: AccountsService, useValue: mockAccountsService },
@@ -190,15 +206,12 @@ describe('AuthService', () => {
       };
 
       mockAccountsService.findOneBy.mockResolvedValueOnce(null);
-      mockUsersService.create.mockResolvedValue(mockUser);
       mockAccount.user = mockUser;
-      mockAccountsService.create.mockResolvedValue(mockAccount);
       mockTokenService.sign.mockReturnValue('mock-jwt-token');
       mockSessionsService.create.mockResolvedValue(mockSession);
 
       const result = await service.register(registerDto);
 
-      expect(mockUsersService.create).toHaveBeenCalled();
       expect(result).toEqual(mockSession);
     });
 

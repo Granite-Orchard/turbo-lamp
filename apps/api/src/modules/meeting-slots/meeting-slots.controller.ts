@@ -4,6 +4,8 @@ import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { Account } from '../accounts/entities/account.entity';
 import { MeetingSlotsService } from './meeting-slots.service';
 import { MeetingsService } from '../meetings/meetings.service';
+import { MeetingSlotResponseDto } from './dto/meeting-slot.response.dto';
+import { plainToInstance } from 'class-transformer';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -20,8 +22,8 @@ export class MeetingSlotsController {
   async findSlots(
     @Req() req: Request & { user: Account },
     @Param('meetingGroupId') meetingGroupId: string,
-  ) {
-    return await this.meetingSlotsService.findAllBy([
+  ): Promise<MeetingSlotResponseDto[]> {
+    const results = await this.meetingSlotsService.findAllBy([
       {
         meetingGroup: {
           id: meetingGroupId,
@@ -29,13 +31,18 @@ export class MeetingSlotsController {
         },
       },
     ]);
+    return results.map((result) =>
+      plainToInstance(MeetingSlotResponseDto, result, {
+        excludeExtraneousValues: true,
+      }),
+    );
   }
 
   @Get(':meetingGroupId/calculate')
   async calculate(
     @Req() req: Request & { user: Account },
     @Param('meetingGroupId') meetingGroupId: string,
-  ) {
+  ): Promise<MeetingSlotResponseDto[]> {
     const meetingExists = await this.meetingService.findOneBy({
       meetingGroupId,
     });
@@ -49,9 +56,14 @@ export class MeetingSlotsController {
         },
       ]);
     }
-    return await this.meetingSlotsService.calculate(
+    const results = await this.meetingSlotsService.calculate(
       meetingGroupId,
       req.user.userId,
+    );
+    return results.map((result) =>
+      plainToInstance(MeetingSlotResponseDto, result, {
+        excludeExtraneousValues: true,
+      }),
     );
   }
 }

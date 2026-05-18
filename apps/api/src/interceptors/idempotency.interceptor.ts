@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   CallHandler,
   ExecutionContext,
   Injectable,
@@ -30,6 +31,15 @@ export class IdempotencyInterceptor implements NestInterceptor {
 
     if (!idempotencyKey) {
       return next.handle();
+    }
+
+    if (
+      typeof idempotencyKey !== 'string' ||
+      idempotencyKey.length < 16 ||
+      idempotencyKey.length > 128 ||
+      !/^[a-zA-Z0-9-]+$/.test(idempotencyKey)
+    ) {
+      throw new BadRequestException('Invalid idempotency key');
     }
 
     const userId = request.user?.userId ?? 'anonymous';

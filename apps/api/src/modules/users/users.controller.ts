@@ -13,9 +13,10 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { Account } from '../accounts/entities/account.entity';
-import { ProfileResponseDto } from './dto/profile.response.dto';
+import { UserResponseDto } from './dto/user.response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
+import { ProfileResponseDto } from '../auth/dto/profile.response.dto';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -24,9 +25,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('profile')
-  profile(
-    @Req() req: Request & { user: ProfileResponseDto },
-  ): ProfileResponseDto {
+  profile(@Req() req: Request & { user: Account }): ProfileResponseDto {
     return plainToInstance(ProfileResponseDto, req.user, {
       excludeExtraneousValues: true,
     });
@@ -37,11 +36,15 @@ export class UsersController {
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
-  ) {
+  ): Promise<UserResponseDto> {
     if (id !== req.user.userId) {
       throw new ForbiddenException('Cannot update other user');
     }
-    return await this.usersService.update(id, updateUserDto);
+
+    const result = await this.usersService.update(id, updateUserDto);
+    return plainToInstance(UserResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @Delete(':id')

@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Inject,
+  InternalServerErrorException,
   NotFoundException,
   Param,
   Patch,
@@ -36,6 +37,8 @@ import { VerificationsService } from '../verifications/verifications.service';
 import { CreateMeetingGroupDto } from './dto/create-meeting-group.dto';
 import { UpdateMeetingGroupDto } from './dto/update-meeting-group.dto';
 import { MeetingGroupsService } from './meeting-groups.service';
+import { MeetingGroupResponseDto } from './dto/meeting-group.response.dto';
+import { plainToInstance } from 'class-transformer';
 
 @ApiBearerAuth()
 @Controller({ path: 'meeting-groups', version: '1' })
@@ -59,7 +62,7 @@ export class MeetingGroupsController {
   async create(
     @Req() req: Request & { user: Account },
     @Body() createMeetingGroupDto: CreateMeetingGroupDto,
-  ) {
+  ): Promise<MeetingGroupResponseDto> {
     const calendar = req.user.calendars.find(
       (c) => c.id === createMeetingGroupDto.calendarId,
     );
@@ -76,6 +79,7 @@ export class MeetingGroupsController {
       sanitizedBefore,
       calendar.timezone,
     );
+    // TODO:... transaction for these writes
     const result = await this.meetingGroupsService.create({
       ...createMeetingGroupDto,
       after: timezonedAfter,
@@ -99,13 +103,17 @@ export class MeetingGroupsController {
       invitationState: ParticipantInvitationState.ACCEPTED,
     });
 
-    return result;
+    return plainToInstance(MeetingGroupResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  async findAll(@Req() req: Request & { user: Account }) {
-    const result = await this.meetingGroupsService.findAllBy(
+  async findAll(
+    @Req() req: Request & { user: Account },
+  ): Promise<MeetingGroupResponseDto[]> {
+    const results = await this.meetingGroupsService.findAllBy(
       [
         { authorId: req.user.userId },
         { participants: { userId: req.user.userId } },
@@ -114,7 +122,12 @@ export class MeetingGroupsController {
         participants: { user: true },
       },
     );
-    return result;
+
+    return results.map((result) =>
+      plainToInstance(MeetingGroupResponseDto, result, {
+        excludeExtraneousValues: true,
+      }),
+    );
   }
 
   @Get(':id/accept')
@@ -140,6 +153,7 @@ export class MeetingGroupsController {
       throw new BadRequestException();
     }
 
+    // TODO:... another transaction needed here
     const participant = await this.meetingParticipantService.create({
       createdBy: NIL,
       meetingGroupId: id,
@@ -175,14 +189,17 @@ export class MeetingGroupsController {
   async findOne(
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
-  ) {
+  ): Promise<MeetingGroupResponseDto> {
     const result = await this.meetingGroupsService.findOneBy(
       { id },
       {
         participants: { user: true },
       },
     );
-    return result;
+
+    return plainToInstance(MeetingGroupResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @UseGuards(JwtAuthGuard)
@@ -191,14 +208,21 @@ export class MeetingGroupsController {
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
     @Body() updateMeetingGroupDto: UpdateMeetingGroupDto,
-  ) {
+  ): Promise<MeetingGroupResponseDto> {
     const found = await this.meetingGroupsService.findOneBy([
       { id, authorId: req.user.userId },
     ]);
     if (!found) {
       throw new NotFoundException();
     }
-    return await this.meetingGroupsService.update(id, updateMeetingGroupDto);
+    const result = await this.meetingGroupsService.update(
+      id,
+      updateMeetingGroupDto,
+    );
+
+    return plainToInstance(MeetingGroupResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @UseGuards(JwtAuthGuard)
@@ -206,13 +230,20 @@ export class MeetingGroupsController {
   async remove(
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
-  ) {
+  ): Promise<MeetingGroupResponseDto> {
     const found = await this.meetingGroupsService.findOneBy([
       { id, authorId: req.user.userId },
     ]);
     if (!found) {
       throw new NotFoundException();
     }
-    return await this.meetingGroupsService.remove(id);
+    const result = await this.meetingGroupsService.remove(id);
+    if (!result.affected) {
+      throw new InternalServerErrorException();
+    }
+
+    return plainToInstance(MeetingGroupResponseDto, found, {
+      excludeExtraneousValues: true,
+    });
   }
 }

@@ -42,16 +42,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: TokenSchema): Promise<Account | null> {
-    const account = await this.accountService.findOneBy(
-      {
-        providerId: payload.provider,
-        user: { id: payload.sub, email: payload.username },
-      },
-      {
-        user: { calendars: true },
-        calendars: true,
-      },
-    );
+    const account = await this.accountService.findOneBy({
+      providerId: payload.provider,
+      user: { id: payload.sub, email: payload.username },
+    });
 
     if (!account) {
       return null;

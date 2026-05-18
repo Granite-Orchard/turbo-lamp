@@ -13,6 +13,8 @@ import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { AccountsService } from './accounts.service';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { Account } from './entities/account.entity';
+import { plainToInstance } from 'class-transformer';
+import { AccountResponseDto } from './dto/account.response.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller({ path: 'accounts', version: '1' })
@@ -28,8 +30,14 @@ export class AccountsController {
   async findOne(
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
-  ) {
-    return await this.accountsService.findOneBy({ id, userId: req.user.id });
+  ): Promise<AccountResponseDto> {
+    const result = await this.accountsService.findOneBy({
+      id,
+      userId: req.user.id,
+    });
+    return plainToInstance(AccountResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @Patch(':id')
@@ -37,7 +45,7 @@ export class AccountsController {
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
     @Body() updateAccountDto: UpdateAccountDto,
-  ) {
+  ): Promise<AccountResponseDto> {
     const found = await this.accountsService.findOneBy({
       id,
       userId: req.user.id,
@@ -45,14 +53,17 @@ export class AccountsController {
     if (!found) {
       throw new NotFoundException();
     }
-    return await this.accountsService.update(id, updateAccountDto);
+    const result = await this.accountsService.update(id, updateAccountDto);
+    return plainToInstance(AccountResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @Delete(':id')
   async remove(
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
-  ) {
+  ): Promise<AccountResponseDto> {
     const found = await this.accountsService.findOneBy({
       id,
       userId: req.user.id,
@@ -60,6 +71,9 @@ export class AccountsController {
     if (!found) {
       throw new NotFoundException();
     }
-    return await this.accountsService.remove(id);
+    const result = await this.accountsService.remove(id);
+    return plainToInstance(AccountResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 }

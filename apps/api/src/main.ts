@@ -1,6 +1,10 @@
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  ValidationPipe,
+  VersioningType,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import 'class-transformer';
@@ -10,6 +14,8 @@ import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { EnvironmentVariables } from './libs/constants';
+import { GlobalExceptionFilter } from './filters/global-exception.filter';
+import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -18,12 +24,11 @@ async function bootstrap() {
     type: VersioningType.URI,
   });
   app.setGlobalPrefix('api/core');
-  // TODO: re-enable once response dtos configured.
-  // app.useGlobalInterceptors(
-  //   new ClassSerializerInterceptor(app.get(Reflector), {
-  //     strategy: 'excludeAll',
-  //   }),
-  // );
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(app.get(Reflector), {
+      strategy: 'excludeAll',
+    }),
+  );
   app.use(compression());
   app.use(helmet());
   app.useGlobalPipes(
@@ -33,6 +38,10 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  app.useGlobalFilters(new GlobalExceptionFilter());
+
+  app.use(json({ limit: '100kb' }));
+  app.use(urlencoded({ extended: true, limit: '100kb' }));
 
   const origin = configService.get<string>(
     EnvironmentVariables.ALLOWED_ORIGINS,
