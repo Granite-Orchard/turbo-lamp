@@ -44,14 +44,13 @@ export class MeetingParticipantsController {
     });
   }
 
-  @Get()
+  @Get('/meeting-group/:id')
   async findAll(
     @Req() req: Request & { user: Account },
+    @Param('id') meetingGroupId: string,
   ): Promise<MeetingParticipantResponseDto[]> {
     const results = await this.meetingParticipantsService.findAllBy([
-      { userId: req.user.userId },
-      { email: req.user.user.email },
-      { createdBy: req.user.userId },
+      { meetingGroupId },
     ]);
 
     return results.map((result) =>

@@ -58,9 +58,11 @@ describe('MeetingParticipantsController (e2e)', () => {
     });
   });
 
-  describe('GET /meeting-participants', () => {
+  describe('GET /meeting-participants/meeting-group/:id', () => {
     it('should return meeting participants list', async () => {
-      const response = await httpServer.get('/meeting-participants');
+      const response = await httpServer.get(
+        '/meeting-participants/meeting-group?id=1',
+      );
 
       expect(response.status).toBeDefined();
     });

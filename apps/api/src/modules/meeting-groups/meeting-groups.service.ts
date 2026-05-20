@@ -135,7 +135,7 @@ export class MeetingGroupsService {
   async generateMagicLink(meetingGroupId: string): Promise<string> {
     const value: VerificationValue = {
       type: VerificationType.MAGIC_LINK_INVITATION,
-      id: '',
+      id: meetingGroupId,
       to: '',
       after: SanitizedRoutes.ONBOARDING_AUTH,
     };
