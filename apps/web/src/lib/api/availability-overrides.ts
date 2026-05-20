@@ -1,4 +1,4 @@
-import { serverRequest } from "@/lib/api/client";
+import { serverRequest } from "@/lib/api/server";
 import {
   createAvailabilityOverrideSchema,
   updateAvailabilityOverrideSchema,

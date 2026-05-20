@@ -1,5 +1,5 @@
 import type { MeetingGroup } from "@/lib/types";
-import { serverRequest } from "./client";
+import { serverRequest } from "./server";
 import {
   createMeetingGroupSchema,
   updateMeetingGroupSchema,

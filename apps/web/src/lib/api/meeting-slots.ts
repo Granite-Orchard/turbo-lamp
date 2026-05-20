@@ -1,5 +1,5 @@
 import type { MeetingSlot } from "@/lib/types";
-import { serverRequest } from "./client";
+import { serverRequest } from "./server";
 
 export const meetingSlotsApi = {
   list: async (id: string) =>

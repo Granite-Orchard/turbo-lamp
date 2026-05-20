@@ -1,5 +1,5 @@
 import { Login, Profile, Register } from "@/lib/types";
-import { serverRequest } from "@/lib/api/client";
+import { serverRequest } from "@/lib/api/server";
 import { loginSchema, registerSchema } from "@/lib/schemas";
 import { cookies } from "next/headers";
 

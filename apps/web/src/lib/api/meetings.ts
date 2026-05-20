@@ -1,5 +1,5 @@
 import type { Meeting } from "@/lib/types";
-import { serverRequest } from "./client";
+import { serverRequest } from "./server";
 import { createMeetingSchema, updateMeetingSchema } from "../schemas";
 
 export const meetingsApi = {

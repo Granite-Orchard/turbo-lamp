@@ -1,5 +1,5 @@
 import type { Availability } from "@/lib/types";
-import { serverRequest } from "@/lib/api/client";
+import { serverRequest } from "@/lib/api/server";
 import {
   createAvailabilitySchema,
   updateAvailabilitySchema,

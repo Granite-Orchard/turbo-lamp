@@ -39,8 +39,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "../../../../../components/ui/input";
-import { Label } from "../../../../../components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useMeetingParticipants } from "@/hooks/use-meeting-participants";
 
 type Actions = {
   listSlotsAction: (id: string) => Promise<MeetingSlot[]>;
@@ -101,7 +102,13 @@ export function MeetingGroupDetail({
   actions,
 }: MeetingGroupDetailProps) {
   const router = useRouter();
-  const [participants, setParticipants] = useState(initialParticipants);
+
+  // swr hook with short polling for live updates
+  const { participants } = useMeetingParticipants(
+    group.id,
+    initialParticipants,
+  );
+
   const [slots, setSlots] = useState<MeetingSlot[]>(initialSlots);
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [slotsError, setSlotsError] = useState<string | null>(null);
