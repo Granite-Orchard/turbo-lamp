@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import {
   ApiError,
   ApiErrorBody,
@@ -8,15 +9,19 @@ import {
   parseJsonSafe,
 } from "./config";
 
-export async function clientRequest<T>(
+export async function serverRequest<T>(
   path: string,
   method: HttpMethod = "GET",
   body?: unknown,
   headers: HeadersInit = {},
   idempotencyKey?: string,
 ): Promise<T> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")!;
+
   const headersCopy = {
     "Content-Type": "application/json",
+    Authorization: `Bearer ${token.value!}`,
     ...headers,
   };
 
@@ -55,11 +60,11 @@ export async function clientRequest<T>(
 }
 
 export const api = {
-  get: <T>(path: string) => clientRequest<T>(path, "GET"),
+  get: <T>(path: string) => serverRequest<T>(path, "GET"),
   post: <T>(path: string, body: unknown) =>
-    clientRequest<T>(path, "POST", body),
-  put: <T>(path: string, body: unknown) => clientRequest<T>(path, "PUT", body),
+    serverRequest<T>(path, "POST", body),
+  put: <T>(path: string, body: unknown) => serverRequest<T>(path, "PUT", body),
   patch: <T>(path: string, body: unknown) =>
-    clientRequest<T>(path, "PATCH", body),
-  del: <T>(path: string) => clientRequest<T>(path, "DELETE"),
+    serverRequest<T>(path, "PATCH", body),
+  del: <T>(path: string) => serverRequest<T>(path, "DELETE"),
 };

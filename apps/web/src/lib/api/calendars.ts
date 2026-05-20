@@ -1,6 +1,6 @@
 import { createCalendarSchema, updateCalendarSchema } from "@/lib/schemas";
 import type { Calendar, ExternalCalendar } from "@/lib/types";
-import { serverRequest } from "./client";
+import { serverRequest } from "./server";
 
 export const calendarsApi = {
   list: async () => {

@@ -3,7 +3,7 @@ import {
   createMeetingAttendeeSchema,
   updateMeetingAttendeeSchema,
 } from "../schemas";
-import { serverRequest } from "./client";
+import { serverRequest } from "./server";
 
 export const meetingAttendeesApi = {
   get: async (id: string) =>

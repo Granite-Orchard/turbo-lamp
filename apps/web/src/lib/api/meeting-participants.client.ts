@@ -3,25 +3,25 @@ import {
   createMeetingParticipantSchema,
   updateParticipantSchema,
 } from "../schemas";
-import { serverRequest } from "./server";
+import { clientRequest } from "./client";
 
-export const meetingParticipantsApi = {
-  list: async () => {
-    return await serverRequest<MeetingParticipant[]>(
-      `/meeting-participants`,
+export const meetingParticipantsClientApi = {
+  list: async (id: string) => {
+    return await clientRequest<MeetingParticipant[]>(
+      `/meeting-participants/meeting-group/${id}`,
       "GET",
     );
   },
 
   get: async (id: string) =>
-    await serverRequest<MeetingParticipant>(
+    await clientRequest<MeetingParticipant>(
       `/meeting-participants/${id}`,
       "GET",
     ),
 
   create: async (data: Partial<MeetingParticipant>) => {
     const payload = createMeetingParticipantSchema.parse(data);
-    return await serverRequest<MeetingParticipant>(
+    return await clientRequest<MeetingParticipant>(
       `/meeting-participants?_rid=${crypto.randomUUID()}`,
       "POST",
       payload,
@@ -30,7 +30,7 @@ export const meetingParticipantsApi = {
 
   update: async (id: string, data: Partial<MeetingParticipant>) => {
     const payload = updateParticipantSchema.parse(data);
-    return await serverRequest<MeetingParticipant>(
+    return await clientRequest<MeetingParticipant>(
       `/meeting-participants/${id}`,
       "PATCH",
       payload,
@@ -38,5 +38,5 @@ export const meetingParticipantsApi = {
   },
 
   delete: async (id: string) =>
-    await serverRequest<void>(`/meeting-participants/${id}`, "DELETE"),
+    await clientRequest<void>(`/meeting-participants/${id}`, "DELETE"),
 };
