@@ -59,7 +59,7 @@ export class CalendarsService {
       externalId: createCalendarDto.externalId,
       providerId: createCalendarDto.providerId,
     });
-    if (result) await this.eventBus.publish(new CalendarCreatedEvent(result));
+    if (result) this.eventBus.publish(new CalendarCreatedEvent(result));
     return result;
   }
 
@@ -72,7 +72,7 @@ export class CalendarsService {
     const result = await this.repository.save(
       this.repository.create(createCalendarDto),
     );
-    await this.eventBus.publish(new CalendarCreatedEvent(result));
+    this.eventBus.publish(new CalendarCreatedEvent(result));
     return result;
   }
 

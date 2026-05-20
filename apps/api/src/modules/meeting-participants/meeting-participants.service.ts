@@ -220,7 +220,7 @@ export class MeetingParticipantsService {
     }
     const result = await this.findOne(id);
     if (result && result.authState === ParticipantAuthState.AUTHORIZED) {
-      await this.eventBus.publish(
+      this.eventBus.publish(
         new MeetingParticipantAuthorizedEvent(result),
       );
     }

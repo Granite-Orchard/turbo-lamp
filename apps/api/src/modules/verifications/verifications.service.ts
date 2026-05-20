@@ -76,7 +76,7 @@ export class VerificationsService {
       createVerificationDto.value,
     );
     if (payload.type === VerificationType.EMAIL_INVITATION) {
-      await this.eventBus.publish(new InvitationCreatedEvent(verification));
+      this.eventBus.publish(new InvitationCreatedEvent(verification));
     }
     return verification;
   }

@@ -107,7 +107,7 @@ export class MeetingsService {
 
     const entity = this.repository.create(createMeetingDto);
     await this.repository.save(entity);
-    await this.eventBus.publish(new MeetingCreatedEvent(entity));
+    this.eventBus.publish(new MeetingCreatedEvent(entity));
     return entity;
   }
 
@@ -146,7 +146,7 @@ export class MeetingsService {
     }
     const result = await this.repository.softDelete(meeting.id);
     if (result.affected) {
-      await this.eventBus.publish(new MeetingDeletedEvent(meeting));
+      this.eventBus.publish(new MeetingDeletedEvent(meeting));
     }
     return result;
   }
