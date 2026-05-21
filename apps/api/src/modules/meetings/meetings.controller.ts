@@ -59,7 +59,6 @@ export class MeetingsController {
       },
       {
         attendees: true,
-        meetingGroup: true,
       },
     );
     if (!result) {

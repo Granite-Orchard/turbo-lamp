@@ -1,4 +1,5 @@
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
+import { MeetingAttendeeResponseDto } from '../../meeting-attendees/dto/meeting-attendee.response.dto';
 
 @Exclude()
 export class MeetingResponseDto {
@@ -19,4 +20,8 @@ export class MeetingResponseDto {
 
   @Expose()
   status: string;
+
+  @Expose()
+  @Type(() => MeetingAttendeeResponseDto)
+  attendees: MeetingAttendeeResponseDto[];
 }
