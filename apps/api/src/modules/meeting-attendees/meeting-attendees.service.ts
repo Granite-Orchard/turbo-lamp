@@ -80,6 +80,9 @@ export class MeetingAttendeesService {
       updateMeetingAttendeeDto,
     });
     const meetingAttendee = await this.findOne(id);
+    if (!meetingAttendee) {
+      throw new NotFoundException();
+    }
     return await this.repository.update(id, {
       ...meetingAttendee,
       ...updateMeetingAttendeeDto,

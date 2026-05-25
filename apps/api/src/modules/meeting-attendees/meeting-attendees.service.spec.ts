@@ -172,6 +172,18 @@ describe('MeetingAttendeesService', () => {
       expect(mockRepository.update).toHaveBeenCalled();
       expect(result).toBeDefined();
     });
+
+    it('should throw NotFoundException when attendee not found', async () => {
+      const updateDto: UpdateMeetingAttendeeDto = {
+        meetingId: 'new-meeting-id',
+      };
+
+      mockRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.update('non-existent-id', updateDto)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
   });
 
   describe('remove', () => {
