@@ -39,6 +39,11 @@ export class MeetingSlotsService {
   ) {}
 
   async calculate(meetingGroupId: string, authorId: string) {
+    this.logger.debug('calculate invoked', {
+      correlationId: '951a2550-8875-460c-9e49-a1a18f19f566',
+      meetingGroupId,
+      authorId,
+    });
     const meetingGroup = await this.meetingGroupService.findOneBy(
       {
         authorId,
@@ -163,6 +168,9 @@ export class MeetingSlotsService {
   }
 
   async findAll() {
+    this.logger.debug('findAll invoked', {
+      correlationId: 'bd5c9dc9-17c6-44c4-a63f-639a5940a35b',
+    });
     return await this.repository.find();
   }
 
@@ -170,6 +178,11 @@ export class MeetingSlotsService {
     where: FindOptionsWhere<MeetingSlot> | FindOptionsWhere<MeetingSlot>[],
     relations?: FindOptionsRelations<MeetingSlot>,
   ) {
+    this.logger.debug('findAllBy invoked', {
+      correlationId: '146ab16d-b6d8-4d1a-ab80-cbd5ad95b9fa',
+      where,
+      relations,
+    });
     return await this.repository.find({
       where,
       relations,
@@ -177,6 +190,11 @@ export class MeetingSlotsService {
   }
 
   async findOne(id: string, relations?: FindOptionsRelations<MeetingSlot>) {
+    this.logger.debug('findOne invoked', {
+      correlationId: '8e3f63b5-aeeb-4f40-bf96-505c32dae153',
+      id,
+      relations,
+    });
     return await this.findOneBy({ id }, relations);
   }
 
@@ -184,6 +202,11 @@ export class MeetingSlotsService {
     where: FindOptionsWhere<MeetingSlot> | FindOptionsWhere<MeetingSlot>[],
     relations?: FindOptionsRelations<MeetingSlot>,
   ) {
+    this.logger.debug('findOneBy invoked', {
+      correlationId: '5e30b64f-d61d-4c2e-a7ac-e8a86c5b9d77',
+      where,
+      relations,
+    });
     return await this.repository.findOne({
       where,
       relations,
@@ -191,6 +214,10 @@ export class MeetingSlotsService {
   }
 
   async upsert(createMeetingSlotDto: CreateMeetingSlotDto) {
+    this.logger.debug('upsert invoked', {
+      correlationId: 'ba0137ab-c441-4011-830c-779c11642a36',
+      createMeetingSlotDto,
+    });
     await this.repository.upsert(createMeetingSlotDto, {
       skipUpdateIfNoValuesChanged: true,
       conflictPaths: ['meetingGroupId', 'rank'],
@@ -204,12 +231,21 @@ export class MeetingSlotsService {
   async create(
     createMeetingSlotDto: CreateMeetingSlotDto & { createdBy: string },
   ) {
+    this.logger.debug('create invoked', {
+      correlationId: '57538107-4def-4655-b631-d09c26bf2aa2',
+      createMeetingSlotDto,
+    });
     return await this.repository.save(
       this.repository.create(createMeetingSlotDto),
     );
   }
 
   async update(id: string, updateMeetingSlotDto: UpdateMeetingSlotDto) {
+    this.logger.debug('update invoked', {
+      correlationId: '7c970611-7e82-4d43-a768-a1bbecebd23f',
+      id,
+      updateMeetingSlotDto,
+    });
     const result = await this.repository.update(id, {
       ...updateMeetingSlotDto,
     });
@@ -220,6 +256,10 @@ export class MeetingSlotsService {
   }
 
   async remove(id: string) {
+    this.logger.debug('remove invoked', {
+      correlationId: 'e4383a06-bd1d-457e-91a2-8f2c8336d02f',
+      id,
+    });
     const slot = await this.findOne(id);
     if (!slot) {
       throw new NotFoundException();
@@ -233,6 +273,13 @@ export class MeetingSlotsService {
     slotMinutes: number,
     limit: number,
   ) {
+    this.logger.debug('getAvailableSlots invoked', {
+      correlationId: 'b43d529b-fc0d-4a64-8600-c7a6e4a121f5',
+      calendars: calendars.length,
+      baseAvailableWindows: baseAvailableWindows.length,
+      slotMinutes,
+      limit,
+    });
     const windowStartMs = baseAvailableWindows[0].start;
     const windowEndMs =
       baseAvailableWindows[baseAvailableWindows.length - 1].end;
@@ -318,6 +365,12 @@ export class MeetingSlotsService {
     windowStart: Date,
     windowEnd: Date,
   ): { start: number; end: number }[] {
+    this.logger.debug('intersectParticipantAvailabilityWindows invoked', {
+      correlationId: 'c6beaf44-2137-4008-ada2-bde73c0c3893',
+      participantData: participantData.length,
+      windowStart,
+      windowEnd,
+    });
     if (participantData.length === 0) {
       return [{ start: windowStart.getTime(), end: windowEnd.getTime() }];
     }
@@ -373,6 +426,13 @@ export class MeetingSlotsService {
     dayStart: number,
     dayEnd: number,
   ): { start: number; end: number }[] {
+    this.logger.debug('intersectRangesForDay invoked', {
+      correlationId: '840cf382-a08d-4ee2-b560-a3e19cc7786c',
+      participantData: participantData.length,
+      dayOfWeek,
+      dayStart,
+      dayEnd,
+    });
     const participantRanges = participantData.map((participant) =>
       this.buildParticipantDayAvailability(
         participant.availabilities,
@@ -405,6 +465,15 @@ export class MeetingSlotsService {
     dayStart: number,
     dayEnd: number,
   ): { start: number; end: number }[] {
+    this.logger.debug('buildParticipantDayAvailability invoked', {
+      correlationId: '85f1961b-2aee-4e4f-a85b-0066d874cb45',
+      availabilities: availabilities.length,
+      overrides: overrides.length,
+      timezone,
+      dayOfWeek,
+      dayStart,
+      dayEnd,
+    });
     const override = overrides.find(
       (o) =>
         new Date(o.date).toISOString().slice(0, 16) ===
@@ -525,6 +594,11 @@ export class MeetingSlotsService {
     ranges: { start: number; end: number }[],
     subtract: { start: number; end: number },
   ): { start: number; end: number }[] {
+    this.logger.debug('subtractRange invoked', {
+      correlationId: 'b7387cce-29d3-4faf-b57c-e4511b671bff',
+      ranges: ranges.length,
+      subtract,
+    });
     const result: { start: number; end: number }[] = [];
 
     for (const range of ranges) {
@@ -555,6 +629,12 @@ export class MeetingSlotsService {
     time: string,
     timezone: string,
   ): number {
+    this.logger.debug('convertLocalTimeToUtc invoked', {
+      correlationId: '66a5a8b7-efd2-4173-8d63-db2cbfbef2df',
+      dayStart,
+      time,
+      timezone,
+    });
     const [hours, minutes] = time.split(':').map(Number);
     const testDate = new Date(dayStart);
     testDate.setUTCHours(hours, minutes, 0, 0);

@@ -32,6 +32,10 @@ export class AvailabilitiesController {
     @Req() req: Request & { user: Account },
     @Body() createAvailabilityDto: CreateAvailabilityDto[] & { userId: string },
   ): Promise<AvailabilityResponseDto[]> {
+    this.logger.debug('upsertBatch invoked', {
+      correlationId: '0c825ef2-0aa4-4de5-b6f8-3faa69db1c3f',
+      userId: req.user.userId,
+    });
     const promises = createAvailabilityDto.map((dto) => {
       return this.availabilitiesService.upsert({
         ...dto,
@@ -52,6 +56,10 @@ export class AvailabilitiesController {
     @Req() req: Request & { user: Account },
     @Body() createAvailabilityDto: CreateAvailabilityDto & { userId: string },
   ): Promise<AvailabilityResponseDto> {
+    this.logger.debug('upsert invoked', {
+      correlationId: '6ccb9e9b-73df-4144-9d02-a30852ab218d',
+      userId: req.user.userId,
+    });
     const result = await this.availabilitiesService.upsert({
       ...createAvailabilityDto,
       userId: req.user.userId,
@@ -68,6 +76,10 @@ export class AvailabilitiesController {
     @Req() req: Request & { user: Account },
     @Body() createAvailabilityDto: CreateAvailabilityDto & { userId: string },
   ): Promise<AvailabilityResponseDto> {
+    this.logger.debug('create invoked', {
+      correlationId: 'c45f4fc7-001c-4806-8ed1-2abd1473b435',
+      userId: req.user.userId,
+    });
     const result = await this.availabilitiesService.create({
       ...createAvailabilityDto,
       userId: req.user.userId,
@@ -83,6 +95,10 @@ export class AvailabilitiesController {
   async findAll(
     @Req() req: Request & { user: Account },
   ): Promise<AvailabilityResponseDto[]> {
+    this.logger.debug('findAll invoked', {
+      correlationId: 'f58bc72d-6f3e-4bf1-9839-cb17b9688e07',
+      userId: req.user.userId,
+    });
     const results = await this.availabilitiesService.findAllBy({
       userId: req.user.userId,
     });
@@ -98,6 +114,10 @@ export class AvailabilitiesController {
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
   ): Promise<AvailabilityResponseDto> {
+    this.logger.debug('findOne invoked', {
+      correlationId: '1eaa724d-8c3b-4e94-bb4d-fece4b36fcf4',
+      userId: req.user.userId,
+    });
     const result = await this.availabilitiesService.findOneBy({
       id,
       userId: req.user.userId,
@@ -114,6 +134,10 @@ export class AvailabilitiesController {
     @Param('id') id: string,
     @Body() updateAvailabilityDto: UpdateAvailabilityDto,
   ): Promise<AvailabilityResponseDto> {
+    this.logger.debug('update invoked', {
+      correlationId: '8ef3b66e-aae0-4a68-bc84-a6f52201a58c',
+      userId: req.user.userId,
+    });
     const existing = await this.availabilitiesService.findOneBy({
       id,
       userId: req.user.userId,
@@ -136,6 +160,10 @@ export class AvailabilitiesController {
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
   ): Promise<AvailabilityResponseDto> {
+    this.logger.debug('remove invoked', {
+      correlationId: '9086e713-9913-4ad8-9488-ed621a64e838',
+      userId: req.user.userId,
+    });
     const existing = await this.availabilitiesService.findOneBy({
       id,
       userId: req.user.userId,

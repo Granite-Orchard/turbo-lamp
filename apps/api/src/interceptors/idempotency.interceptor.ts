@@ -30,6 +30,10 @@ export class IdempotencyInterceptor implements NestInterceptor {
       .switchToHttp()
       .getRequest();
     const idempotencyKey = request.headers[IDEMPOTENCY_KEY_HEADER] as string;
+    this.logger.debug('intercept invoked', {
+      correlationId: 'dcc3b438-79ea-49ac-81be-138b43cf0bec',
+      idempotencyKey,
+    });
 
     if (!idempotencyKey) {
       return next.handle();
@@ -50,8 +54,14 @@ export class IdempotencyInterceptor implements NestInterceptor {
     return from(this.cacheManager.get<string>(cacheKey)).pipe(
       switchMap((cached) => {
         if (cached) {
+          this.logger.debug('cache hit, returning cached payload.', {
+            correlationId: '9277fc5f-2c83-4a16-8c09-53398e2baae3',
+          });
           return of(JSON.parse(cached));
         }
+        this.logger.debug('cach miss, setting cache key', {
+          correlationId: '88adee17-3f06-467d-929f-b3f7664c42af',
+        });
 
         return next.handle().pipe(
           tap((response) => {

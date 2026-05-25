@@ -173,6 +173,28 @@ describe('CalendarsService', () => {
       expect(mockEventBus.publish).toHaveBeenCalled();
       expect(result).toEqual(mockCalendar);
     });
+
+    it('should not publish event when result is null after upsert', async () => {
+      const dto: CreateCalendarDto & { accountId: string; createdBy: string } =
+        {
+          accountId: mockCalendar.accountId,
+          userId: mockCalendar.userId,
+          externalId: mockCalendar.externalId,
+          providerId: mockCalendar.providerId,
+          name: mockCalendar.name,
+          timezone: mockCalendar.timezone,
+          enabled: true,
+          createdBy: mockCalendar.userId,
+        };
+
+      mockRepository.upsert.mockResolvedValue({ affected: 1 });
+      mockRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.upsert(dto);
+
+      expect(mockEventBus.publish).not.toHaveBeenCalled();
+      expect(result).toBeNull();
+    });
   });
 
   describe('create', () => {

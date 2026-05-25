@@ -83,6 +83,9 @@ export class AuthController {
     @Ip() ip: string,
     @Body() body: LoginDto,
   ): Promise<SessionResponseDto> {
+    this.logger.debug('login invoked', {
+      correlationId: 'c3d48937-db7c-4bc6-b75e-6d2ba8cb68a2',
+    });
     const account = await this.authService.validateUser(
       body.username,
       AccountProvider.CREDENTIALS,
@@ -103,11 +106,19 @@ export class AuthController {
 
   @UseGuards(OAuthRegisterInitiationGuard)
   @Get('oauth/register/:provider')
-  getRegisterProvider() {}
+  getRegisterProvider() {
+    this.logger.debug('getRegisterProvider invoked', {
+      correlationId: '18047f6e-a9d9-43cc-a6b3-a2c4d23f92c1',
+    });
+  }
 
   @UseGuards(OAuthInitiationGuard)
   @Get('oauth/:provider')
-  getProvider() {}
+  getProvider() {
+    this.logger.debug('getProvider invoked', {
+      correlationId: 'b33d85d3-ada7-49bb-ae49-3b9ed9569c7b',
+    });
+  }
 
   @UseGuards(OAuthGuard)
   @Get('oauth/callback/:provider')
@@ -117,6 +128,9 @@ export class AuthController {
     @Ip() ip: string,
     @Res() res: Response,
   ) {
+    this.logger.debug('getProviderCallback invoked', {
+      correlationId: '9f59eed1-7cad-4b2f-8007-941ec41d0d44',
+    });
     const verification = await this.verificationService.consume(state);
 
     if (!verification) {
@@ -129,6 +143,9 @@ export class AuthController {
       : SanitizedRoutes.ONBOARDING;
 
     if (verification.value !== '') {
+      this.logger.debug('verification has value, verifying', {
+        correlationId: '7e592a9a-8cbc-4d74-8e25-18578f3d3aae',
+      });
       const payload = this.tokenService.verify<VerificationValue>(
         verification.value,
       );
@@ -140,6 +157,10 @@ export class AuthController {
         await this.invitationsService.acceptInvitation(payload.id, req.user);
         redirect = SanitizedRoutes.ONBOARDING;
       }
+      this.logger.debug('verified redirect', {
+        correlationId: '96623b36-38b9-4571-b0f3-e4f93d439a93',
+        redirect,
+      });
     }
 
     const session = await this.authService.login(req.user, {
@@ -153,6 +174,7 @@ export class AuthController {
       EnvironmentVariables.FRONTEND_URL,
     )!;
     this.logger.debug('callback complete, cookie set, redirecting', {
+      correlationId: '9610d314-4b7c-4305-9df0-b16485671117',
       frontendUrl,
       redirect,
     });

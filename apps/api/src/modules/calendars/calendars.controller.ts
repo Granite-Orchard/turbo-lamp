@@ -45,6 +45,10 @@ export class CalendarsController {
   async findAllExternal(
     @Req() req: Request & { user: Account },
   ): Promise<ExternalCalendarResponseDto[]> {
+    this.logger.debug('findAllExternal invoked', {
+      correlationId: 'c620ea07-b787-4d15-a350-c5e162f651dd',
+      userId: req.user.userId,
+    });
     const { providerId } = req.user;
     const results = await this.externalCalendarService.listCalendars(
       providerId as 'google',
@@ -66,6 +70,13 @@ export class CalendarsController {
     @Query('after') after: string,
     @Query('before') before: string,
   ) {
+    this.logger.debug('events invoked', {
+      correlationId: '19c7944b-cba8-4422-a0e3-e635cd682e5a',
+      id,
+      before,
+      after,
+      userId: req.user.userId,
+    });
     const calendar = await this.calendarService.findOneBy({
       id,
       userId: req.user.userId,
@@ -91,6 +102,10 @@ export class CalendarsController {
   async findAll(
     @Req() req: Request & { user: Account },
   ): Promise<CalendarResponseDto[]> {
+    this.logger.debug('findAll invoked', {
+      correlationId: 'db8aee1c-86b1-4edf-9854-e776862b5b5d',
+      userId: req.user.userId,
+    });
     const results = await this.calendarService.findAllBy({
       userId: req.user.userId,
     });
@@ -107,6 +122,11 @@ export class CalendarsController {
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
   ): Promise<CalendarResponseDto> {
+    this.logger.debug('findOne invoked', {
+      correlationId: '7b98a6b0-eed3-4a26-a66a-1d556b37cc0a',
+      id,
+      userId: req.user.userId,
+    });
     const calendar = await this.calendarService.findOne(id);
     if (!calendar) throw new NotFoundException();
     if (calendar.userId !== req.user.userId) throw new UnauthorizedException();
@@ -121,6 +141,11 @@ export class CalendarsController {
     @Req() req: Request & { user: Account },
     @Body() createCalendarDto: CreateCalendarDto,
   ): Promise<CalendarResponseDto> {
+    this.logger.debug('upsert invoked', {
+      correlationId: '531e2a70-5df6-4fb2-9f0d-f45c55089405',
+      userId: req.user.userId,
+      createCalendarDto,
+    });
     const calendar = await this.calendarService.upsert({
       ...createCalendarDto,
       accountId: req.user.id,
@@ -138,6 +163,11 @@ export class CalendarsController {
     @Req() req: Request & { user: Account },
     @Body() createCalendarDto: CreateCalendarDto,
   ): Promise<CalendarResponseDto> {
+    this.logger.debug('create invoked', {
+      correlationId: 'e9e705bc-e261-4098-8ad6-9bf0d96ac4cd',
+      userId: req.user.userId,
+      createCalendarDto,
+    });
     const calendar = await this.calendarService.create({
       ...createCalendarDto,
       accountId: req.user.id,
@@ -154,6 +184,11 @@ export class CalendarsController {
     @Req() req: Request & { user: Account },
     @Body() createCalendarDto: CreateCalendarDto[],
   ): Promise<CalendarResponseDto[]> {
+    this.logger.debug('upsertBatch invoked', {
+      correlationId: 'f825fa1c-ec5e-4cbe-868b-0e8a6192fbe6',
+      userId: req.user.userId,
+      createCalendarDto,
+    });
     const promises = createCalendarDto.map((dto) =>
       this.calendarService.upsert({
         ...dto,
@@ -175,6 +210,11 @@ export class CalendarsController {
     @Req() req: Request & { user: Account },
     @Body() createCalendarDto: CreateCalendarDto[],
   ): Promise<CalendarResponseDto[]> {
+    this.logger.debug('createBatch invoked', {
+      correlationId: '02f0af8d-813c-4b21-9cc8-55b225288637',
+      userId: req.user.userId,
+      createCalendarDto,
+    });
     const promises = createCalendarDto.map((dto) =>
       this.calendarService.create({
         ...dto,
@@ -198,6 +238,12 @@ export class CalendarsController {
     @Param('id') id: string,
     @Body() updateCalendarDto: UpdateCalendarDto,
   ): Promise<CalendarResponseDto> {
+    this.logger.debug('update invoked', {
+      correlationId: '474ceeb9-9dfd-4c92-aad7-e5f556d8d8da',
+      userId: req.user.userId,
+      id,
+      updateCalendarDto,
+    });
     const calendar = await this.calendarService.findOneBy({ id });
     if (!calendar) throw new NotFoundException();
     if (calendar.userId !== req.user.userId) throw new UnauthorizedException();
@@ -216,6 +262,11 @@ export class CalendarsController {
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
   ): Promise<CalendarResponseDto> {
+    this.logger.debug('remove invoked', {
+      correlationId: 'd9c3f499-d720-422f-9e39-f59abbbe0942',
+      userId: req.user.userId,
+      id,
+    });
     const calendar = await this.calendarService.findOneBy({ id });
     if (!calendar) throw new NotFoundException();
     if (calendar.userId !== req.user.userId) throw new UnauthorizedException();

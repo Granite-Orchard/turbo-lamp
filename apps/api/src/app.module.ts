@@ -9,6 +9,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { SentryModule } from '@sentry/nestjs/setup';
 import { CacheableMemory } from 'cacheable';
 import Redis from 'ioredis';
 import Keyv from 'keyv';
@@ -38,6 +39,7 @@ import { VerificationsModule } from './modules/verifications/verifications.modul
 
 @Module({
   imports: [
+    SentryModule.forRoot(),
     ConfigModule.forRoot({
       cache: true,
       isGlobal: true,

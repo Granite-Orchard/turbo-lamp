@@ -1,4 +1,12 @@
-import { Controller, Get, Inject, Param, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Inject,
+  Logger,
+  Param,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { Account } from '../accounts/entities/account.entity';
@@ -11,6 +19,7 @@ import { plainToInstance } from 'class-transformer';
 @UseGuards(JwtAuthGuard)
 @Controller({ path: 'meeting-slots', version: '1' })
 export class MeetingSlotsController {
+  private readonly logger: Logger = new Logger(MeetingSlotsController.name);
   constructor(
     @Inject(MeetingSlotsService)
     private readonly meetingSlotsService: MeetingSlotsService,
@@ -23,6 +32,11 @@ export class MeetingSlotsController {
     @Req() req: Request & { user: Account },
     @Param('meetingGroupId') meetingGroupId: string,
   ): Promise<MeetingSlotResponseDto[]> {
+    this.logger.debug('findSlots invoked', {
+      correlationId: '623f03a9-54bb-4d82-b644-9c777f8c1a32',
+      userId: req.user.userId,
+      meetingGroupId,
+    });
     const results = await this.meetingSlotsService.findAllBy([
       {
         meetingGroup: {
@@ -43,6 +57,11 @@ export class MeetingSlotsController {
     @Req() req: Request & { user: Account },
     @Param('meetingGroupId') meetingGroupId: string,
   ): Promise<MeetingSlotResponseDto[]> {
+    this.logger.debug('calculate invoked', {
+      correlationId: '3f2d2c3a-ae46-4772-8d8c-f6f346cedd48',
+      userId: req.user.userId,
+      meetingGroupId,
+    });
     const meetingExists = await this.meetingService.findOneBy({
       meetingGroupId,
     });

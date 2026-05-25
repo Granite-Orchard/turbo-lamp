@@ -169,6 +169,23 @@ describe('MeetingParticipantsService', () => {
       expect(mockVerificationService.create).toHaveBeenCalled();
       expect(result).toEqual(mockParticipant);
     });
+
+    it('should create participant and skip verification when already AUTHORIZED', async () => {
+      const createDto: CreateMeetingParticipantDto & { createdBy: string } = {
+        meetingGroupId: mockParticipant.meetingGroupId,
+        email: mockParticipant.email,
+        createdBy: 'author-id',
+        authState: ParticipantAuthState.AUTHORIZED,
+      };
+
+      mockRepository.create.mockReturnValue(mockParticipant);
+      mockRepository.save.mockResolvedValue(mockParticipant);
+
+      const result = await service.create(createDto);
+
+      expect(mockVerificationService.create).not.toHaveBeenCalled();
+      expect(result).toEqual(mockParticipant);
+    });
   });
 
   describe('update', () => {
@@ -231,6 +248,28 @@ describe('MeetingParticipantsService', () => {
         }),
       ).rejects.toThrow(BadRequestException);
     });
+
+    it('should throw NotFoundException when update affects no rows', async () => {
+      mockRepository.findOne.mockResolvedValue(mockParticipant);
+      mockRepository.update.mockResolvedValue({ affected: 0 });
+
+      await expect(
+        service.update(mockParticipant.id, { invitationState: ParticipantInvitationState.ACCEPTED }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw BadRequestException for invalid auth state transition', async () => {
+      mockRepository.findOne.mockResolvedValue({
+        ...mockParticipant,
+        authState: ParticipantAuthState.UNAUTHORIZED,
+      });
+
+      await expect(
+        service.update(mockParticipant.id, {
+          authState: 'invalid' as ParticipantAuthState,
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
   });
 
   describe('remove', () => {
@@ -253,6 +292,28 @@ describe('MeetingParticipantsService', () => {
       await expect(service.remove('non-existent-id')).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  describe('validateInvitationStateTransition (private)', () => {
+    it('should handle unknown current state with empty allowed transitions', () => {
+      expect(() =>
+        (service as any).validateInvitationStateTransition(
+          'unknown-state' as any,
+          ParticipantInvitationState.PENDING,
+        ),
+      ).toThrow(BadRequestException);
+    });
+  });
+
+  describe('validateAuthStateTransition (private)', () => {
+    it('should handle unknown current state with empty allowed transitions', () => {
+      expect(() =>
+        (service as any).validateAuthStateTransition(
+          'unknown-state' as any,
+          ParticipantAuthState.AUTHORIZED,
+        ),
+      ).toThrow(BadRequestException);
     });
   });
 });

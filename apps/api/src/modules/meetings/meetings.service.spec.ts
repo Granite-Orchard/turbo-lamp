@@ -169,6 +169,26 @@ describe('MeetingsService', () => {
       expect(result).toEqual(mockMeeting);
     });
 
+    it('should default to SCHEDULED when no status is provided', async () => {
+      const createMeetingDto = {
+        meetingGroupId: mockMeeting.meetingGroupId,
+        start: mockMeeting.start,
+        end: mockMeeting.end,
+      } as CreateMeetingDto;
+
+      mockRepository.create.mockImplementation((dto) => ({
+        ...mockMeeting,
+        ...dto,
+      }));
+      mockRepository.save.mockResolvedValue(mockMeeting);
+
+      await service.create(createMeetingDto);
+
+      expect(mockRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({ status: MeetingStatus.SCHEDULED }),
+      );
+    });
+
     it('should throw BadRequestException when end <= start', async () => {
       const createMeetingDto: CreateMeetingDto = {
         meetingGroupId: mockMeeting.meetingGroupId,
@@ -257,10 +277,51 @@ describe('MeetingsService', () => {
         service.update(mockMeeting.id, updateMeetingDto),
       ).rejects.toThrow(BadRequestException);
     });
+
+    it('should throw NotFoundException when update affects no rows', async () => {
+      const updateMeetingDto: UpdateMeetingDto = { start: new Date() };
+
+      mockRepository.findOne.mockResolvedValue(mockMeeting);
+      mockRepository.update.mockResolvedValue({ affected: 0 });
+
+      await expect(
+        service.update(mockMeeting.id, updateMeetingDto),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should validate times when only end is provided (start falls back to existing)', async () => {
+      const updateMeetingDto: UpdateMeetingDto = {
+        end: new Date(mockMeeting.start.getTime() - 3600000),
+      };
+
+      mockRepository.findOne.mockResolvedValue(mockMeeting);
+
+      await expect(
+        service.update(mockMeeting.id, updateMeetingDto),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should validate times when only start is provided (end falls back to existing)', async () => {
+      const updateMeetingDto: UpdateMeetingDto = {
+        start: new Date(mockMeeting.start.getTime() + 1800000),
+      };
+
+      mockRepository.findOne.mockResolvedValueOnce(mockMeeting);
+      mockRepository.update.mockResolvedValue({ affected: 1 });
+      mockRepository.findOne.mockResolvedValueOnce({
+        ...mockMeeting,
+        ...updateMeetingDto,
+      });
+
+      const result = await service.update(mockMeeting.id, updateMeetingDto);
+
+      expect(mockRepository.update).toHaveBeenCalled();
+      expect(result).toBeDefined();
+    });
   });
 
   describe('remove', () => {
-    it('should soft delete a meeting', async () => {
+    it('should soft delete a meeting and publish MeetingDeletedEvent', async () => {
       mockRepository.findOne.mockResolvedValue(mockMeeting);
       mockRepository.softDelete.mockResolvedValue({ affected: 1 });
 
@@ -268,6 +329,7 @@ describe('MeetingsService', () => {
 
       expect(mockRepository.findOne).toHaveBeenCalled();
       expect(mockRepository.softDelete).toHaveBeenCalledWith(mockMeeting.id);
+      expect(mockEventBus.publish).toHaveBeenCalled();
       expect(result).toEqual({ affected: 1 });
     });
 
@@ -277,6 +339,17 @@ describe('MeetingsService', () => {
       await expect(service.remove('non-existent-id')).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  describe('validateStatusTransition (private)', () => {
+    it('should handle unknown current status with empty allowed transitions', () => {
+      expect(() =>
+        (service as any).validateStatusTransition(
+          'unknown-status',
+          MeetingStatus.SCHEDULED,
+        ),
+      ).toThrow(BadRequestException);
     });
   });
 });

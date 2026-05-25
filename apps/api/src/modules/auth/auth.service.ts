@@ -39,6 +39,9 @@ export class AuthService {
     provider: AccountProvider,
     password?: string,
   ): Promise<Account | null> {
+    this.logger.debug('validateUser invoked', {
+      correlationId: 'fc00dc75-ced2-4be1-ba27-bba3f0881e97',
+    });
     if (provider === AccountProvider.CREDENTIALS && !password) {
       throw new UnauthorizedException();
     }
@@ -50,10 +53,18 @@ export class AuthService {
       { user: true },
     );
     if (!account) {
+      this.logger.debug('No account found. Returning early', {
+        correlationId: 'd399543a-2d29-4f80-9b5d-c40d714349bd',
+        provider,
+      });
       return null;
     }
 
     if (provider === AccountProvider.CREDENTIALS) {
+      this.logger.debug('Provider credentials', {
+        correlationId: '07e65228-0530-4d28-8715-bb2cc5b90758',
+        provider,
+      });
       if (!account.password) {
         return null;
       }
@@ -71,6 +82,9 @@ export class AuthService {
     register: RegisterDto,
     metadata?: { userAgent: string | undefined; ip: string | undefined },
   ): Promise<Session> {
+    this.logger.debug('register invoked', {
+      correlationId: '1ffda1a9-3622-495c-98e8-99708ffe5b20',
+    });
     const { username, password, confirmPassword, timezone } = register;
     const hashedPassword = await bcrypt.hash(password, 10);
     const isMatch = await bcrypt.compare(confirmPassword, hashedPassword);
@@ -115,6 +129,9 @@ export class AuthService {
     account: Account,
     metadata?: { userAgent: string | undefined; ip: string | undefined },
   ): Promise<Session> {
+    this.logger.debug('login invoked', {
+      correlationId: '37eadf15-c668-4e7b-b86e-40e5f8b1c352',
+    });
     const token_ttl = this.configService.get<number>(
       EnvironmentVariables.TOKEN_TTL,
     )!;

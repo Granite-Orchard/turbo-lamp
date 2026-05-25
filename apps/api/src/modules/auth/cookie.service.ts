@@ -24,7 +24,12 @@ export class CookieService {
       path: '/',
       sameSite: 'lax',
     };
-    this.logger.debug('attaching cookie', { name, value, opts });
+    this.logger.debug('attaching cookie', {
+      name,
+      value,
+      opts,
+      correlationId: 'fbba269d-fb2c-4609-a10e-31ebfb062e83',
+    });
     return response.cookie(name, value, opts);
   }
 }

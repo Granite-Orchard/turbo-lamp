@@ -37,11 +37,21 @@ export class OAuthRegisterInitiationGuard implements CanActivate {
 
     const provider = req.params.provider;
 
+    this.logger.debug('canActivate invoked with provider', {
+      correlationId: '8c3d36df-c94d-4ee6-9601-efa4753b4410',
+      provider,
+    });
+
     if (!STRATEGIES.includes(provider)) {
       throw new UnauthorizedException();
     }
 
     const guard = new (AuthGuard(provider))();
+
+    this.logger.debug('canActivate auth provider located', {
+      correlationId: '41b48fff-2265-48d1-bf96-be2e0c804bd9',
+      provider,
+    });
 
     const value: VerificationValue = {
       type: VerificationType.OAUTH_STATE,
@@ -51,6 +61,9 @@ export class OAuthRegisterInitiationGuard implements CanActivate {
     };
 
     if (req.query?.token) {
+      this.logger.debug('token exists in query object', {
+        correlationId: 'c81d2df6-262c-4086-99df-71319e021032',
+      });
       const token = await this.verificationService.consume(req.query.token);
 
       if (!token) {
@@ -70,6 +83,10 @@ export class OAuthRegisterInitiationGuard implements CanActivate {
       value.after = payload.after;
     }
 
+    this.logger.debug('Generating verification', {
+      correlationId: 'ed6bf907-e8d5-46ee-bb44-2b6bfdc5e554',
+    });
+
     const expiresIn = 300000;
     // 5 minutes
     const expiresAt = new Date(Date.now() + expiresIn);
@@ -77,6 +94,11 @@ export class OAuthRegisterInitiationGuard implements CanActivate {
       identifier: this.tokenService.randomHash(),
       value: this.tokenService.sign(value, { expiresIn }),
       expiresAt,
+    });
+
+    this.logger.debug('Verification expires at', {
+      expiresAt,
+      correlationId: 'ed6bf907-e8d5-46ee-bb44-2b6bfdc5e554',
     });
 
     guard.getAuthenticateOptions = () => ({

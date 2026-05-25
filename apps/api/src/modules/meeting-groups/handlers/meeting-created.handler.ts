@@ -22,6 +22,10 @@ export class MeetingCreatedHandler implements IEventHandler<MeetingCreatedEvent>
   ) {}
 
   async handle(event: MeetingCreatedEvent) {
+    this.logger.warn('handle invoked', {
+      correlationId: '40d216a5-7c1d-43c8-9a2d-c9747e4c8cd0',
+      event,
+    });
     const { entity } = event;
     const meetingGroup = await this.meetingGroupsService.findOne(
       entity.meetingGroupId,
@@ -32,7 +36,9 @@ export class MeetingCreatedHandler implements IEventHandler<MeetingCreatedEvent>
       },
     );
     if (!meetingGroup) {
-      this.logger.warn(`MeetingGroup not found for meeting ${entity.id}`);
+      this.logger.warn(`MeetingGroup not found for meeting ${entity.id}`, {
+        correlationId: '6cedd968-7b97-4377-bce9-60fe242db16f',
+      });
       return;
     }
 
@@ -41,6 +47,7 @@ export class MeetingCreatedHandler implements IEventHandler<MeetingCreatedEvent>
     if (!authorProviderAccount) {
       this.logger.warn(
         `No provider account for author ${meetingGroup.authorId}`,
+        { correlationId: '0d0d51a6-ef20-4d5c-ac8f-afa21bbdece9' },
       );
       return;
     }
@@ -50,6 +57,7 @@ export class MeetingCreatedHandler implements IEventHandler<MeetingCreatedEvent>
     if (participants.length === 0) {
       this.logger.warn(
         `No valid participants to invite for meeting ${entity.id}`,
+        { correlationId: '35e8a6e9-47cf-4536-80ab-18bd829f1051' },
       );
       return;
     }

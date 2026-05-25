@@ -16,6 +16,11 @@ export class InvitationsService {
   ) {}
 
   async acceptInvitation(id: string, user: Account): Promise<void> {
+    this.logger.debug('acceptInvitation invoked', {
+      correlationId: 'a43d1b74-1124-4aa8-ab5d-3a084fce738c',
+      id,
+      userId: user.userId,
+    });
     await this.meetingParticipantsService.update(id, {
       userId: user.userId,
       invitationState: ParticipantInvitationState.ACCEPTED,

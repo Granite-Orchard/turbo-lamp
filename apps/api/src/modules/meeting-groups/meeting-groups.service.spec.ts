@@ -204,6 +204,33 @@ describe('MeetingGroupsService', () => {
       expect(result).toEqual(mockMeetingGroup);
     });
 
+    it('should default to OPEN when no status is provided', async () => {
+      const createDto = {
+        authorId: mockMeetingGroup.authorId,
+        calendarId: mockMeetingGroup.calendarId,
+        summary: mockMeetingGroup.summary,
+        description: mockMeetingGroup.description,
+        location: mockMeetingGroup.location,
+        duration: 60,
+        after: new Date(Date.now() + 86400000),
+        before: new Date(Date.now() + 172800000),
+        timezone: 'America/New_York',
+        createdBy: mockMeetingGroup.authorId,
+      } as CreateMeetingGroupDto & { createdBy: string };
+
+      mockRepository.create.mockImplementation((dto) => ({
+        ...mockMeetingGroup,
+        ...dto,
+      }));
+      mockRepository.save.mockResolvedValue(mockMeetingGroup);
+
+      await service.create(createDto);
+
+      expect(mockRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({ status: MeetingGroupStatus.OPEN }),
+      );
+    });
+
     it('should throw BadRequestException when after >= before', async () => {
       const createDto: CreateMeetingGroupDto & { createdBy: string } = {
         authorId: mockMeetingGroup.authorId,
@@ -319,6 +346,78 @@ describe('MeetingGroupsService', () => {
       await expect(service.remove('non-existent-id')).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  describe('generateMagicLink', () => {
+    const meetingGroupId = '123e4567-e89b-12d3-a456-426614174000';
+    const mockHash = 'mock-random-hash';
+    const mockSignedValue = 'mock-signed-token';
+
+    beforeEach(() => {
+      mockTokenService.randomHash.mockReturnValue(mockHash);
+      mockTokenService.sign.mockReturnValue(mockSignedValue);
+      mockVerificationsService.create.mockResolvedValue({
+        identifier: mockHash,
+      });
+    });
+
+    it('should generate a magic link with verification and token', async () => {
+      const result = await service.generateMagicLink(meetingGroupId);
+
+      expect(mockTokenService.randomHash).toHaveBeenCalled();
+      expect(mockTokenService.sign).toHaveBeenCalled();
+      expect(mockVerificationsService.create).toHaveBeenCalledWith({
+        identifier: mockHash,
+        value: mockSignedValue,
+        expiresAt: expect.any(Date),
+      });
+      expect(result).toContain(meetingGroupId);
+      expect(result).toContain('accept?token=');
+      expect(result).toContain(mockHash);
+    });
+
+    it('should use BACKEND_URL from config', async () => {
+      const backendUrl = 'https://example.com';
+      const configGet = jest.fn().mockReturnValue(backendUrl);
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          MeetingGroupsService,
+          {
+            provide: getRepositoryToken(MeetingGroup),
+            useValue: mockRepository,
+          },
+          {
+            provide: VerificationsService,
+            useValue: mockVerificationsService,
+          },
+          {
+            provide: TokenService,
+            useValue: mockTokenService,
+          },
+          {
+            provide: ConfigService,
+            useValue: { get: configGet },
+          },
+        ],
+      }).compile();
+
+      const svc = module.get<MeetingGroupsService>(MeetingGroupsService);
+      const result = await svc.generateMagicLink(meetingGroupId);
+
+      expect(configGet).toHaveBeenCalledWith('BACKEND_URL');
+      expect(result).toContain(backendUrl);
+    });
+  });
+
+  describe('validateStatusTransition', () => {
+    it('should throw BadRequestException for unknown current status', () => {
+      expect(() =>
+        service.validateStatusTransition(
+          'unknown' as MeetingGroupStatus,
+          MeetingGroupStatus.OPEN,
+        ),
+      ).toThrow(BadRequestException);
     });
   });
 });
