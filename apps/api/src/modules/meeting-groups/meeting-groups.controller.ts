@@ -65,6 +65,11 @@ export class MeetingGroupsController {
     @Req() req: Request & { user: Account },
     @Body() createMeetingGroupDto: CreateMeetingGroupDto,
   ): Promise<MeetingGroupResponseDto> {
+    this.logger.debug('create invoked', {
+      correlationId: '03055c45-0f94-49f7-a5c8-55a1e8d8254b',
+      userId: req.user.userId,
+      createMeetingGroupDto,
+    });
     const sanitizedAfter = new Date(createMeetingGroupDto.after);
     const sanitizedBefore = new Date(createMeetingGroupDto.before);
     const timezonedAfter = convertDateToTimezone(
@@ -119,6 +124,10 @@ export class MeetingGroupsController {
   async findAll(
     @Req() req: Request & { user: Account },
   ): Promise<MeetingGroupResponseDto[]> {
+    this.logger.debug('findAll invoked', {
+      correlationId: 'e6bee973-79c5-4a23-9be8-a5835de6461b',
+      userId: req.user.userId,
+    });
     const results = await this.meetingGroupsService.findAllBy(
       [
         { authorId: Equal(req.user.userId) },
@@ -143,6 +152,11 @@ export class MeetingGroupsController {
     @Query('token') token: string,
     @Res() res: express.Response,
   ) {
+    this.logger.debug('accept invoked', {
+      correlationId: '09ab0f5d-f65e-470b-9318-7981c296f9ca',
+      id,
+      token,
+    });
     const verification = await this.verificationService.findOneBy({
       identifier: token,
     });
@@ -209,6 +223,11 @@ export class MeetingGroupsController {
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
   ): Promise<MeetingGroupResponseDto> {
+    this.logger.debug('findOne invoked', {
+      correlationId: '80f52994-f6c9-479b-8dad-af4b999038ef',
+      id,
+      userId: req.user.userId,
+    });
     const result = await this.meetingGroupsService.findOneBy(
       { id, participants: { userId: Equal(req.user.userId) } },
       {
@@ -228,6 +247,12 @@ export class MeetingGroupsController {
     @Param('id') id: string,
     @Body() updateMeetingGroupDto: UpdateMeetingGroupDto,
   ): Promise<MeetingGroupResponseDto> {
+    this.logger.debug('update invoked', {
+      correlationId: '42518899-f2c3-4e94-b9e2-3b9381d1ccb0',
+      id,
+      userId: req.user.userId,
+      updateMeetingGroupDto,
+    });
     const found = await this.meetingGroupsService.findOneBy([
       { id, authorId: Equal(req.user.userId) },
     ]);
@@ -250,6 +275,11 @@ export class MeetingGroupsController {
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
   ): Promise<MeetingGroupResponseDto> {
+    this.logger.debug('remove invoked', {
+      correlationId: 'b593bebe-9e81-4808-8ece-f484d0af2dd6',
+      id,
+      userId: req.user.userId,
+    });
     const found = await this.meetingGroupsService.findOneBy([
       { id, authorId: Equal(req.user.userId) },
     ]);

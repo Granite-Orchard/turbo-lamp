@@ -46,6 +46,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, PROVIDER) {
   }
 
   authorizationParams() {
+    this.logger.debug('authorizationParams invoked', {
+      correlationId: '443e0402-9570-45b9-8c00-5d1c4500ab98',
+    });
     return {
       access_type: 'offline',
       prompt: 'consent',
@@ -58,6 +61,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, PROVIDER) {
     refreshToken: string,
     profile: Profile,
   ): Promise<Account> {
+    this.logger.debug('validate invoked', {
+      correlationId: '2e3b97c2-6d89-4e78-8449-8338d8081040',
+    });
     const { value: email } = profile.emails![0];
     let account = await this.authService.validateUser(
       email,
@@ -65,6 +71,10 @@ export class GoogleStrategy extends PassportStrategy(Strategy, PROVIDER) {
     );
 
     if (account) {
+      this.logger.debug('account exists. updating access token', {
+        correlationId: 'a119c391-fa33-4641-94f0-6f0581a51c13',
+        accountId: account.id,
+      });
       account.accessToken = accessToken;
       account.accessTokenExpiresAt = new Date(Date.now() + 3600 * 1000);
       if (refreshToken) {
@@ -74,6 +84,10 @@ export class GoogleStrategy extends PassportStrategy(Strategy, PROVIDER) {
       await this.accountService.update(account.id, account);
       return account;
     }
+
+    this.logger.debug('account does not exist. creating account and user', {
+      correlationId: 'a670e342-f0ac-47fc-843b-209c8f563c86',
+    });
 
     const user = await this.userService.create({
       name: profile.displayName,
@@ -95,6 +109,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, PROVIDER) {
       { account },
     );
     await this.userService.update(user.id, { timezone: user.timezone });
+
+    // TODO: is this still needed?
     user.calendars = [];
     account.user = user;
     return account;

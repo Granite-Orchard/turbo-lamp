@@ -1,5 +1,7 @@
+import './instrument';
 import {
   ClassSerializerInterceptor,
+  ConsoleLogger,
   ValidationPipe,
   VersioningType,
 } from '@nestjs/common';
@@ -18,7 +20,9 @@ import { GlobalExceptionFilter } from './filters/global-exception.filter';
 import { EnvironmentVariables } from './libs/constants';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: new ConsoleLogger({ forceConsole: true }),
+  });
   const configService = app.get<ConfigService>(ConfigService);
   app.enableVersioning({
     type: VersioningType.URI,

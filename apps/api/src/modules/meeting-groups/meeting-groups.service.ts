@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -31,6 +32,7 @@ const ALLOWED_STATUS_TRANSITIONS: Record<
 
 @Injectable()
 export class MeetingGroupsService {
+  private readonly logger: Logger = new Logger(MeetingGroupsService.name);
   constructor(
     @InjectRepository(MeetingGroup)
     private readonly repository: Repository<MeetingGroup>,
@@ -45,6 +47,11 @@ export class MeetingGroupsService {
     current: MeetingGroupStatus,
     next: MeetingGroupStatus,
   ): void {
+    this.logger.debug('validateStatusTransition invoked', {
+      correlationId: '40226802-4492-45f4-9f1c-7e5792dacd22',
+      current,
+      next,
+    });
     const allowed = ALLOWED_STATUS_TRANSITIONS[current] || [];
     if (!allowed.includes(next)) {
       throw new BadRequestException({
@@ -62,6 +69,10 @@ export class MeetingGroupsService {
   public validateMeetingGroupConstraints(
     createMeetingGroupDto: CreateMeetingGroupDto & { createdBy: string },
   ): void {
+    this.logger.debug('validateMeetingGroupConstraints invoked', {
+      correlationId: 'ce3fede0-093c-445f-92fa-6d6700641d90',
+      createMeetingGroupDto,
+    });
     if (createMeetingGroupDto.after >= createMeetingGroupDto.before) {
       throw new BadRequestException({
         message: "'after' must be before 'before'",
@@ -98,6 +109,9 @@ export class MeetingGroupsService {
   }
 
   async findAll() {
+    this.logger.debug('findAll invoked', {
+      correlationId: '2b99888a-aedf-4657-80f2-572141a07956',
+    });
     return await this.repository.find();
   }
 
@@ -105,6 +119,11 @@ export class MeetingGroupsService {
     where: FindOptionsWhere<MeetingGroup> | FindOptionsWhere<MeetingGroup>[],
     relations?: FindOptionsRelations<MeetingGroup>,
   ) {
+    this.logger.debug('findAllBy invoked', {
+      correlationId: 'e63e07cc-92ce-47b9-aba8-06d94e025013',
+      where,
+      relations,
+    });
     const defaultRelations: FindOptionsRelations<MeetingGroup> = {
       participants: true,
       calendar: true,
@@ -119,6 +138,11 @@ export class MeetingGroupsService {
   }
 
   async findOne(id: string, relations?: FindOptionsRelations<MeetingGroup>) {
+    this.logger.debug('findOne invoked', {
+      correlationId: 'ef37ea02-72aa-40d0-84c2-4bf758b03623',
+      id,
+      relations,
+    });
     return await this.findOneBy({ id }, relations);
   }
 
@@ -126,6 +150,11 @@ export class MeetingGroupsService {
     where: FindOptionsWhere<MeetingGroup> | FindOptionsWhere<MeetingGroup>[],
     relations?: FindOptionsRelations<MeetingGroup>,
   ) {
+    this.logger.debug('findOneBy invoked', {
+      correlationId: 'fdcae60d-7db9-4cf0-a171-792949c97dc8',
+      where,
+      relations,
+    });
     return await this.repository.findOne({
       where,
       relations,
@@ -133,6 +162,10 @@ export class MeetingGroupsService {
   }
 
   async generateMagicLink(meetingGroupId: string): Promise<string> {
+    this.logger.debug('generateMagicLink invoked', {
+      correlationId: 'a3c4f3f4-82be-4c26-8087-c9d85dd9cc56',
+      meetingGroupId,
+    });
     const value: VerificationValue = {
       type: VerificationType.MAGIC_LINK_INVITATION,
       id: meetingGroupId,
@@ -157,6 +190,10 @@ export class MeetingGroupsService {
   async create(
     createMeetingGroupDto: CreateMeetingGroupDto & { createdBy: string },
   ) {
+    this.logger.debug('create invoked', {
+      correlationId: '4ec99af0-11f3-4d0d-909b-71e3d235fb72',
+      createMeetingGroupDto,
+    });
     this.validateMeetingGroupConstraints(createMeetingGroupDto);
     return await this.repository.save(
       this.repository.create(createMeetingGroupDto),
@@ -164,6 +201,11 @@ export class MeetingGroupsService {
   }
 
   async update(id: string, updateMeetingGroupDto: UpdateMeetingGroupDto) {
+    this.logger.debug('udpate invoked', {
+      correlationId: 'bfda368d-88ed-4cbc-ac0f-e97d7eec04c2',
+      id,
+      updateMeetingGroupDto,
+    });
     const meetingGroup = await this.findOne(id);
     if (!meetingGroup) {
       throw new NotFoundException({
@@ -183,6 +225,10 @@ export class MeetingGroupsService {
   }
 
   async remove(id: string) {
+    this.logger.debug('remove invoked', {
+      correlationId: 'a79ad30f-38a6-4aaa-8633-733a46743946',
+      id,
+    });
     const meetingGroup = await this.findOne(id);
     if (!meetingGroup) {
       throw new NotFoundException();

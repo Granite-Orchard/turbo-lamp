@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventBus } from '@nestjs/cqrs';
@@ -55,6 +56,7 @@ const ALLOWED_AUTH_TRANSITIONS: Record<
 
 @Injectable()
 export class MeetingParticipantsService {
+  private readonly logger: Logger = new Logger(MeetingParticipantsService.name);
   constructor(
     @InjectRepository(MeetingParticipant)
     private readonly repository: Repository<MeetingParticipant>,
@@ -71,6 +73,11 @@ export class MeetingParticipantsService {
     current: ParticipantInvitationState,
     next: ParticipantInvitationState,
   ): void {
+    this.logger.debug('validateInvitationStateTransition invoked', {
+      correlationId: '6f979af9-f5c4-451e-b3a3-d977ff0dc4bb',
+      current,
+      next,
+    });
     const allowed = ALLOWED_INVITATION_TRANSITIONS[current] || [];
     if (!allowed.includes(next)) {
       throw new BadRequestException({
@@ -89,6 +96,11 @@ export class MeetingParticipantsService {
     current: ParticipantAuthState,
     next: ParticipantAuthState,
   ): void {
+    this.logger.debug('validateAuthStateTransition invoked', {
+      correlationId: '3cda8f20-cff7-4a6b-958f-a441c6f37111',
+      current,
+      next,
+    });
     const allowed = ALLOWED_AUTH_TRANSITIONS[current] || [];
     if (!allowed.includes(next)) {
       throw new BadRequestException({
@@ -108,6 +120,10 @@ export class MeetingParticipantsService {
       createdBy: string;
     },
   ) {
+    this.logger.debug('create invoked', {
+      correlationId: '701d2dee-9389-4d59-a528-23c61fb69ac9',
+      createMeetingParticipantDto,
+    });
     const invitationState =
       createMeetingParticipantDto.invitationState ??
       ParticipantInvitationState.PENDING;
@@ -144,6 +160,9 @@ export class MeetingParticipantsService {
   }
 
   async findAll() {
+    this.logger.debug('findAll invoked', {
+      correlationId: '506b5026-239a-4fee-becd-55c8d57fa9a7',
+    });
     return await this.repository.find();
   }
 
@@ -153,6 +172,11 @@ export class MeetingParticipantsService {
       | FindOptionsWhere<MeetingParticipant>[],
     relations?: FindOptionsRelations<MeetingParticipant>,
   ) {
+    this.logger.debug('findAllBy invoked', {
+      correlationId: '5aebd511-b1e0-4fe6-bed2-a968c68a9a62',
+      where,
+      relations,
+    });
     return await this.repository.find({
       where,
       relations,
@@ -163,6 +187,11 @@ export class MeetingParticipantsService {
     id: string,
     relations?: FindOptionsRelations<MeetingParticipant>,
   ) {
+    this.logger.debug('findOne invoked', {
+      correlationId: 'dd710db2-b63d-42d1-a353-97fb881bec06',
+      id,
+      relations,
+    });
     return await this.findOneBy({ id }, relations);
   }
 
@@ -172,6 +201,11 @@ export class MeetingParticipantsService {
       | FindOptionsWhere<MeetingParticipant>[],
     relations?: FindOptionsRelations<MeetingParticipant>,
   ) {
+    this.logger.debug('findOneBy invoked', {
+      correlationId: 'c851e7e8-7556-486f-89b4-aeb6592043e0',
+      where,
+      relations,
+    });
     return await this.repository.findOne({
       where,
       relations,
@@ -182,6 +216,11 @@ export class MeetingParticipantsService {
     id: string,
     updateMeetingParticipantDto: UpdateMeetingParticipantDto,
   ) {
+    this.logger.debug('update invoked', {
+      correlationId: '65a4839d-c574-4d1c-818d-91fcde126881',
+      id,
+      updateMeetingParticipantDto,
+    });
     const existing = await this.findOne(id);
     if (!existing) {
       throw new NotFoundException({
@@ -220,14 +259,16 @@ export class MeetingParticipantsService {
     }
     const result = await this.findOne(id);
     if (result && result.authState === ParticipantAuthState.AUTHORIZED) {
-      this.eventBus.publish(
-        new MeetingParticipantAuthorizedEvent(result),
-      );
+      this.eventBus.publish(new MeetingParticipantAuthorizedEvent(result));
     }
     return result;
   }
 
   async remove(id: string) {
+    this.logger.debug('remove invoked', {
+      correlationId: '7721b01a-7917-4510-bb78-e267f167764b',
+      id,
+    });
     const meeting = await this.findOne(id);
     if (!meeting) {
       throw new NotFoundException();

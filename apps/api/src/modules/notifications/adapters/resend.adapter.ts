@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CreateEmailOptions, Resend } from 'resend';
 import { EnvironmentVariables } from '../../../libs/constants';
@@ -6,6 +6,7 @@ import { Mailer, SendEmailParams } from '../mailer.interface';
 
 @Injectable()
 export class ResendMailer implements Mailer {
+  private readonly logger: Logger = new Logger(ResendMailer.name);
   private readonly from: string;
   private readonly resend: Resend;
 
@@ -26,6 +27,10 @@ export class ResendMailer implements Mailer {
   }
 
   async sendEmail(params: SendEmailParams) {
+    this.logger.debug('sendEmail invoked', {
+      correlationId: '2b441887-1f4c-4e4f-bded-994621c7c48b',
+      params,
+    });
     const result = await this.resend.emails.send({
       from: this.from,
       to: params.to,

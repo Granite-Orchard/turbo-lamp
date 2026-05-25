@@ -5,6 +5,7 @@ import {
   Get,
   Inject,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
   Param,
   Patch,
@@ -28,6 +29,7 @@ import { Equal } from 'typeorm';
 @UseGuards(JwtAuthGuard)
 @Controller({ path: 'meetings', version: '1' })
 export class MeetingsController {
+  private readonly logger: Logger = new Logger(MeetingsController.name);
   constructor(
     @Inject(MeetingsService)
     private readonly meetingsService: MeetingsService,
@@ -37,6 +39,10 @@ export class MeetingsController {
   async findAll(
     @Req() req: Request & { user: Account },
   ): Promise<MeetingResponseDto[]> {
+    this.logger.debug('findAll invoked', {
+      correlationId: 'e37cfacd-85e9-40c3-bddc-8e34af556280',
+      userId: req.user.userId,
+    });
     const results = await this.meetingsService.findAllBy({
       attendees: { userId: Equal(req.user.userId) },
     });
@@ -52,6 +58,11 @@ export class MeetingsController {
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
   ): Promise<MeetingResponseDto> {
+    this.logger.debug('findOne invoked', {
+      correlationId: '3db87d4b-b8a8-44eb-950e-48ac7a92c892',
+      userId: req.user.userId,
+      id,
+    });
     const result = await this.meetingsService.findOneBy(
       {
         id,
@@ -75,6 +86,11 @@ export class MeetingsController {
     @Req() req: Request & { user: Account },
     @Body() createMeetingDto: CreateMeetingDto,
   ): Promise<MeetingResponseDto> {
+    this.logger.debug('create invoked', {
+      correlationId: 'ce9d16c9-b7ca-4002-8f20-3958df732b80',
+      userId: req.user.userId,
+      createMeetingDto,
+    });
     const result = await this.meetingsService.create(createMeetingDto);
     return plainToInstance(MeetingResponseDto, result, {
       excludeExtraneousValues: true,
@@ -87,6 +103,11 @@ export class MeetingsController {
     @Param('id') id: string,
     @Body() updateMeetingDto: UpdateMeetingDto,
   ): Promise<MeetingResponseDto> {
+    this.logger.debug('update invoked', {
+      correlationId: 'ab97bf5f-40bd-4e8b-86bb-d0d77ad01def',
+      userId: req.user.userId,
+      updateMeetingDto,
+    });
     const found = await this.meetingsService.findOneBy({
       id,
       meetingGroup: { authorId: Equal(req.user.userId) },
@@ -103,6 +124,11 @@ export class MeetingsController {
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
   ): Promise<MeetingResponseDto> {
+    this.logger.debug('remove invoked', {
+      correlationId: '329ceef6-1449-4886-ae84-8d81260f0434',
+      userId: req.user.userId,
+      id,
+    });
     const found = await this.meetingsService.findOneBy({
       id,
       meetingGroup: { authorId: Equal(req.user.userId) },

@@ -65,6 +65,10 @@ export class GoogleCalendarProvider implements CalendarProvider {
   ) {}
 
   async getTimezone(params: GetTimezoneParams): Promise<string> {
+    this.logger.debug('getTimezone invoked', {
+      correlationId: '1a7d19f5-f2c5-4b0f-9b03-d8cfb0332185',
+      accountId: params.account.id,
+    });
     const accessToken = await this.auth.getValidAccessToken(params.account);
     const { data } = await firstValueFrom(
       this.http.get<GoogleCalendarSettingsResponse>(
@@ -80,6 +84,10 @@ export class GoogleCalendarProvider implements CalendarProvider {
   }
 
   async listCalendars(params: ListCalendarsParams): Promise<Calendar[]> {
+    this.logger.debug('listCalendars invoked', {
+      correlationId: 'a8f099bd-03cc-401d-9e52-656b58439550',
+      accountId: params.account.id,
+    });
     const accessToken = await this.auth.getValidAccessToken(params.account);
 
     const { data } = await firstValueFrom(
@@ -113,6 +121,10 @@ export class GoogleCalendarProvider implements CalendarProvider {
   }
 
   async listEvents(params: ListEventsParams): Promise<CalendarEvent[]> {
+    this.logger.debug('listEvents invoked', {
+      correlationId: 'a5464c9a-7fae-48f6-a5c8-6d5e372e16eb',
+      accountId: params.account.id,
+    });
     try {
       const accessToken = await this.auth.getValidAccessToken(params.account);
 
@@ -164,6 +176,10 @@ export class GoogleCalendarProvider implements CalendarProvider {
   }
 
   async getEvent(params: GetEventParams): Promise<CalendarEvent> {
+    this.logger.debug('getEvent invoked', {
+      correlationId: '7091318d-8b30-4a09-8cc5-89f8511b9426',
+      accountId: params.account.id,
+    });
     const accessToken = await this.auth.getValidAccessToken(params.account);
 
     const { eventId, calendarId = 'primary' } = params;
@@ -193,6 +209,10 @@ export class GoogleCalendarProvider implements CalendarProvider {
   }
 
   async createEvent(params: CreateEventParams): Promise<CalendarEvent> {
+    this.logger.debug('createEvent invoked', {
+      correlationId: '6bed82fe-9df0-4d06-870d-549a577766e9',
+      accountId: params.account.id,
+    });
     try {
       const accessToken = await this.auth.getValidAccessToken(params.account);
 
@@ -235,6 +255,10 @@ export class GoogleCalendarProvider implements CalendarProvider {
   }
 
   async updateEvent(params: UpdateEventParams): Promise<CalendarEvent> {
+    this.logger.debug('updateEvent invoked', {
+      correlationId: '1082e4cb-9596-49a9-8904-a33f1c4085c3',
+      accountId: params.account.id,
+    });
     const accessToken = await this.auth.getValidAccessToken(params.account);
 
     const { eventId, calendarId = 'primary', patch } = params;
@@ -266,6 +290,10 @@ export class GoogleCalendarProvider implements CalendarProvider {
   }
 
   async deleteEvent(params: DeleteEventParams): Promise<{ success: true }> {
+    this.logger.debug('deleteEvent invoked', {
+      correlationId: '8d6137dd-1dcb-4cf1-9ff5-3142993a91ea',
+      accountId: params.account.id,
+    });
     try {
       const accessToken = await this.auth.getValidAccessToken(params.account);
 

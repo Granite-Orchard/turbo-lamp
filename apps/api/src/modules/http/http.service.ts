@@ -21,6 +21,7 @@ export class CustomHttpService {
           const backoffTime = Math.pow(2, retryCount) * 1000;
           this.logger.debug(
             `Retry attempt ${retryCount}/${retries} in ${backoffTime}ms — Error: ${error?.message}`,
+            { correlationId: 'd1347eb4-3a7e-4ef3-9cd0-be5d409a4f5e' },
           );
           return timer(backoffTime);
         },

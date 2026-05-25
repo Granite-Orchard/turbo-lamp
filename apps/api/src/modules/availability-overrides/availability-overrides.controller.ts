@@ -34,6 +34,11 @@ export class AvailabilityOverridesController {
     @Req() req: Request & { user: Account },
     @Body() createAvailabilityOverrideDto: CreateAvailabilityOverrideDto,
   ): Promise<AvailabilityOverrideResponseDto> {
+    this.logger.debug('upsert invoked', {
+      correlationId: '8cf01efc-8e0e-429f-b84c-ead156db4a3f',
+      userId: req.user.userId,
+      createAvailabilityOverrideDto,
+    });
     const result = await this.availabilityOverridesService.upsert({
       ...createAvailabilityOverrideDto,
       createdBy: req.user.userId,
@@ -50,6 +55,11 @@ export class AvailabilityOverridesController {
     @Req() req: Request & { user: Account },
     @Body() createAvailabilityOverrideDto: CreateAvailabilityOverrideDto,
   ): Promise<AvailabilityOverrideResponseDto> {
+    this.logger.debug('create invoked', {
+      correlationId: '8cf01efc-8e0e-429f-b84c-ead156db4a3f',
+      userId: req.user.userId,
+      createAvailabilityOverrideDto,
+    });
     const result = await this.availabilityOverridesService.create({
       ...createAvailabilityOverrideDto,
       createdBy: req.user.userId,
@@ -65,6 +75,10 @@ export class AvailabilityOverridesController {
   async findAll(
     @Req() req: Request & { user: Account },
   ): Promise<AvailabilityOverrideResponseDto[]> {
+    this.logger.debug('findAll invoked', {
+      correlationId: '6a125921-bceb-43cf-9e6e-b255fb9df71d',
+      userId: req.user.userId,
+    });
     const results = await this.availabilityOverridesService.findAllBy({
       userId: req.user.userId,
     });
@@ -81,6 +95,11 @@ export class AvailabilityOverridesController {
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
   ): Promise<AvailabilityOverrideResponseDto> {
+    this.logger.debug('findOne invoked', {
+      correlationId: 'e44f0bb1-9c31-4ed2-882f-8ed79c0c3590',
+      id,
+      userId: req.user.userId,
+    });
     const result = await this.availabilityOverridesService.findOneBy({
       id,
       userId: req.user.userId,
@@ -97,6 +116,12 @@ export class AvailabilityOverridesController {
     @Param('id') id: string,
     @Body() updateAvailabilityOverrideDto: UpdateAvailabilityOverrideDto,
   ): Promise<AvailabilityOverrideResponseDto> {
+    this.logger.debug('update invoked', {
+      correlationId: '16b5b9c5-e83e-46df-b2ed-9ffe9f3c1d70',
+      id,
+      updateAvailabilityOverrideDto,
+      userId: req.user.userId,
+    });
     const existing = await this.availabilityOverridesService.findOneBy({
       id,
       userId: req.user.userId,
@@ -119,6 +144,11 @@ export class AvailabilityOverridesController {
     @Req() req: Request & { user: Account },
     @Param('id') id: string,
   ): Promise<AvailabilityOverrideResponseDto> {
+    this.logger.debug('remove invoked', {
+      correlationId: 'b72e899d-f129-4e6d-8f95-7abeb5ffb30f',
+      id,
+      userId: req.user.userId,
+    });
     const existing = await this.availabilityOverridesService.findOneBy({
       id,
       userId: req.user.userId,

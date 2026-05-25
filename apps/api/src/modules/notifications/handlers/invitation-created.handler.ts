@@ -1,4 +1,4 @@
-import { Inject } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
 import {
   EnvironmentVariables,
@@ -13,6 +13,7 @@ import { ConfigService } from '@nestjs/config';
 
 @EventsHandler(InvitationCreatedEvent)
 export class InvitationCreatedHandler implements IEventHandler<InvitationCreatedEvent> {
+  private readonly logger: Logger = new Logger(InvitationCreatedHandler.name);
   constructor(
     @Inject(ConfigService)
     private readonly configService: ConfigService,
@@ -23,6 +24,10 @@ export class InvitationCreatedHandler implements IEventHandler<InvitationCreated
   ) {}
 
   async handle(event: InvitationCreatedEvent) {
+    this.logger.debug('handle invoked', {
+      correlationId: 'c5ea5bf0-3b79-4ba2-814a-0b31608ec7cc',
+      event,
+    });
     const { entity } = event;
     const frontendUrl = this.configService.get<string>(
       EnvironmentVariables.FRONTEND_URL,

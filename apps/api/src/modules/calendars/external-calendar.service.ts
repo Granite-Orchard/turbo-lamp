@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Account } from '../accounts/entities/account.entity';
 import { GoogleCalendarProvider } from './providers/google-calendar.provider';
 
@@ -120,6 +120,7 @@ export interface CalendarProvider {
 
 @Injectable()
 export class ExternalCalendarService {
+  private readonly logger: Logger = new Logger(ExternalCalendarService.name);
   private providers: Record<CalendarProviderType, CalendarProvider>;
 
   constructor(private readonly google: GoogleCalendarProvider) {
@@ -129,6 +130,10 @@ export class ExternalCalendarService {
   }
 
   private resolve(provider: CalendarProviderType): CalendarProvider {
+    this.logger.debug('resolve invoked', {
+      correlationId: '68bd107d-830a-491d-a7b5-1165e0d15e5b',
+      provider,
+    });
     const instance = this.providers[provider];
     if (!instance) throw new Error(`Unsupported provider: ${provider}`);
     return instance;

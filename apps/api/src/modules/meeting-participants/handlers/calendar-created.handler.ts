@@ -14,6 +14,10 @@ export class CalendarCreatedHandler implements IEventHandler<CalendarCreatedEven
   ) {}
 
   async handle(event: CalendarCreatedEvent) {
+    this.logger.debug('handle invoked', {
+      correlationId: 'f769126a-c232-4cac-9986-622bfff97a5e',
+      event,
+    });
     const { entity } = event;
     const participations = await this.meetingParticipantsService.findAllBy({
       userId: entity.userId,

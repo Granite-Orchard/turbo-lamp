@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import type { Request } from 'express';
@@ -15,6 +15,7 @@ import {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
+  private readonly logger: Logger = new Logger(JwtStrategy.name);
   constructor(
     @Inject(ConfigService)
     private readonly configService: ConfigService,
@@ -42,6 +43,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: TokenSchema): Promise<Account | null> {
+    this.logger.debug('validate invoked', {
+      correlationId: 'ac50730a-3e20-4838-bec9-6be0c0831249',
+      payload,
+    });
     const account = await this.accountService.findOneBy(
       {
         providerId: payload.provider,

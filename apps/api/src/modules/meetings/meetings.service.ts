@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { EventBus } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -23,6 +24,7 @@ const ALLOWED_MEETING_STATUS_TRANSITIONS: Record<
 
 @Injectable()
 export class MeetingsService {
+  private readonly logger: Logger = new Logger(MeetingsService.name);
   constructor(
     @InjectRepository(Meeting)
     private readonly repository: Repository<Meeting>,
@@ -33,6 +35,11 @@ export class MeetingsService {
     current: MeetingStatus,
     next: MeetingStatus,
   ): void {
+    this.logger.debug('validateStatusTransition invoked', {
+      correlationId: '3e6c325d-40d3-4b14-9815-83c9d18cf48f',
+      current,
+      next,
+    });
     const allowed = ALLOWED_MEETING_STATUS_TRANSITIONS[current] || [];
     if (!allowed.includes(next)) {
       throw new BadRequestException({
@@ -48,6 +55,11 @@ export class MeetingsService {
   }
 
   private validateMeetingTimes(start: Date, end: Date): void {
+    this.logger.debug('validateMeetingTimes invoked', {
+      correlationId: '8f110bf9-732e-407c-994f-cef614ce618a',
+      start,
+      end,
+    });
     if (end <= start) {
       throw new BadRequestException({
         message: 'Meeting end must be after start',
@@ -58,6 +70,9 @@ export class MeetingsService {
   }
 
   async findAll() {
+    this.logger.debug('findAll invoked', {
+      correlationId: '22191db0-66da-40dc-a897-40bc1483bbaf',
+    });
     return await this.repository.find();
   }
 
@@ -65,6 +80,11 @@ export class MeetingsService {
     where: FindOptionsWhere<Meeting> | FindOptionsWhere<Meeting>[],
     relations?: FindOptionsRelations<Meeting>,
   ) {
+    this.logger.debug('findAllBy invoked', {
+      correlationId: '516bf46b-60f8-4792-8833-6576479f429b',
+      where,
+      relations,
+    });
     const defaultRelations: FindOptionsRelations<Meeting> = {
       attendees: true,
       meetingGroup: true,
@@ -79,6 +99,11 @@ export class MeetingsService {
   }
 
   async findOne(id: string, relations?: FindOptionsRelations<Meeting>) {
+    this.logger.debug('findOne invoked', {
+      correlationId: 'b0edad41-e88a-4fcd-9140-f7ed37cbf819',
+      id,
+      relations,
+    });
     return await this.findOneBy({ id }, relations);
   }
 
@@ -86,6 +111,11 @@ export class MeetingsService {
     where: FindOptionsWhere<Meeting> | FindOptionsWhere<Meeting>[],
     relations?: FindOptionsRelations<Meeting>,
   ) {
+    this.logger.debug('findOneBy invoked', {
+      correlationId: '39b74f73-aab5-47db-a25f-7558daef36a1',
+      where,
+      relations,
+    });
     return await this.repository.findOne({
       where,
       relations,
@@ -93,6 +123,10 @@ export class MeetingsService {
   }
 
   async create(createMeetingDto: CreateMeetingDto) {
+    this.logger.debug('create invoked', {
+      correlationId: '5909e06a-b7c2-4598-9484-dfb94eff1d3a',
+      createMeetingDto,
+    });
     this.validateMeetingTimes(createMeetingDto.start, createMeetingDto.end);
 
     const status = createMeetingDto.status as MeetingStatus | undefined;
@@ -112,6 +146,11 @@ export class MeetingsService {
   }
 
   async update(id: string, updateMeetingDto: UpdateMeetingDto) {
+    this.logger.debug('update invoked', {
+      correlationId: '48ab4177-7e18-463a-9638-7e2b250982af',
+      id,
+      updateMeetingDto,
+    });
     const existing = await this.findOne(id);
     if (!existing) {
       throw new NotFoundException({
@@ -138,6 +177,10 @@ export class MeetingsService {
   }
 
   async remove(id: string) {
+    this.logger.debug('remove invoked', {
+      correlationId: '35605fc2-ceec-492b-867b-eece4ef67eb8',
+      id,
+    });
     const meeting = await this.findOne(id, {
       meetingGroup: { calendar: { account: true } },
     });
