@@ -25,11 +25,6 @@ export class MeetingParticipantAuthorizedHandler implements IEventHandler<Meetin
     });
     const { entity } = event;
 
-    const hasValidContext = await this.validateUserContext(entity.userId!);
-    if (!hasValidContext) {
-      return;
-    }
-
     const meetingGroup = await this.meetingGroupsService.findOneBy({
       id: entity.meetingGroupId,
     });
@@ -37,6 +32,11 @@ export class MeetingParticipantAuthorizedHandler implements IEventHandler<Meetin
     if (!meetingGroup) return;
 
     if (meetingGroup.authorId === entity.userId) return;
+
+    const hasValidContext = await this.validateUserContext(entity.userId!);
+    if (!hasValidContext) {
+      return;
+    }
 
     await this.meetingSlotsService.calculate(
       entity.meetingGroupId,
