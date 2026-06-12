@@ -1,68 +1,88 @@
-import { Card } from "@/components/ui/card";
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
 
 const steps = [
   {
-    step: "01",
-    title: "Connect your calendars",
+    title: "Create a meeting",
     description:
-      "Link your Google Calendar, Outlook, or any other calendar service in just a few clicks.",
+      "Connect your calendar and setup the duration, location, and any specific scheduling rules.",
+    image: "/slider/slide-1 image.svg",
   },
   {
-    step: "02",
     title: "Add participants",
     description:
-      "Enter the email addresses of everyone who needs to attend. Syncal handles the rest.",
+      "Invite attendees directly via email or share a custom meeting link.",
+    image: "/slider/slide-2 image.svg",
   },
   {
-    step: "03",
-    title: "AI finds the perfect time",
+    title: "They share availability",
     description:
-      "Our AI analyzes all calendars and suggests optimal times based on availability and preferences.",
+      "Participants can connect their calendar or simply provide preferences.",
+    image: "/slider/slide-3 image.svg",
   },
   {
-    step: "04",
-    title: "Meeting scheduled",
+    title: "Veen finds the perfect time",
     description:
-      "With one click, the meeting is booked and everyone receives calendar invites automatically.",
+      "We analyze timezones, schedule gaps, and preferred working hours to pinpoint the ideal overlap for everyone.",
+    image: "/slider/slide-4 image.svg",
   },
 ];
 
 export function HowItWorks() {
+  const [activeStep, setActiveStep] = useState(0);
+
   return (
-    <section
-      id="how-it-works"
-      className="border-y border-border/50 bg-secondary/20 py-20 md:py-32"
-    >
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="mb-16 text-center">
-          <h2 className="text-balance text-3xl font-bold text-foreground md:text-4xl lg:text-5xl">
-            How Syncal works
+    <section id="how-it-works" className="bg-white py-20 md:py-28">
+      <div className="mx-auto max-w-[1200px] px-6">
+        <div className="flex flex-col items-center gap-6 text-center mb-16">
+          <h2
+            className="text-[clamp(2rem,4vw,3.75rem)] text-black"
+            style={{ fontFamily: "var(--font-trocchi, serif)" }}
+          >
+            How veen works
           </h2>
-          <p className="mt-4 text-pretty text-lg text-muted-foreground">
-            Four simple steps to schedule any meeting with ease.
+          <p className="text-[1.25rem] text-black max-w-[398px]">
+            Four simple steps to schedule with internal and external teams.
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {steps.map((step, index) => (
-            <Card
-              key={step.step}
-              className="relative border-border/50 bg-card/50 p-6"
-            >
-              <div className="mb-4 text-5xl font-bold text-accent/20">
-                {step.step}
-              </div>
-              <h3 className="mb-2 text-lg font-semibold text-foreground">
-                {step.title}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {step.description}
-              </p>
-              {index < steps.length - 1 && (
-                <div className="absolute right-0 top-1/2 hidden h-px w-6 -translate-y-1/2 translate-x-full bg-border lg:block" />
-              )}
-            </Card>
-          ))}
+        <div className="flex flex-col lg:flex-row gap-16 items-center justify-center">
+          {/* Steps list */}
+          <div className="flex flex-col gap-10 w-full max-w-[480px]">
+            {steps.map((step, index) => (
+              <button
+                key={index}
+                onClick={() => setActiveStep(index)}
+                className={`flex flex-col gap-3 items-start text-left p-3 rounded-lg transition-opacity cursor-pointer ${
+                  index === activeStep ? "opacity-100" : "opacity-20 hover:opacity-40"
+                }`}
+              >
+                <h3
+                  className="text-[2rem] text-black"
+                  style={{ fontFamily: "var(--font-trocchi, serif)" }}
+                >
+                  {step.title}
+                </h3>
+                <p className="text-[1.25rem] text-black max-w-[398px]">
+                  {step.description}
+                </p>
+              </button>
+            ))}
+          </div>
+
+          {/* Slide image */}
+          <div className="w-full max-w-[662px] shrink-0">
+            <Image
+              key={activeStep}
+              src={steps[activeStep].image}
+              alt={steps[activeStep].title}
+              width={662}
+              height={500}
+              className="w-full h-auto transition-opacity duration-300"
+            />
+          </div>
         </div>
       </div>
     </section>
