@@ -129,10 +129,7 @@ export class MeetingGroupsController {
       userId: req.user.userId,
     });
     const results = await this.meetingGroupsService.findAllBy(
-      [
-        { authorId: Equal(req.user.userId) },
-        { participants: { userId: Equal(req.user.userId) } },
-      ],
+      { authorId: Equal(req.user.userId) },
       {
         participants: { user: true },
       },
@@ -229,7 +226,7 @@ export class MeetingGroupsController {
       userId: req.user.userId,
     });
     const result = await this.meetingGroupsService.findOneBy(
-      { id, participants: { userId: Equal(req.user.userId) } },
+      { id },
       {
         participants: { user: true },
       },

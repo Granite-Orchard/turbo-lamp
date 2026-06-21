@@ -1,4 +1,6 @@
 "use client";
+import Image from "next/image";
+
 import { Button } from "@/components/ui/button";
 import { IconBrandGoogle } from "@tabler/icons-react";
 import { Calendar } from "lucide-react";
@@ -22,11 +24,14 @@ export default function Page() {
 
       {/* Left side - Benefits */}
       <div className="relative hidden w-1/2 flex-col justify-between p-12 lg:flex">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent">
-            <Calendar className="h-5 w-5 text-accent-foreground" />
-          </div>
-          <span className="text-xl font-semibold text-foreground">Veen</span>
+        <Link href="/" className="mb-6 flex items-center gap-2">
+          <Image
+            src="/veen-logo.svg"
+            alt="Veen logo"
+            width={100}
+            height={29}
+            className="dark:invert"
+          />
         </Link>
 
         <div className="max-w-md">

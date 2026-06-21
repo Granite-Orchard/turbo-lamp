@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import {
   CalendarClock,
   ChevronUp,
@@ -122,15 +124,15 @@ export function AppSidebar({ actions }: { actions: Actions }) {
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-semibold text-sm">
-            M
-          </div>
-          <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-            <span className="font-semibold text-sm">MeetSync</span>
-            <span className="text-xs text-muted-foreground">
-              Group Scheduling
-            </span>
-          </div>
+          <Link href="/" className="mb-6 flex items-center gap-2">
+            <Image
+              src="/veen-logo.svg"
+              alt="Veen logo"
+              width={100}
+              height={29}
+              className="dark:invert"
+            />
+          </Link>
         </div>
       </SidebarHeader>
 

@@ -66,7 +66,6 @@ export class MeetingsController {
     const result = await this.meetingsService.findOneBy(
       {
         id,
-        attendees: { userId: Equal(req.user.userId) },
       },
       {
         attendees: true,
