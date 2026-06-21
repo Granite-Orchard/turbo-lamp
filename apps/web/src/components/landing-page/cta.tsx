@@ -15,7 +15,7 @@ export function CTA() {
               Ready to eliminate scheduling friction?
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-lg text-muted-foreground">
-              Join 50,000+ teams who have reclaimed their time with Syncal.
+              Join 50,000+ teams who have reclaimed their time with Veen.
               Start for free, no credit card required.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">

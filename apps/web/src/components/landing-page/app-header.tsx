@@ -115,7 +115,7 @@ export function AppHeader() {
                 <Calendar className="h-4 w-4 text-accent-foreground" />
               </div>
               <span className="text-lg font-semibold text-foreground">
-                Syncal
+                Veen
               </span>
             </div>
             <nav className="flex flex-col gap-1">

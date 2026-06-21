@@ -6,13 +6,6 @@ import {
 import { serverRequest } from "./server";
 
 export const meetingParticipantsApi = {
-  list: async () => {
-    return await serverRequest<MeetingParticipant[]>(
-      `/meeting-participants`,
-      "GET",
-    );
-  },
-
   get: async (id: string) =>
     await serverRequest<MeetingParticipant>(
       `/meeting-participants/${id}`,

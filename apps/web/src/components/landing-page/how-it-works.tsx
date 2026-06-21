@@ -35,45 +35,35 @@ export function HowItWorks() {
 
   return (
     <section id="how-it-works" className="bg-white py-20 md:py-28">
-      <div className="mx-auto max-w-[1200px] px-6">
+      <div className="mx-auto max-w-300 px-6">
         <div className="flex flex-col items-center gap-6 text-center mb-16">
-          <h2
-            className="text-[clamp(2rem,4vw,3.75rem)] text-black"
-            style={{ fontFamily: "var(--font-trocchi, serif)" }}
-          >
-            How veen works
-          </h2>
-          <p className="text-[1.25rem] text-black max-w-[398px]">
+          <h2 className="text-7xl font-trocchi">How veen works</h2>
+          <p className="text-xl max-w-99.5">
             Four simple steps to schedule with internal and external teams.
           </p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-16 items-center justify-center">
           {/* Steps list */}
-          <div className="flex flex-col gap-10 w-full max-w-[480px]">
+          <div className="flex flex-col gap-10 w-full max-w-120">
             {steps.map((step, index) => (
               <button
                 key={index}
                 onClick={() => setActiveStep(index)}
                 className={`flex flex-col gap-3 items-start text-left p-3 rounded-lg transition-opacity cursor-pointer ${
-                  index === activeStep ? "opacity-100" : "opacity-20 hover:opacity-40"
+                  index === activeStep
+                    ? "opacity-100"
+                    : "opacity-20 hover:opacity-40"
                 }`}
               >
-                <h3
-                  className="text-[2rem] text-black"
-                  style={{ fontFamily: "var(--font-trocchi, serif)" }}
-                >
-                  {step.title}
-                </h3>
-                <p className="text-[1.25rem] text-black max-w-[398px]">
-                  {step.description}
-                </p>
+                <h3 className="text-4xl font-trocchi">{step.title}</h3>
+                <p className="text-xl max-w-99.5">{step.description}</p>
               </button>
             ))}
           </div>
 
           {/* Slide image */}
-          <div className="w-full max-w-[662px] shrink-0">
+          <div className="w-full max-w-165.5 shrink-0">
             <Image
               key={activeStep}
               src={steps[activeStep].image}

@@ -74,7 +74,7 @@ export default function LoginClient({ actions }: { actions: Actions }) {
                 <Calendar className="h-5 w-5 text-accent-foreground" />
               </div>
               <span className="text-xl font-semibold text-foreground">
-                Syncal
+                Veen
               </span>
             </Link>
             <h1 className="text-2xl font-semibold text-foreground">

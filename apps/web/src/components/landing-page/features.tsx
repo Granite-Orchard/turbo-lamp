@@ -30,45 +30,41 @@ const features = [
 export function Features() {
   return (
     <section id="features" className="bg-white py-20 md:py-28">
-      <div className="mx-auto max-w-[1200px] px-6">
+      <div className="mx-auto max-w-300 px-6">
         <div className="flex flex-col items-center gap-6 text-center mb-16">
-          <h2
-            className="text-[clamp(2rem,4vw,3.75rem)] text-black max-w-[1003px]"
-            style={{ fontFamily: "var(--font-trocchi, serif)" }}
-          >
+          <h2 className="text-7xl max-w-250.75 font-trocchi">
             Everything you need for effortless scheduling
           </h2>
-          <p className="text-[1.25rem] text-black max-w-[452px]">
-            Features that eliminate scheduling friction and save hours every week.
+          <p className="text-xl max-w-113">
+            Features that eliminate scheduling friction and save hours every
+            week.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-9 md:[grid-template-columns:35%_1fr]">
-
+        <div className="grid grid-cols-1 gap-9 md:grid-cols-[35%_1fr]">
           {features.map((feature) =>
             feature.wide ? (
               <div
                 key={feature.title}
-                className="col-span-1 md:col-span-2 relative overflow-hidden flex flex-col md:flex-row h-[500px]"
+                className="col-span-1 md:col-span-2 relative overflow-hidden flex flex-col md:flex-row h-125"
               >
                 {/* Background */}
-                <Image src={feature.bg} alt="" fill className="object-cover" aria-hidden />
+                <Image
+                  src={feature.bg}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  aria-hidden
+                />
 
                 {/* Text — full width on mobile, 50% on desktop */}
                 <div className="relative z-10 w-full md:w-1/2 flex flex-col justify-end px-8 md:px-10 pt-10 pb-10 md:pb-20 gap-3">
-                  <h3
-                    className="text-[1.6rem] md:text-[1.8rem] text-black"
-                    style={{ fontFamily: "var(--font-trocchi, serif)" }}
-                  >
-                    {feature.title}
-                  </h3>
-                  <p className="text-[1rem] md:text-[1.1rem] text-black leading-[1.4]">
-                    {feature.description}
-                  </p>
+                  <h3 className="text-3xl font-trocchi">{feature.title}</h3>
+                  <p className="text-md">{feature.description}</p>
                 </div>
 
                 {/* Illustration — below text on mobile, right half on desktop */}
-                <div className="relative z-10 w-full md:w-1/2 h-[260px] md:h-full">
+                <div className="relative z-10 w-full md:w-1/2 h-65 md:h-full">
                   <Image
                     src={feature.illustration}
                     alt=""
@@ -81,10 +77,16 @@ export function Features() {
             ) : (
               <div
                 key={feature.title}
-                className="col-span-1 relative overflow-hidden h-[560px]"
+                className="col-span-1 relative overflow-hidden h-140"
               >
                 {/* Background */}
-                <Image src={feature.bg} alt="" fill className="object-cover" aria-hidden />
+                <Image
+                  src={feature.bg}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  aria-hidden
+                />
 
                 {/* Illustration — full width, no padding */}
                 <Image
@@ -98,18 +100,13 @@ export function Features() {
 
                 {/* Text — always pinned to bottom-20 */}
                 <div className="absolute bottom-20 left-0 right-0 z-10 flex flex-col gap-3 px-6">
-                  <h3
-                    className="text-[1.8rem] text-black"
-                    style={{ fontFamily: "var(--font-trocchi, serif)" }}
-                  >
-                    {feature.title}
-                  </h3>
-                  <p className="text-[1.1rem] text-black leading-[1.4] min-h-[3.1rem]">
+                  <h3 className="text-3xl font-trocchi">{feature.title}</h3>
+                  <p className="text-lg min-h-[3.1rem]">
                     {feature.description}
                   </p>
                 </div>
               </div>
-            )
+            ),
           )}
         </div>
       </div>

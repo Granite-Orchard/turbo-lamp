@@ -56,7 +56,7 @@ const plans = [
 
 const faqs = [
   {
-    question: "Can I try Syncal before committing?",
+    question: "Can I try Veen before committing?",
     answer:
       "Yes! All paid plans come with a 14-day free trial. No credit card required to start.",
   },

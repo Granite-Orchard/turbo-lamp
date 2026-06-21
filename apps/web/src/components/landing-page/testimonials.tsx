@@ -5,7 +5,7 @@ import { Star } from "lucide-react";
 const testimonials = [
   {
     quote:
-      "Syncal has completely transformed how our team schedules meetings. What used to take 20+ emails now happens in seconds.",
+      "Veen has completely transformed how our team schedules meetings. What used to take 20+ emails now happens in seconds.",
     author: "Sarah Chen",
     role: "Product Lead at Vercel",
     initials: "SC",
@@ -35,7 +35,7 @@ export function Testimonials() {
             Loved by teams everywhere
           </h2>
           <p className="mt-4 text-pretty text-lg text-muted-foreground">
-            See why thousands of teams trust Syncal for their scheduling needs.
+            See why thousands of teams trust Veen for their scheduling needs.
           </p>
         </div>
 

@@ -26,7 +26,7 @@ export default function Page() {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent">
             <Calendar className="h-5 w-5 text-accent-foreground" />
           </div>
-          <span className="text-xl font-semibold text-foreground">Syncal</span>
+          <span className="text-xl font-semibold text-foreground">Veen</span>
         </Link>
 
         <div className="max-w-md">
@@ -54,7 +54,7 @@ export default function Page() {
                   <Calendar className="h-5 w-5 text-accent-foreground" />
                 </div>
                 <span className="text-xl font-semibold text-foreground">
-                  Syncal
+                  Veen
                 </span>
               </Link>
             </div>

@@ -17,7 +17,7 @@ export default function DashboardClient({
 }: {
   initialData: InitialData;
 }) {
-  const { meetingGroups, meetings, participations } = initialData;
+  const { meetingGroups, meetings } = initialData;
 
   const now = new Date();
 
@@ -25,10 +25,6 @@ export default function DashboardClient({
 
   const upcomingMeetings = meetings.filter(
     (m) => new Date(m.start) > now,
-  ).length;
-
-  const pendingInvitations = participations.filter(
-    (p) => p.invitationState === "pending",
   ).length;
 
   const scheduledMeetings = meetingGroups.filter(
@@ -44,11 +40,6 @@ export default function DashboardClient({
           title="Upcoming Meetings"
           value={upcomingMeetings}
           icon={Calendar}
-        />
-        <MetricCard
-          title="Pending Invitations"
-          value={pendingInvitations}
-          icon={Clock}
         />
         <MetricCard
           title="Scheduled"

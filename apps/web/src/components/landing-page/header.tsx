@@ -5,12 +5,12 @@ import Link from "next/link";
 
 export function Header() {
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-5 pointer-events-none">
-      <div className="pointer-events-auto flex items-center justify-between bg-white border border-black/20 rounded-full px-8 py-3 w-full max-w-[609px] shadow-sm">
-        <Image src="/veen-logo.svg" alt="Veen" width={100} height={29} priority />
+    <header className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-5">
+      <div className="flex items-center justify-between border rounded-full px-8 py-3 w-full max-w-152.25 shadow-sm bg-white">
+        <Image src="/veen-logo.svg" alt="Veen logo" width={100} height={29} />
         <Link
           href="#waitlist"
-          className="bg-[#ffbc08] text-black font-medium text-sm px-5 py-2.5 rounded-lg border border-white/20 hover:bg-[#f0b000] transition-colors whitespace-nowrap"
+          className="bg-brand-yellow font-medium px-5 py-2.5 rounded-lg border hover:bg-brand-yellow/80"
         >
           Join the waitlist
         </Link>
