@@ -50,15 +50,20 @@ export default function AvailabilityClient({
   ) => {
     const foundAvailability = availabilities.find((a) => a.id === id);
     if (!foundAvailability) return;
+    const previous = availabilities;
     const updatedCopy: Availability = {
       ...foundAvailability,
       [field]: value,
     };
-    await actions.updateAvailabilityAction(id, updatedCopy);
     setAvailabilities(
       availabilities.map((a) => (a.id === id ? updatedCopy : a)),
     );
-    router.refresh();
+    try {
+      await actions.updateAvailabilityAction(id, updatedCopy);
+      router.refresh();
+    } catch {
+      setAvailabilities(previous);
+    }
   };
 
   return (

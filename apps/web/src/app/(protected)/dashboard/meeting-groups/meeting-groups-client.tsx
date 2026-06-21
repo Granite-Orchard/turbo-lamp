@@ -27,7 +27,8 @@ import {
   Search,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { CreateGroupDialog } from "./create-meeting-group-dialog";
 
 type Actions = {
@@ -68,15 +69,7 @@ export default function MeetingGroupsClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [meetingGroups, setMeetingGroups] =
     useState<MeetingGroup[]>(initialMeetingGroups);
-  const [refreshKey, setRefreshKey] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  useEffect(() => {
-    async function process() {
-      setMeetingGroups(initialData.meetingGroups);
-    }
-    process();
-  }, [initialData.meetingGroups, refreshKey]);
 
   const filteredGroups = searchQuery
     ? meetingGroups.filter(
@@ -106,10 +99,6 @@ export default function MeetingGroupsClient({
           createMeetingGroupParticipantsAction={
             actions.createMeetingGroupParticipantsAction
           }
-          onSuccessAction={() => {
-            setRefreshKey((k) => k + 1);
-            router.refresh();
-          }}
         />
       </div>
 
@@ -129,10 +118,6 @@ export default function MeetingGroupsClient({
               createMeetingGroupParticipantsAction={
                 actions.createMeetingGroupParticipantsAction
               }
-              onSuccessAction={() => {
-                setRefreshKey((k) => k + 1);
-                router.refresh();
-              }}
             />
           </CardContent>
         </Card>
@@ -180,11 +165,14 @@ export default function MeetingGroupsClient({
                       <DropdownMenuItem
                         className="text-destructive"
                         onSelect={async () => {
-                          await actions.deleteMeetingGroupAction(group.id);
-                          setMeetingGroups((prev) =>
-                            prev.filter((g) => g.id !== group.id),
-                          );
-                          router.refresh();
+                          try {
+                            await actions.deleteMeetingGroupAction(group.id);
+                            setMeetingGroups((prev) =>
+                              prev.filter((g) => g.id !== group.id),
+                            );
+                          } catch {
+                            toast.error("Failed to delete meeting group");
+                          }
                         }}
                       >
                         Delete group

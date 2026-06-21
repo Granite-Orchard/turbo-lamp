@@ -40,9 +40,14 @@ export function CalendarEntry({
   const [checked, setChecked] = useState<boolean>(calendar.enabled);
 
   const handleOnCheckedChange = async (id: string) => {
+    const previous = checked;
     const newChecked = !checked;
     setChecked(newChecked);
-    return await toggleCalendarEnabledAction(id, { enabled: newChecked });
+    try {
+      return await toggleCalendarEnabledAction(id, { enabled: newChecked });
+    } catch {
+      setChecked(previous);
+    }
   };
   return (
     <div className="flex items-center justify-between rounded-lg border p-3">

@@ -801,27 +801,7 @@ export default function OnboardingClient({ initialData, actions }: Props) {
     () => overrides ?? [],
   );
 
-  // Keep local state in sync if server props change (e.g. after revalidation).
-  useEffect(() => {
-    async function process() {
-      setSelectedCalendarIds(
-        new Set(calendars?.map((c) => c.externalId) ?? []),
-      );
-    }
-    process();
-  }, [calendars]);
 
-  useEffect(() => {
-    async function process() {
-      if (availabilities?.length) {
-        setLocalAvailabilities(availabilities);
-      } else {
-        // Re-seed defaults if props change and there are still no saved availabilities.
-        setLocalAvailabilities(createDefaultAvailabilities());
-      }
-    }
-    process();
-  }, [availabilities, userId]);
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 

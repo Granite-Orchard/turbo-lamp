@@ -25,7 +25,7 @@ export async function updateMeetingGroupAction(
   data: Partial<MeetingGroup>,
 ): Promise<MeetingGroup> {
   const result = await meetingGroupsApi.update(id, data);
-  revalidatePath("/dashboard/meeting-groups");
+  revalidatePath("/dashboard/meeting-groups", "layout");
   return result;
 }
 

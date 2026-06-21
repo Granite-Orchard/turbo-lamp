@@ -210,7 +210,6 @@ export function MeetingGroupDetail({
 
       toast.success("Meeting scheduled successfully");
       setConfirmOpen(false);
-      router.refresh();
       router.push(`/dashboard/meetings/${meeting.id}`);
     } catch (err) {
       toast.error(getErrorMessage(err));

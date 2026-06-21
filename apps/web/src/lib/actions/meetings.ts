@@ -15,18 +15,18 @@ export async function listMeetingsAction(): Promise<Meeting[]> {
 
 export async function createMeetingAction(data: Partial<Meeting>) {
   const result = await meetingsApi.create(data);
-  revalidatePath("/dashboard/meetings");
+  revalidatePath("/dashboard/meetings", "layout");
   return result;
 }
 
 export async function updateMeetingAction(id: string, data: Partial<Meeting>) {
   const result = await meetingsApi.update(id, data);
-  revalidatePath("/dashboard/meetings");
+  revalidatePath("/dashboard/meetings", "layout");
   return result;
 }
 
 export async function deleteMeetingAction(id: string) {
   await meetingsApi.delete(id);
-  revalidatePath("/dashboard/meetings");
+  revalidatePath("/dashboard/meetings", "layout");
   redirect("/dashboard/meetings");
 }

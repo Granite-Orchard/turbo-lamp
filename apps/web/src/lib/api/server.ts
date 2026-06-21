@@ -34,6 +34,7 @@ export async function serverRequest<T>(
     headers: headersCopy,
     body: body ? JSON.stringify(body) : undefined,
     credentials: "include",
+    cache: "no-store",
   });
 
   const payload = await parseJsonSafe(res);

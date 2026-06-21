@@ -10,7 +10,10 @@ export const availabilitiesApi = {
     await serverRequest<Availability>(`/availabilities/${id}`, "GET"),
 
   list: async () =>
-    await serverRequest<Availability[]>(`/availabilities`, "GET"),
+    await serverRequest<Availability[]>(
+      `/availabilities?_rid=${crypto.randomUUID()}`,
+      "GET",
+    ),
 
   upsert: async (data: Partial<Availability>) => {
     const payload = createAvailabilitySchema.parse(data);

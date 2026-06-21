@@ -43,9 +43,15 @@ export class MeetingsController {
       correlationId: 'e37cfacd-85e9-40c3-bddc-8e34af556280',
       userId: req.user.userId,
     });
-    const results = await this.meetingsService.findAllBy({
-      attendees: { userId: Equal(req.user.userId) },
-    });
+    const results = await this.meetingsService.findAllBy(
+      {
+        attendees: { userId: Equal(req.user.userId) },
+      },
+      {
+        attendees: true,
+        meetingGroup: true,
+      },
+    );
     return results.map((result) =>
       plainToInstance(MeetingResponseDto, result, {
         excludeExtraneousValues: true,
@@ -69,6 +75,7 @@ export class MeetingsController {
       },
       {
         attendees: true,
+        meetingGroup: true,
       },
     );
     if (!result) {
