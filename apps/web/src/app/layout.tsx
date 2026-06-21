@@ -41,7 +41,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${trocchi.variable} h-full antialiased`}
+      className={`${trocchi.variable} h-full antialiased font-trocchi`}
       suppressHydrationWarning
     >
       <body className="min-h-screen">

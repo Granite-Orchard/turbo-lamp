@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { useRouter } from "next/navigation";
 
 import { Login } from "@/lib/types";
@@ -70,12 +72,12 @@ export default function LoginClient({ actions }: { actions: Actions }) {
         <div className="rounded-2xl border border-border/50 bg-card/50 p-8 backdrop-blur-sm">
           <div className="mb-8 flex flex-col items-center text-center">
             <Link href="/" className="mb-6 flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent">
-                <Calendar className="h-5 w-5 text-accent-foreground" />
-              </div>
-              <span className="text-xl font-semibold text-foreground">
-                Veen
-              </span>
+              <Image
+                src="/veen-logo.svg"
+                alt="Veen logo"
+                width={100}
+                height={29}
+              />
             </Link>
             <h1 className="text-2xl font-semibold text-foreground">
               Welcome back
