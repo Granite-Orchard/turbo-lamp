@@ -187,7 +187,7 @@ export class MeetingsService {
     if (!meeting) {
       throw new NotFoundException();
     }
-    const result = await this.repository.softDelete(meeting.id);
+    const result = await this.repository.delete(meeting.id);
     if (result.affected) {
       this.eventBus.publish(new MeetingDeletedEvent(meeting));
     }

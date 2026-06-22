@@ -125,6 +125,6 @@ export class CalendarsService {
     if (!calendar) {
       throw new NotFoundException();
     }
-    return await this.repository.softDelete(calendar.id);
+    return await this.repository.delete(calendar.id);
   }
 }

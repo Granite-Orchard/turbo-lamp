@@ -81,7 +81,7 @@ export class AccountsService {
     if (!account) {
       throw new NotFoundException();
     }
-    await this.repository.softDelete(account.id);
+    await this.repository.delete(account.id);
     return account;
   }
 }

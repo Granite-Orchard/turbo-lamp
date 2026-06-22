@@ -47,7 +47,7 @@ describe('MeetingGroupsService', () => {
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
-    softDelete: jest.fn(),
+    delete: jest.fn(),
   };
 
   const mockVerificationsService = {
@@ -329,12 +329,12 @@ describe('MeetingGroupsService', () => {
   describe('remove', () => {
     it('should soft delete a meeting group', async () => {
       mockRepository.findOne.mockResolvedValue(mockMeetingGroup);
-      mockRepository.softDelete.mockResolvedValue({ affected: 1 });
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
 
       const result = await service.remove(mockMeetingGroup.id);
 
       expect(mockRepository.findOne).toHaveBeenCalled();
-      expect(mockRepository.softDelete).toHaveBeenCalledWith(
+      expect(mockRepository.delete).toHaveBeenCalledWith(
         mockMeetingGroup.id,
       );
       expect(result).toEqual({ affected: 1 });

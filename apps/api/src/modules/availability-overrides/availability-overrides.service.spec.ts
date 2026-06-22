@@ -33,7 +33,7 @@ describe('AvailabilityOverridesService', () => {
     save: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
-    softDelete: jest.fn(),
+    delete: jest.fn(),
     upsert: jest.fn(),
   };
 
@@ -184,12 +184,12 @@ describe('AvailabilityOverridesService', () => {
   describe('remove', () => {
     it('should soft delete an override', async () => {
       mockRepository.findOne.mockResolvedValue(mockOverride);
-      mockRepository.softDelete.mockResolvedValue({ affected: 1 });
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
 
       const result = await service.remove(mockOverride.id);
 
       expect(mockRepository.findOne).toHaveBeenCalled();
-      expect(mockRepository.softDelete).toHaveBeenCalledWith(mockOverride.id);
+      expect(mockRepository.delete).toHaveBeenCalledWith(mockOverride.id);
       expect(result).toEqual({ affected: 1 });
     });
 

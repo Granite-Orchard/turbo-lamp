@@ -41,7 +41,7 @@ describe('AccountsService', () => {
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
-    softDelete: jest.fn(),
+    delete: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -209,12 +209,12 @@ describe('AccountsService', () => {
   describe('remove', () => {
     it('should soft delete an account', async () => {
       mockRepository.findOne.mockResolvedValue(mockAccount);
-      mockRepository.softDelete.mockResolvedValue({ affected: 1 });
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
 
       const result = await service.remove(mockAccount.id);
 
       expect(mockRepository.findOne).toHaveBeenCalled();
-      expect(mockRepository.softDelete).toHaveBeenCalledWith(mockAccount.id);
+      expect(mockRepository.delete).toHaveBeenCalledWith(mockAccount.id);
       expect(result).toEqual(mockAccount);
     });
 

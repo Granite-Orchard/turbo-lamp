@@ -91,6 +91,6 @@ export class SessionsService {
     if (!session) {
       throw new NotFoundException();
     }
-    return await this.repository.softDelete(session.id);
+    return await this.repository.delete(session.id);
   }
 }

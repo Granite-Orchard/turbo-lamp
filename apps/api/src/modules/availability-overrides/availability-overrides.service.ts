@@ -133,6 +133,6 @@ export class AvailabilityOverridesService {
     if (!meeting) {
       throw new NotFoundException();
     }
-    return await this.repository.softDelete(meeting.id);
+    return await this.repository.delete(meeting.id);
   }
 }

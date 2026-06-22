@@ -33,7 +33,7 @@ describe('AvailabilitiesService', () => {
     save: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
-    softDelete: jest.fn(),
+    delete: jest.fn(),
     upsert: jest.fn(),
   };
 
@@ -184,12 +184,12 @@ describe('AvailabilitiesService', () => {
   describe('remove', () => {
     it('should soft delete an availability', async () => {
       mockRepository.findOne.mockResolvedValue(mockAvailability);
-      mockRepository.softDelete.mockResolvedValue({ affected: 1 });
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
 
       const result = await service.remove(mockAvailability.id);
 
       expect(mockRepository.findOne).toHaveBeenCalled();
-      expect(mockRepository.softDelete).toHaveBeenCalledWith(
+      expect(mockRepository.delete).toHaveBeenCalledWith(
         mockAvailability.id,
       );
       expect(result).toEqual({ affected: 1 });

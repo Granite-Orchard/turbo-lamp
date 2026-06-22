@@ -42,7 +42,7 @@ describe('MeetingParticipantsService', () => {
     save: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
-    softDelete: jest.fn(),
+    delete: jest.fn(),
   };
 
   const mockConfigService = {
@@ -275,12 +275,12 @@ describe('MeetingParticipantsService', () => {
   describe('remove', () => {
     it('should soft delete participant', async () => {
       mockRepository.findOne.mockResolvedValue(mockParticipant);
-      mockRepository.softDelete.mockResolvedValue({ affected: 1 });
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
 
       const result = await service.remove(mockParticipant.id);
 
       expect(mockRepository.findOne).toHaveBeenCalled();
-      expect(mockRepository.softDelete).toHaveBeenCalledWith(
+      expect(mockRepository.delete).toHaveBeenCalledWith(
         mockParticipant.id,
       );
       expect(result).toEqual({ affected: 1 });

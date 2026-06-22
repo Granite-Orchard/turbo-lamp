@@ -34,7 +34,7 @@ describe('SessionsService', () => {
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
-    softDelete: jest.fn(),
+    delete: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -222,12 +222,12 @@ describe('SessionsService', () => {
   describe('remove', () => {
     it('should soft delete a session', async () => {
       mockRepository.findOne.mockResolvedValue(mockSession);
-      mockRepository.softDelete.mockResolvedValue({ affected: 1 });
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
 
       const result = await service.remove(mockSession.id);
 
       expect(mockRepository.findOne).toHaveBeenCalled();
-      expect(mockRepository.softDelete).toHaveBeenCalledWith(mockSession.id);
+      expect(mockRepository.delete).toHaveBeenCalledWith(mockSession.id);
       expect(result).toEqual({ affected: 1 });
     });
 

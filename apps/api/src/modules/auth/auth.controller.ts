@@ -155,7 +155,6 @@ export class AuthController {
       redirect = `${base}`;
       if (base === SanitizedRoutes.MEETING_INVITATION_ACCEPTED) {
         await this.invitationsService.acceptInvitation(payload.id, req.user);
-        redirect = SanitizedRoutes.ONBOARDING;
       }
       this.logger.debug('verified redirect', {
         correlationId: '96623b36-38b9-4571-b0f3-e4f93d439a93',

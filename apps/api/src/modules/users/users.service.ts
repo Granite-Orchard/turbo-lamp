@@ -68,6 +68,6 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException();
     }
-    return await this.repository.softDelete(user.id);
+    return await this.repository.delete(user.id);
   }
 }

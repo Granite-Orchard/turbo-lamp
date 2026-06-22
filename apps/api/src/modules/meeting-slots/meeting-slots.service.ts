@@ -264,7 +264,7 @@ export class MeetingSlotsService {
     if (!slot) {
       throw new NotFoundException();
     }
-    return await this.repository.softDelete(slot.id);
+    return await this.repository.delete(slot.id);
   }
 
   private getAvailableSlots(

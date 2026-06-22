@@ -40,7 +40,7 @@ describe('CalendarsService', () => {
     save: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
-    softDelete: jest.fn(),
+    delete: jest.fn(),
     upsert: jest.fn(),
   };
 
@@ -246,12 +246,12 @@ describe('CalendarsService', () => {
   describe('remove', () => {
     it('should soft delete a calendar', async () => {
       mockRepository.findOne.mockResolvedValue(mockCalendar);
-      mockRepository.softDelete.mockResolvedValue({ affected: 1 });
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
 
       const result = await service.remove(mockCalendar.id);
 
       expect(mockRepository.findOne).toHaveBeenCalled();
-      expect(mockRepository.softDelete).toHaveBeenCalledWith(mockCalendar.id);
+      expect(mockRepository.delete).toHaveBeenCalledWith(mockCalendar.id);
       expect(result).toEqual({ affected: 1 });
     });
 

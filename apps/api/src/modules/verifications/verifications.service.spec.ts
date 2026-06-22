@@ -37,7 +37,7 @@ describe('VerificationsService', () => {
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
-    softDelete: jest.fn(),
+    delete: jest.fn(),
     remove: jest.fn(),
   };
 
@@ -274,12 +274,12 @@ describe('VerificationsService', () => {
   describe('remove', () => {
     it('should soft delete a verification', async () => {
       mockRepository.findOne.mockResolvedValue(mockVerification);
-      mockRepository.softDelete.mockResolvedValue({ affected: 1 });
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
 
       const result = await service.remove(mockVerification.id);
 
       expect(mockRepository.findOne).toHaveBeenCalled();
-      expect(mockRepository.softDelete).toHaveBeenCalledWith(
+      expect(mockRepository.delete).toHaveBeenCalledWith(
         mockVerification.id,
       );
       expect(result).toEqual({ affected: 1 });

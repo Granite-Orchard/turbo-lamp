@@ -98,6 +98,6 @@ export class MeetingAttendeesService {
     if (!meetingAttendee) {
       throw new NotFoundException();
     }
-    return await this.repository.softDelete(meetingAttendee.id);
+    return await this.repository.delete(meetingAttendee.id);
   }
 }

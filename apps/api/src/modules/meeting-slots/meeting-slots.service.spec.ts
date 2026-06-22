@@ -30,7 +30,7 @@ describe('MeetingSlotsService', () => {
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
-    softDelete: jest.fn(),
+    delete: jest.fn(),
     upsert: jest.fn(),
   };
 
@@ -229,12 +229,12 @@ describe('MeetingSlotsService', () => {
   describe('remove', () => {
     it('should soft delete a meeting slot', async () => {
       mockRepository.findOne.mockResolvedValue(mockMeetingSlot);
-      mockRepository.softDelete.mockResolvedValue({ affected: 1 });
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
 
       const result = await service.remove(mockMeetingSlot.id);
 
       expect(mockRepository.findOne).toHaveBeenCalled();
-      expect(mockRepository.softDelete).toHaveBeenCalledWith(
+      expect(mockRepository.delete).toHaveBeenCalledWith(
         mockMeetingSlot.id,
       );
       expect(result).toEqual({ affected: 1 });

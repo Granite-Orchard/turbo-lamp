@@ -75,14 +75,14 @@ export function WaitlistSection() {
             <div className="flex flex-col gap-3">
               <div className="flex flex-col sm:flex-row gap-3">
                 <input
-                  className="bg-primary-foreground border border-primary/25 rounded-lg px-5 py-3 flex-1"
+                  className="bg-primary-foreground border border-primary/25 rounded-lg px-5 py-3"
                   type="email"
                   placeholder="you@company.com"
                 ></input>
-                <button className="bg-brand-yellow rounded-lg px-5 py-3 font-medium text-lg hover:bg-brand-yellow/80 transition-colors">
+                <button className="bg-brand-yellow rounded-lg px-2 py-3 font-medium hover:bg-brand-yellow/80 transition-colors">
                   Join the waitlist
                 </button>
-                <button className="bg-primary rounded-lg px-5 py-3 text-secondary font-medium text-lg hover:bg-primary/80 transition-colors">
+                <button className="bg-primary rounded-lg px-2 py-3 text-secondary font-medium hover:bg-primary/80 transition-colors">
                   Get Updates
                 </button>
               </div>

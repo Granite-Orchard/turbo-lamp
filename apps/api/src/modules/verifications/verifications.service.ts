@@ -132,6 +132,6 @@ export class VerificationsService {
     if (!verification) {
       throw new NotFoundException();
     }
-    return await this.repository.softDelete(verification.id);
+    return await this.repository.delete(verification.id);
   }
 }

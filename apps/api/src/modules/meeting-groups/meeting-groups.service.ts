@@ -233,6 +233,6 @@ export class MeetingGroupsService {
     if (!meetingGroup) {
       throw new NotFoundException();
     }
-    return await this.repository.softDelete(meetingGroup.id);
+    return await this.repository.delete(meetingGroup.id);
   }
 }
