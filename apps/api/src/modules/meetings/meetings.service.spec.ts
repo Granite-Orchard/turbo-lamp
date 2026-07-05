@@ -37,7 +37,6 @@ describe('MeetingsService', () => {
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
-    delete: jest.fn(),
   };
 
   const mockEventBus = {

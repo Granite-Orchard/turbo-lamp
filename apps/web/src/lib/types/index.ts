@@ -162,6 +162,11 @@ export interface MeetingSlot {
 
 export type CalculatedSlots = MeetingSlot[];
 
+// waitlist types
+export interface Waitlist {
+  email: string;
+}
+
 // Meeting types
 export interface Meeting {
   id: string;

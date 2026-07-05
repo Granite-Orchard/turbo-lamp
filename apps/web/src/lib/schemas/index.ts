@@ -226,6 +226,10 @@ export const createMeetingParticipantSchema = z
 
 export const meetingStatusSchema = z.enum(["scheduled", "cancelled"]);
 
+export const createWaitlistSchema = z.object({
+  email: z.email(),
+});
+
 export const createMeetingSchema = z.object({
   meetingGroupId: z.uuid(),
   start: isoDateTimeSchema,
