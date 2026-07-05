@@ -1,4 +1,8 @@
+"use client";
+
+import { useActionState } from "react";
 import Image from "next/image";
+import type { Waitlist } from "@/lib/types";
 
 const benefits = [
   {
@@ -23,7 +27,30 @@ const benefits = [
   },
 ];
 
-export function WaitlistSection() {
+type WaitlistActions = {
+  createWaitlistAction: (data: Partial<Waitlist>) => Promise<Waitlist>;
+};
+
+type WaitlistState = { ok: true } | { ok: false; error: string } | null;
+
+export function WaitlistSection({
+  actions,
+}: {
+  actions: WaitlistActions;
+}) {
+  const [state, formAction, isPending] = useActionState<WaitlistState, FormData>(
+    async (_prev, formData) => {
+      const email = formData.get("email") as string;
+      try {
+        await actions.createWaitlistAction({ email });
+        return { ok: true as const };
+      } catch (e) {
+        return { ok: false as const, error: (e as Error).message };
+      }
+    },
+    null,
+  );
+
   return (
     <section id="waitlist" className="w-full bg-amber-50 py-20 md:py-28">
       <div className="mx-auto max-w-300 px-6">
@@ -73,19 +100,38 @@ export function WaitlistSection() {
 
             {/* Email signup — aligned to right column */}
             <div className="flex flex-col gap-3">
-              <div className="flex flex-col sm:flex-row gap-3">
-                <input
-                  className="bg-primary-foreground border border-primary/25 rounded-lg px-5 py-3"
-                  type="email"
-                  placeholder="you@company.com"
-                ></input>
-                <button className="bg-brand-yellow rounded-lg px-2 py-3 font-medium hover:bg-brand-yellow/80 transition-colors">
-                  Join the waitlist
-                </button>
-                <button className="bg-primary rounded-lg px-2 py-3 text-secondary font-medium hover:bg-primary/80 transition-colors">
-                  Get Updates
-                </button>
-              </div>
+              {state?.ok ? (
+                <p className="text-lg font-medium text-green-700">
+                  You&apos;re on the list! We&apos;ll be in touch soon.
+                </p>
+              ) : (
+                <>
+                  <form action={formAction} className="flex flex-col sm:flex-row gap-3">
+                    <input
+                      className="bg-primary-foreground border border-primary/25 rounded-lg px-5 py-3"
+                      type="email"
+                      name="email"
+                      placeholder="you@company.com"
+                      required
+                    />
+                    <button
+                      type="submit"
+                      disabled={isPending}
+                      className="bg-brand-yellow rounded-lg px-2 py-3 font-medium hover:bg-brand-yellow/80 transition-colors disabled:opacity-50"
+                    >
+                      {isPending ? "Joining…" : "Join the waitlist"}
+                    </button>
+                    <button type="button" className="bg-primary rounded-lg px-2 py-3 text-secondary font-medium hover:bg-primary/80 transition-colors">
+                      Get Updates
+                    </button>
+                  </form>
+                  {state?.ok === false && (
+                    <p className="text-sm text-red-600">
+                      Something went wrong: {state.error}. Please try again.
+                    </p>
+                  )}
+                </>
+              )}
               <p className="text-sm text-primary/60 text-center">
                 No spam. Unsubscribe anytime. Early access ships Q4 2026.
               </p>

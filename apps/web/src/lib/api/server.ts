@@ -17,13 +17,17 @@ export async function serverRequest<T>(
   idempotencyKey?: string,
 ): Promise<T> {
   const cookieStore = await cookies();
-  const token = cookieStore.get("session")!;
+  const token = cookieStore.get("session");
 
   const headersCopy = {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${token.value!}`,
     ...headers,
   };
+
+  if (token) {
+    (headersCopy as Record<string, string>)["Authorization"] =
+      `Bearer ${token.value}`;
+  }
 
   if (isIdempotentMethod(method) && idempotencyKey) {
     (headersCopy as Record<string, string>)["Idempotency-Key"] = idempotencyKey;

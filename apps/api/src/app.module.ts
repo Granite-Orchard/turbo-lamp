@@ -37,7 +37,6 @@ import { SessionsModule } from './modules/sessions/sessions.module';
 import { UsersModule } from './modules/users/users.module';
 import { VerificationsModule } from './modules/verifications/verifications.module';
 import { WaitlistModule } from './modules/waitlist/waitlist.module';
-import { WaitlistModule } from './modules/waitlist/waitlist.module';
 
 @Module({
   imports: [
