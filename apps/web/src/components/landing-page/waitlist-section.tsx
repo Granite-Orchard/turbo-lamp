@@ -33,23 +33,19 @@ type WaitlistActions = {
 
 type WaitlistState = { ok: true } | { ok: false; error: string } | null;
 
-export function WaitlistSection({
-  actions,
-}: {
-  actions: WaitlistActions;
-}) {
-  const [state, formAction, isPending] = useActionState<WaitlistState, FormData>(
-    async (_prev, formData) => {
-      const email = formData.get("email") as string;
-      try {
-        await actions.createWaitlistAction({ email });
-        return { ok: true as const };
-      } catch (e) {
-        return { ok: false as const, error: (e as Error).message };
-      }
-    },
-    null,
-  );
+export function WaitlistSection({ actions }: { actions: WaitlistActions }) {
+  const [state, formAction, isPending] = useActionState<
+    WaitlistState,
+    FormData
+  >(async (_prev, formData) => {
+    const email = formData.get("email") as string;
+    try {
+      await actions.createWaitlistAction({ email });
+      return { ok: true as const };
+    } catch (e) {
+      return { ok: false as const, error: (e as Error).message };
+    }
+  }, null);
 
   return (
     <section id="waitlist" className="w-full bg-amber-50 py-20 md:py-28">
@@ -106,7 +102,10 @@ export function WaitlistSection({
                 </p>
               ) : (
                 <>
-                  <form action={formAction} className="flex flex-col sm:flex-row gap-3">
+                  <form
+                    action={formAction}
+                    className="flex flex-col sm:flex-row gap-3"
+                  >
                     <input
                       className="bg-primary-foreground border border-primary/25 rounded-lg px-5 py-3"
                       type="email"
@@ -121,13 +120,16 @@ export function WaitlistSection({
                     >
                       {isPending ? "Joining…" : "Join the waitlist"}
                     </button>
-                    <button type="button" className="bg-primary rounded-lg px-2 py-3 text-secondary font-medium hover:bg-primary/80 transition-colors">
+                    <button
+                      type="button"
+                      className="bg-primary rounded-lg px-2 py-3 text-secondary font-medium hover:bg-primary/80 transition-colors"
+                    >
                       Get Updates
                     </button>
                   </form>
                   {state?.ok === false && (
                     <p className="text-sm text-red-600">
-                      Something went wrong: {state.error}. Please try again.
+                      Something went wrong. Please try again.
                     </p>
                   )}
                 </>
