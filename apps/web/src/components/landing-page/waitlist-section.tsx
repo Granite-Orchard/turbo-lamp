@@ -48,7 +48,7 @@ export function WaitlistSection({ actions }: { actions: WaitlistActions }) {
   }, null);
 
   return (
-    <section id="waitlist" className="w-full bg-amber-50 py-20 md:py-28">
+    <section id="waitlist" className="w-full bg-accent py-20 md:py-28">
       <div className="mx-auto max-w-300 px-6">
         <div className="flex flex-col lg:flex-row gap-16 items-stretch">
           {/* Left — photo, no border radius */}
@@ -77,7 +77,7 @@ export function WaitlistSection({ actions }: { actions: WaitlistActions }) {
               {benefits.map((benefit) => (
                 <div
                   key={benefit.title}
-                  className="flex flex-col gap-2 pb-6 border-b border-primary/20"
+                  className="flex flex-col gap-2 pb-6 border-b border-border"
                 >
                   <Image
                     src={benefit.icon}
@@ -97,7 +97,7 @@ export function WaitlistSection({ actions }: { actions: WaitlistActions }) {
             {/* Email signup — aligned to right column */}
             <div className="flex flex-col gap-3">
               {state?.ok ? (
-                <p className="text-lg font-medium text-green-700">
+                <p className="text-lg font-medium text-brand-green">
                   You&apos;re on the list! We&apos;ll be in touch soon.
                 </p>
               ) : (
@@ -107,7 +107,7 @@ export function WaitlistSection({ actions }: { actions: WaitlistActions }) {
                     className="flex flex-col sm:flex-row gap-3"
                   >
                     <input
-                      className="bg-primary-foreground border border-primary/25 rounded-lg px-5 py-3"
+                      className="bg-background border border-border rounded-lg px-5 py-3"
                       type="email"
                       name="email"
                       placeholder="you@company.com"
@@ -122,19 +122,19 @@ export function WaitlistSection({ actions }: { actions: WaitlistActions }) {
                     </button>
                     <button
                       type="button"
-                      className="bg-primary rounded-lg px-2 py-3 text-secondary font-medium hover:bg-primary/80 transition-colors"
+                      className="bg-primary rounded-lg px-2 py-3 text-primary-foreground font-medium hover:bg-primary/80 transition-colors"
                     >
                       Get Updates
                     </button>
                   </form>
                   {state?.ok === false && (
-                    <p className="text-sm text-red-600">
+                    <p className="text-sm text-destructive">
                       Something went wrong. Please try again.
                     </p>
                   )}
                 </>
               )}
-              <p className="text-sm text-primary/60 text-center">
+              <p className="text-sm text-muted-foreground text-center">
                 No spam. Unsubscribe anytime. Early access ships Q4 2026.
               </p>
             </div>

@@ -16,12 +16,12 @@ export function ProblemStatement() {
 
       {/* Content */}
       <div className="z-10 mx-auto max-w-225 px-6 text-center flex flex-col gap-12">
-        <h2 className="text-7xl leading-tight text-secondary font-trocchi">
+        <h2 className="text-7xl leading-tight text-primary-foreground font-trocchi">
           The Meeting Problem <br className="hidden sm:block" />
           Nobody Bothered to Fix
         </h2>
 
-        <p className="text-3xl text-secondary">
+        <p className="text-3xl text-primary-foreground">
           Booking a cross-company meeting is still a nightmare. Chasing replies,
           coordinating assistants, waiting on busy people, and getting hit with
           &ldquo;here&rsquo;s my Calendly link&rdquo; can turn a simple task

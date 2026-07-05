@@ -34,7 +34,7 @@ export function HowItWorks() {
   const [activeStep, setActiveStep] = useState(0);
 
   return (
-    <section id="how-it-works" className="bg-white py-20 md:py-28">
+    <section id="how-it-works" className="bg-background py-20 md:py-28">
       <div className="mx-auto max-w-300 px-6">
         <div className="flex flex-col items-center gap-6 text-center mb-16">
           <h2 className="text-7xl font-trocchi">How veen works</h2>

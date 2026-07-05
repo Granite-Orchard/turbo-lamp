@@ -93,10 +93,10 @@
 }
 
 .dark {
-  /* Veen brand tokens */
-  --brand-yellow: oklch(0.8347 0.171 82.39);
-  --brand-green: oklch(0.9179 0.147 148.4);
-  --brand-purple: oklch(0.8617 0.083 302.8);
+  /* Veen brand tokens — darkened for contrast on dark backgrounds */
+  --brand-yellow: oklch(0.78 0.171 82.39);
+  --brand-green: oklch(0.82 0.147 148.4);
+  --brand-purple: oklch(0.80 0.083 302.8);
   /* */
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);

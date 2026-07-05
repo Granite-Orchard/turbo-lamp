@@ -13,26 +13,26 @@ export function Footer() {
             height={29}
           />
 
-          <p className="text-[1.25rem] text-secondary order-3 md:order-2 text-center">
+          <p className="text-[1.25rem] text-primary-foreground order-3 md:order-2 text-center">
             ©{new Date().getFullYear()} Veen, Inc. All rights reserved.
           </p>
 
           <nav className="flex items-center gap-12 order-2 md:order-3">
             <Link
               href="#"
-              className="text-[1.25rem] text-secondary hover:text-secondary/70 transition-colors"
+              className="text-[1.25rem] text-primary-foreground hover:text-primary-foreground/70 transition-colors"
             >
               Privacy
             </Link>
             <Link
               href="#"
-              className="text-[1.25rem] text-secondary hover:text-secondary/70 transition-colors"
+              className="text-[1.25rem] text-primary-foreground hover:text-primary-foreground/70 transition-colors"
             >
               Terms of Service
             </Link>
             <Link
               href="#"
-              className="text-[1.25rem] text-secondary hover:text-secondary/70 transition-colors"
+              className="text-[1.25rem] text-primary-foreground hover:text-primary-foreground/70 transition-colors"
             >
               Contact
             </Link>
