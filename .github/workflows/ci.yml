@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - "apps/api/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/quality.yml"
+      - ".github/workflows/ci.yml"
+
+concurrency:
+  group: api-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Quality gates
+    uses: ./.github/workflows/quality.yml

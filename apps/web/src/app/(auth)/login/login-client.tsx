@@ -21,9 +21,11 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { IconBrandGithub, IconBrandGoogle } from "@tabler/icons-react";
-import { ArrowLeft, Calendar } from "lucide-react";
+import { IconBrandGoogle } from "@tabler/icons-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+
+import { BASE_URL } from "@/lib/api/config";
 
 type Actions = {
   loginAction: (data: Login) => Promise<unknown>;
@@ -47,6 +49,7 @@ export default function LoginClient({ actions }: { actions: Actions }) {
       });
 
       router.push("/dashboard");
+      return;
     } catch (error) {
       toast.error(error as string);
       return;
@@ -165,21 +168,11 @@ export default function LoginClient({ actions }: { actions: Actions }) {
               variant="outline"
               className="h-11"
               onClick={() => {
-                window.location.href = `http://localhost:3001/api/core/v1/auth/oauth/google`;
+                window.location.href = `${BASE_URL}/auth/oauth/google`;
               }}
             >
               <IconBrandGoogle />
               Google
-            </Button>
-            <Button
-              variant="outline"
-              className="h-11"
-              onClick={() => {
-                window.location.href = `http://localhost:3001/api/core/v1/auth/oauth/github`;
-              }}
-            >
-              <IconBrandGithub />
-              GitHub
             </Button>
           </div>
 

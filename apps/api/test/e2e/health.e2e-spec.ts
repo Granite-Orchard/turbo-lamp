@@ -4,7 +4,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import request, { SuperTest, Test as SupertestRequest } from 'supertest';
+import request from 'supertest';
 
 import { HealthController } from '../../src/modules/health/health.controller';
 import { CacheHealthIndicator } from '../../src/modules/health/indicators/cache-health.indicator';
@@ -17,7 +17,7 @@ import {
 
 describe('HealthController (integration)', () => {
   let app: INestApplication;
-  let httpServer: SuperTest<SupertestRequest>;
+  let httpServer: ReturnType<typeof request>;
 
   const mockDb = {
     pingCheck: jest.fn(),

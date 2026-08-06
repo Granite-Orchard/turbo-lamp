@@ -40,7 +40,6 @@ describe('UsersService', () => {
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
-    delete: jest.fn(),
   };
 
   beforeEach(async () => {

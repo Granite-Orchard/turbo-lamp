@@ -57,7 +57,7 @@ async function bootstrap() {
     origin: origin.split(',').map((o) => o.trim()),
     credentials: true,
   });
-  app.set('trust proxy', true);
+  app.set('trust proxy', 1);
   app.use(cookieParser());
 
   if (process.env.NODE_ENV !== 'production') {

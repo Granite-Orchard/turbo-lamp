@@ -38,6 +38,8 @@ describe('MeetingGroupsController (e2e)', () => {
     canActivate: jest.fn().mockReturnValue(true),
   };
 
+  const mockManager = {};
+
   const mockDataSource = {
     transaction: jest.fn(async (cb) => cb(mockManager)),
   };

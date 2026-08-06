@@ -1,0 +1,74 @@
+name: Deploy API
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "apps/api/**"
+      - "apps/api/infra/dockerfiles/api.Dockerfile"
+      - "package.json"
+      - "package-lock.json"
+      - ".do/app.yaml"
+      - ".github/workflows/quality.yml"
+      - ".github/workflows/build-api.yml"
+      - ".github/workflows/deploy-api.yml"
+
+concurrency:
+  group: deploy-api
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  REGISTRY: registry.digitalocean.com
+  IMAGE_REPO: veen/api
+  HEALTH_URL: https://veen-api.ondigitalocean.app/api/core/v1/health
+
+jobs:
+  quality:
+    name: Quality gates
+    uses: ./.github/workflows/quality.yml
+
+  build:
+    name: Build, scan & push image
+    needs: quality
+    uses: ./.github/workflows/build-api.yml
+    with:
+      image-tags: sha-${{ github.sha }},latest
+    secrets: inherit
+
+  deploy:
+    name: Deploy to production app
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Authenticate with DigitalOcean
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_ACCESS_TOKEN }}
+
+      - name: Login to DO Container Registry
+        run: doctl registry login --expiry-seconds 600
+
+      - name: Create deployment
+        run: doctl apps create-deployment "$DO_APP_ID" --image "$REGISTRY/$IMAGE_REPO:sha-${{ github.sha }}"
+        env:
+          DO_APP_ID: ${{ secrets.DO_APP_ID }}
+
+      - name: Wait for health
+        env:
+          HEALTH_URL: ${{ env.HEALTH_URL }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 60); do
+            code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$HEALTH_URL" || true)"
+            echo "attempt ${attempt}/60: HTTP ${code:-timeout}"
+            if [ "${code:-}" = "200" ]; then
+              echo "API is healthy."
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "API did not become healthy within 10 minutes." >&2
+          exit 1

@@ -1,4 +1,5 @@
-export const BASE_URL = "http://localhost:3001/api/core/v1";
+export const BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/core/v1";
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 

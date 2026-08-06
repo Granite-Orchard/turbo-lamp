@@ -19,9 +19,11 @@ import {
 } from "@/components/ui/field";
 import { registerSchema } from "@/lib/schemas";
 import { Register } from "@/lib/types";
-import { IconBrandGithub, IconBrandGoogle } from "@tabler/icons-react";
+import { IconBrandGoogle } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+
+import { BASE_URL } from "@/lib/api/config";
 
 const benefits = [
   "14-day free trial, no credit card required",
@@ -237,21 +239,11 @@ export default function RegisterClient({ actions }: { actions: Actions }) {
                 variant="outline"
                 className="h-11"
                 onClick={() => {
-                  window.location.href = `http://localhost:3001/api/core/v1/auth/oauth/register/google`;
+                  window.location.href = `${BASE_URL}/auth/oauth/register/google`;
                 }}
               >
                 <IconBrandGoogle />
                 Google
-              </Button>
-              <Button
-                variant="outline"
-                className="h-11"
-                onClick={() => {
-                  window.location.href = `http://localhost:3001/api/core/v1/auth/oauth/register/github`;
-                }}
-              >
-                <IconBrandGithub />
-                GitHub
               </Button>
             </div>
 

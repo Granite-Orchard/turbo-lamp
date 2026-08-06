@@ -56,7 +56,7 @@ RUN npm ci --omit=dev --legacy-peer-deps
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 
 USER appuser
-EXPOSE 3001
+EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-  CMD wget -qO- http://localhost:3001/api/core/v1/health || exit 1
+  CMD wget -qO- http://localhost:8080/api/core/v1/health || exit 1
 CMD ["node", "apps/api/dist/main"]

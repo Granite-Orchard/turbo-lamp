@@ -17,12 +17,16 @@ export class CookieService {
   ) {
     const isProduction =
       this.config.get(EnvironmentVariables.NODE_ENV) === 'production';
+    const cookieDomain = this.config.get<string>(
+      EnvironmentVariables.COOKIE_DOMAIN,
+    );
     const opts: CookieOptions = {
       ...options,
       httpOnly: true,
       secure: isProduction,
       path: '/',
       sameSite: 'lax',
+      ...(cookieDomain ? { domain: cookieDomain } : {}),
     };
     this.logger.debug('attaching cookie', {
       name,

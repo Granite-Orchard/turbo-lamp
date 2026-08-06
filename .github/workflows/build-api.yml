@@ -1,0 +1,77 @@
+name: Build & Push API Image (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      image-tags:
+        type: string
+        required: true
+        description: Comma-separated list of tags to push to the DO container registry
+    secrets:
+      DO_ACCESS_TOKEN:
+        required: true
+
+permissions:
+  contents: read
+  security-events: write
+
+env:
+  REGISTRY: registry.digitalocean.com
+  IMAGE_REPO: veen/api
+
+jobs:
+  build-and-push:
+    name: Build, scan & push image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/api/infra/dockerfiles/api.Dockerfile
+          push: false
+          load: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}:scan
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Scan image (Trivy)
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}:scan
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
+
+      - name: Upload Trivy SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
+
+      - name: Authenticate with DigitalOcean
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_ACCESS_TOKEN }}
+
+      - name: Login to DO Container Registry
+        run: doctl registry login --expiry-seconds 600
+
+      - name: Tag & push image
+        env:
+          TAGS: ${{ inputs.image-tags }}
+        run: |
+          set -euo pipefail
+          for tag in ${TAGS//,/ }; do
+            tag="$(echo "$tag" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+            docker tag "$REGISTRY/$IMAGE_REPO:scan" "$REGISTRY/$IMAGE_REPO:$tag"
+            docker push "$REGISTRY/$IMAGE_REPO:$tag"
+          done

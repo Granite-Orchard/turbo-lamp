@@ -1,0 +1,72 @@
+# DigitalOcean App Platform spec for the Veen API.
+# Bootstrap: doctl apps create --spec .do/app.yaml
+# Subsequent deploys run from .github/workflows/deploy-api.yml (image push +
+# `doctl apps create-deployment`), which reuse the env vars set on this app.
+name: veen-api
+region: nyc3
+
+# App-level envs are inherited by every component (api service + migrate job).
+envs:
+  - key: NODE_ENV
+    value: production
+  - key: TOKEN_TTL
+    value: "3600"
+  - key: FRONTEND_URL
+    value: https://www.veen.me
+  - key: BACKEND_URL
+    value: https://api.veen.me
+  - key: ALLOWED_ORIGINS
+    value: https://veen.me,https://www.veen.me
+  - key: COOKIE_DOMAIN
+    value: .veen.me
+  - key: GOOGLE_CALLBACK_URL
+    value: https://api.veen.me/api/core/v1/auth/oauth/callback/google
+  - key: RESEND_FROM_EMAIL
+    value: onboarding@resend.dev
+  - key: SMTP_FROM_EMAIL
+    value: noreply@mailhog.com
+
+services:
+  - name: api
+    image:
+      registry_type: DOCR
+      repository: api
+      tag: latest
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    http_port: 8080
+    routes:
+      - path: /
+    health_check:
+      http_path: /api/core/v1/health
+      initial_delay_seconds: 10
+      period_seconds: 30
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
+
+# Runs migrations before the api service is deployed, using the same image and
+# DATABASE_URL from app-level envs (PROD_DATABASE_URL is no longer needed in CI).
+jobs:
+  - name: migrate
+    kind: PRE_DEPLOY
+    image:
+      registry_type: DOCR
+      repository: api
+      tag: latest
+    run_command: npx --no-install typeorm migration:run -d apps/api/dist/data-source.js
+    instance_count: 1
+    instance_size_slug: basic-xxs
+
+# SECRETS - add at the APP level in the DO dashboard (App > Settings >
+# Environment Variables) after creation; both the api service and the migrate
+# job inherit them, so they must NOT live in the repo:
+#   DATABASE_URL (Supabase pooler, ?sslmode=no-verify)
+#   REDIS_CACHE_URL   rediss://default:<token>@...upstash.io:6379/0
+#   REDIS_QUEUE_URL   rediss://default:<token>@...upstash.io:6379/1
+#   REDIS_THROTTLE_URL rediss://default:<token>@...upstash.io:6379/2
+#   JWT_PRIVATE (multi-line PEM), JWT_PUBLIC (multi-line PEM)
+#   GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+#   RESEND_API_KEY
+#   SENTRY_DSN
+#   SMTP_URL (if SMTP fallback is used in prod)

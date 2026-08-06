@@ -1,0 +1,37 @@
+name: Quality (reusable)
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Lint, typecheck, unit tests & build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          check-latest: true
+          cache: npm
+
+      - name: Install workspace deps
+        run: npm ci --legacy-peer-deps --prefer-offline --no-audit --no-fund
+
+      - name: Lint (src)
+        run: npm run lint:ci --workspace=api
+
+      - name: Typecheck
+        run: npm run check-types --workspace=api
+
+      - name: Unit tests
+        run: npm run test:unit --workspace=api
+
+      - name: Build
+        run: npm run build --workspace=api

@@ -7,6 +7,8 @@ import { Calendar } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { BASE_URL } from "@/lib/api/config";
+
 export default function OnboardingAuthClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -77,7 +79,7 @@ export default function OnboardingAuthClient() {
               <Button
                 className="h-11"
                 onClick={() => {
-                  window.location.href = `http://localhost:3001/api/core/v1/auth/oauth/register/google?token=${token}`;
+                  window.location.href = `${BASE_URL}/auth/oauth/register/google?token=${token}`;
                 }}
               >
                 <IconBrandGoogle />
