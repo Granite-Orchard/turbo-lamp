@@ -2,13 +2,13 @@ import Image from "next/image";
 
 export function Hero() {
   return (
-    <section className="pt-40 pb-20">
-      <div className="mx-auto max-w-300 px-6 flex flex-col items-center gap-12 text-center">
-        <h1 className="text-7xl max-w-4xl font-trocchi">
+    <section className="pt-28 pb-10 md:pt-40 md:pb-20">
+      <div className="mx-auto max-w-300 px-4 md:px-6 flex flex-col items-center gap-6 md:gap-12 text-center">
+        <h1 className="max-w-4xl font-trocchi">
           Schedule multi-company meetings without all the back and forth
         </h1>
 
-        <p className="text-xl max-w-166.75">
+        <p className="max-w-[90%] md:max-w-166.75">
           The easiest way to find a time to meet when you don&apos;t have access
           to everyone&apos;s calendar.
         </p>
@@ -27,6 +27,7 @@ export function Hero() {
             width={987}
             height={584}
             className="w-full h-auto"
+            priority
           />
         </div>
       </div>

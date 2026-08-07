@@ -47,13 +47,30 @@
 
   /* brand specific theming */
   --font-trocchi: var(--font-trocchi);
+  --font-inter: var(--font-inter);
   --color-brand-yellow: var(--brand-yellow);
+  --color-secondary-text: var(--secondary-text);
   --color-brand-green: var(--brand-green);
   --color-brand-purple: var(--brand-purple);
 }
 
 :root {
   --radius: 0.625rem;
+  --secondary-text: rgba(0, 0, 0, 0.70);
+
+  /* ── Fluid Font Sizes (320px → 1240px viewport) ── */
+  --text-small:    clamp(0.88rem, 0.83rem + 0.22vw, 1.00rem);   /* 14px → 16px */
+  --text-medium:   clamp(1.00rem, 0.91rem + 0.43vw, 1.25rem);   /* 16px → 20px */
+  --text-base:     clamp(1.13rem, 1.00rem + 0.65vw, 1.50rem);   /* 18px → 24px */
+  --text-subtitle: clamp(1.38rem, 1.25rem + 0.65vw, 1.75rem);   /* 22px → 28px */
+  --text-h3:       clamp(1.50rem, 1.33rem + 0.87vw, 2.00rem);   /* 24px → 32px */
+  --text-h2:       clamp(2.00rem, 1.65rem + 1.74vw, 3.00rem);   /* 32px → 48px */
+  --text-h1:       clamp(2.00rem, 1.45rem + 3.29vw, 4.00rem);   /* 32px → 64px, ≈36px at 390px */
+
+  /* ── Line Heights ── */
+  --lh-tight:   1.2;
+  --lh-relaxed: 1.4;
+
   /* Veen brand tokens */
   --brand-yellow: oklch(0.8347 0.171 82.39);
   --brand-green: oklch(0.9179 0.147 148.4);
@@ -94,6 +111,7 @@
 
 .dark {
   /* Veen brand tokens — darkened for contrast on dark backgrounds */
+  --secondary-text: rgba(255, 255, 255, 0.70);
   --brand-yellow: oklch(0.78 0.171 82.39);
   --brand-green: oklch(0.82 0.147 148.4);
   --brand-purple: oklch(0.80 0.083 302.8);
@@ -138,4 +156,27 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Font families */
+  body { font-family: var(--font-inter, sans-serif); }
+  h1, h2, h3, h4 { font-family: var(--font-trocchi, serif); }
+  button, [type="button"], [type="submit"] { font-weight: 500; }
+
+  /* Fluid typography — element defaults */
+  h1 { font-size: var(--text-h1); line-height: var(--lh-tight); }
+  h2 { font-size: var(--text-h2); line-height: var(--lh-tight); }
+  h3 { font-size: var(--text-h3); line-height: var(--lh-tight); }
+  h4 { font-size: var(--text-base); line-height: var(--lh-tight); }
+  p  { font-size: var(--text-base); line-height: var(--lh-relaxed); color: var(--secondary-text); }
+}
+
+@layer utilities {
+  /* Fluid scale utility classes for non-heading elements */
+  .text-fluid-h1    { font-size: var(--text-h1);    line-height: var(--lh-tight); }
+  .text-fluid-h2    { font-size: var(--text-h2);    line-height: var(--lh-tight); }
+  .text-fluid-h3    { font-size: var(--text-h3);    line-height: var(--lh-tight); }
+  .subtitle         { font-size: var(--text-subtitle); line-height: var(--lh-relaxed); }
+  .medium-text      { font-size: var(--text-medium); line-height: var(--lh-relaxed); }
+  .small-text       { font-size: var(--text-small);  line-height: var(--lh-relaxed); }
+  .caption          { font-size: var(--text-medium); line-height: var(--lh-tight); }
 }

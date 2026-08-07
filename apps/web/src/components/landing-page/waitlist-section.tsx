@@ -48,7 +48,7 @@ export function WaitlistSection({ actions }: { actions: WaitlistActions }) {
   }, null);
 
   return (
-    <section id="waitlist" className="w-full bg-accent py-20 md:py-28">
+    <section id="waitlist" className="w-full bg-accent py-10 md:py-28">
       <div className="mx-auto max-w-300 px-6">
         <div className="flex flex-col lg:flex-row gap-16 items-stretch">
           {/* Left — photo, no border radius */}
@@ -57,6 +57,7 @@ export function WaitlistSection({ actions }: { actions: WaitlistActions }) {
               src="/Backgrounds/CTA/cta-img.jpg"
               alt="Team meeting"
               fill
+              sizes="(max-width: 1024px) 100vw, 540px"
               className="object-cover"
             />
           </div>
@@ -65,15 +66,15 @@ export function WaitlistSection({ actions }: { actions: WaitlistActions }) {
           <div className="flex flex-col gap-8 flex-1 justify-between">
             {/* Top: heading + description */}
             <div className="flex flex-col gap-4">
-              <h2 className="text-6xl font-trocchi">Why join the waitlist?</h2>
-              <p className="text-md">
+              <h2 className="font-trocchi">Why join the waitlist?</h2>
+              <p>
                 Early supporters will help shape the future of Veen and receive
                 launch benefits that won&apos;t be available later.
               </p>
             </div>
 
-            {/* Benefits 2×2 grid */}
-            <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+            {/* Benefits grid — 1 col on mobile, 2 col on sm+ */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
               {benefits.map((benefit) => (
                 <div
                   key={benefit.title}
@@ -85,11 +86,12 @@ export function WaitlistSection({ actions }: { actions: WaitlistActions }) {
                     width={32}
                     height={32}
                     aria-hidden
+                    unoptimized
                   />
-                  <h3 className="text-xl font-medium leading-tight">
+                  <h3 className="font-medium">
                     {benefit.title}
                   </h3>
-                  <p className="text-sm">{benefit.description}</p>
+                  <p className="small-text">{benefit.description}</p>
                 </div>
               ))}
             </div>
@@ -97,44 +99,46 @@ export function WaitlistSection({ actions }: { actions: WaitlistActions }) {
             {/* Email signup — aligned to right column */}
             <div className="flex flex-col gap-3">
               {state?.ok ? (
-                <p className="text-lg font-medium text-brand-green">
+                <p className="font-medium text-brand-green">
                   You&apos;re on the list! We&apos;ll be in touch soon.
                 </p>
               ) : (
                 <>
                   <form
                     action={formAction}
-                    className="flex flex-col sm:flex-row gap-3"
+                    className="flex flex-col gap-3"
                   >
                     <input
-                      className="bg-background border border-border rounded-lg px-5 py-3"
+                      className="bg-background border border-border rounded-lg px-5 py-3 w-full"
                       type="email"
                       name="email"
                       placeholder="you@company.com"
                       required
                     />
-                    <button
-                      type="submit"
-                      disabled={isPending}
-                      className="bg-brand-yellow rounded-lg px-2 py-3 font-medium hover:bg-brand-yellow/80 transition-colors disabled:opacity-50"
-                    >
-                      {isPending ? "Joining…" : "Join the waitlist"}
-                    </button>
-                    <button
-                      type="button"
-                      className="bg-primary rounded-lg px-2 py-3 text-primary-foreground font-medium hover:bg-primary/80 transition-colors"
-                    >
-                      Get Updates
-                    </button>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <button
+                        type="submit"
+                        disabled={isPending}
+                        className="w-full sm:w-auto bg-brand-yellow rounded-lg px-5 py-3 font-medium hover:bg-brand-yellow/80 transition-colors disabled:opacity-50"
+                      >
+                        {isPending ? "Joining…" : "Join the waitlist"}
+                      </button>
+                      <button
+                        type="button"
+                        className="w-full sm:w-auto bg-primary rounded-lg px-5 py-3 text-primary-foreground font-medium hover:bg-primary/80 transition-colors"
+                      >
+                        Get Updates
+                      </button>
+                    </div>
                   </form>
                   {state?.ok === false && (
-                    <p className="text-sm text-destructive">
+                    <p className="small-text text-destructive">
                       Something went wrong. Please try again.
                     </p>
                   )}
                 </>
               )}
-              <p className="text-sm text-muted-foreground text-center">
+              <p className="small-text text-muted-foreground text-center">
                 No spam. Unsubscribe anytime. Early access ships Q4 2026.
               </p>
             </div>

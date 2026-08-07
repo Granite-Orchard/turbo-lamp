@@ -13,7 +13,9 @@ export default function Home() {
       <Header />
       <Hero />
       <ProblemStatement />
+      <div className="h-5 md:h-10 lg:hidden bg-background" />
       <HowItWorks />
+      <div className="h-5 md:h-10 lg:hidden bg-background" />
       <Features />
       <WaitlistSection actions={{ createWaitlistAction }} />
       <Footer />
