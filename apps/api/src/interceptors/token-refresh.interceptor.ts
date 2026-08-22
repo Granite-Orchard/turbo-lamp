@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { tap, catchError } from 'rxjs';
+import { tap } from 'rxjs';
 import type { Request, Response } from 'express';
 import { CookieService } from '../modules/auth/cookie.service';
 import { TokenSchema, TokenService } from '../modules/auth/token.service';
@@ -43,57 +43,57 @@ export class TokenRefreshInterceptor implements NestInterceptor {
     }
 
     return next.handle().pipe(
-      tap(async () => {
-        try {
-          const decoded = this.jwtService.decode<TokenSchema & { exp: number }>(token);
-          if (!decoded?.exp) {
-            return;
-          }
+      tap(() => {
+        void (async () => {
+          try {
+            const decoded = this.jwtService.decode<
+              TokenSchema & { exp: number }
+            >(token);
+            if (!decoded?.exp) {
+              return;
+            }
 
-          const now = Date.now();
-          const expiresAtMs = decoded.exp * 1000;
-          if (expiresAtMs - now >= REFRESH_THRESHOLD_MS) {
-            return;
-          }
+            const now = Date.now();
+            const expiresAtMs = decoded.exp * 1000;
+            if (expiresAtMs - now >= REFRESH_THRESHOLD_MS) {
+              return;
+            }
 
-          const token_ttl = this.configService.get<number>(
-            EnvironmentVariables.TOKEN_TTL,
-          )!;
+            const token_ttl = this.configService.get<number>(
+              EnvironmentVariables.TOKEN_TTL,
+            )!;
 
-          const newExpiresAt = new Date(now + token_ttl * 1000);
-          const newToken = this.tokenService.sign(
-            {
-              sub: decoded.sub,
-              username: decoded.username,
-              provider: decoded.provider,
-            },
-            { expiresIn: token_ttl * 1000 },
-          );
+            const newExpiresAt = new Date(now + token_ttl * 1000);
+            const newToken = this.tokenService.sign(
+              {
+                sub: decoded.sub,
+                username: decoded.username,
+                provider: decoded.provider,
+              },
+              { expiresIn: token_ttl * 1000 },
+            );
 
-          this.cookieService.attachCookie(
-            res,
-            CookieKey.SESSION,
-            newToken,
-          );
+            this.cookieService.attachCookie(res, CookieKey.SESSION, newToken);
 
-          const session = await this.sessionService.findOneBy({ token });
-          if (session) {
-            await this.sessionService.update(session.id, {
-              token: newToken,
-              expiresAt: newExpiresAt,
+            const session = await this.sessionService.findOneBy({ token });
+            if (session) {
+              await this.sessionService.update(session.id, {
+                token: newToken,
+                expiresAt: newExpiresAt,
+              });
+            }
+
+            this.logger.debug('token refreshed', {
+              correlationId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+              userId: decoded.sub,
+            });
+          } catch (err) {
+            this.logger.warn('token refresh failed', {
+              correlationId: 'b2c3d4e5-f6a7-8901-bcde-f12345678901',
+              error: err instanceof Error ? err.message : String(err),
             });
           }
-
-          this.logger.debug('token refreshed', {
-            correlationId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-            userId: decoded.sub,
-          });
-        } catch (err) {
-          this.logger.warn('token refresh failed', {
-            correlationId: 'b2c3d4e5-f6a7-8901-bcde-f12345678901',
-            error: err instanceof Error ? err.message : String(err),
-          });
-        }
+        })();
       }),
     );
   }

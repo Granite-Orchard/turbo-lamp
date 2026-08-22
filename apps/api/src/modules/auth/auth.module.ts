@@ -43,6 +43,12 @@ import { TokenService } from './token.service';
     CookieService,
   ],
   controllers: [AuthController],
-  exports: [JwtService, AuthService, TokenService, CookieService, GoogleAuthManager],
+  exports: [
+    JwtService,
+    AuthService,
+    TokenService,
+    CookieService,
+    GoogleAuthManager,
+  ],
 })
 export class AuthModule {}
