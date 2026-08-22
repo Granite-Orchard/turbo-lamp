@@ -35,3 +35,9 @@ jobs:
 
       - name: Build
         run: npm run build --workspace=api
+
+      - name: Lint (web)
+        run: npm run lint --workspace=web
+
+      - name: Typecheck (web)
+        run: npm run check-types --workspace=web

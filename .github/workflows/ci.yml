@@ -5,6 +5,7 @@ on:
     branches: [master]
     paths:
       - "apps/api/**"
+      - "apps/web/**"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/quality.yml"

@@ -22,8 +22,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     @Inject(AccountsService)
     private readonly accountService: AccountsService,
   ) {
-    const privateKey = configService.get<string>(
-      EnvironmentVariables.JWT_PRIVATE,
+    const publicKey = configService.get<string>(
+      EnvironmentVariables.JWT_PUBLIC,
     )!;
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
@@ -35,7 +35,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             : null;
         },
       ]),
-      secretOrKey: privateKey,
+      secretOrKey: publicKey,
       algorithms: [TOKEN_ALGORITHM],
       issuer: TOKEN_ISSUER,
       audience: TOKEN_AUDIENCE,

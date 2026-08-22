@@ -197,8 +197,8 @@ export class MeetingGroupsController {
         after: SanitizedRoutes.MEETING_INVITATION_ACCEPTED,
       };
       // 5 minutes
-      const expiresIn = 300000;
-      const expiresAt = new Date(Date.now() + expiresIn);
+      const expiresIn = 300;
+      const expiresAt = new Date(Date.now() + expiresIn * 1000);
       const newVerification = await verificationRepo.save({
         identifier: this.tokenService.randomHash(),
         value: this.tokenService.sign(newValue, { expiresIn }),
@@ -231,6 +231,16 @@ export class MeetingGroupsController {
         participants: { user: true },
       },
     );
+    if (!result) {
+      throw new NotFoundException();
+    }
+    const isAuthor = result.authorId === req.user.userId;
+    const isParticipant = result.participants?.some(
+      (participant) => participant.userId === req.user.userId,
+    );
+    if (!isAuthor && !isParticipant) {
+      throw new NotFoundException();
+    }
 
     return plainToInstance(MeetingGroupResponseDto, result, {
       excludeExtraneousValues: true,

@@ -173,8 +173,8 @@ export class MeetingGroupsService {
       after: SanitizedRoutes.ONBOARDING_AUTH,
     };
     // 7 days
-    const expiresIn = 60 * 1000 * 60 * 24 * 7;
-    const expiresAt = new Date(Date.now() + expiresIn);
+    const expiresIn = 60 * 60 * 24 * 7;
+    const expiresAt = new Date(Date.now() + expiresIn * 1000);
     const verification = await this.verificationsService.create({
       identifier: this.tokenService.randomHash(),
       value: this.tokenService.sign(value, { expiresIn }),

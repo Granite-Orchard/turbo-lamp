@@ -5,6 +5,7 @@ import { TokenService } from './token.service';
 import { CookieService } from './cookie.service';
 import { VerificationsService } from '../verifications/verifications.service';
 import { InvitationsService } from '../invitations/invitations.service';
+import { SessionsService } from '../sessions/sessions.service';
 import { SessionCookieInterceptor } from '../../interceptors/session-cookie.interceptor';
 import { ConfigService } from '@nestjs/config';
 import { RegisterDto } from './dto/register.dto';
@@ -41,6 +42,7 @@ describe('AuthController', () => {
         { provide: CookieService, useValue: mockCookieService },
         { provide: VerificationsService, useValue: {} },
         { provide: InvitationsService, useValue: {} },
+        { provide: SessionsService, useValue: {} },
         { provide: ConfigService, useValue: mockConfigService },
       ],
     })

@@ -2,6 +2,11 @@
 # Bootstrap: doctl apps create --spec .do/app.yaml
 # Subsequent deploys run from .github/workflows/deploy-api.yml (image push +
 # `doctl apps create-deployment`), which reuse the env vars set on this app.
+#
+# The `latest` tags below are BOOTSTRAP-ONLY defaults. CI pushes only
+# `sha-<git-sha>` tags and always deploys an explicit sha image, so `latest`
+# in the registry goes stale. Do NOT redeploy from the DO console (it uses
+# `latest`); trigger deploys via CI instead.
 name: veen-api
 region: nyc3
 
@@ -22,9 +27,9 @@ envs:
   - key: GOOGLE_CALLBACK_URL
     value: https://api.veen.me/api/core/v1/auth/oauth/callback/google
   - key: RESEND_FROM_EMAIL
-    value: onboarding@resend.dev
+    value: onboarding@veen.me
   - key: SMTP_FROM_EMAIL
-    value: noreply@mailhog.com
+    value: onboarding@veen.me
 
 services:
   - name: api

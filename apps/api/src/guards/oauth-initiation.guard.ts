@@ -85,9 +85,9 @@ export class OAuthInitiationGuard implements CanActivate {
       correlationId: 'ed6bf907-e8d5-46ee-bb44-2b6bfdc5e554',
     });
 
-    const expiresIn = 300000;
+    const expiresIn = 300;
     // 5 minutes
-    const expiresAt = new Date(Date.now() + expiresIn);
+    const expiresAt = new Date(Date.now() + expiresIn * 1000);
     const verification = await this.verificationService.create({
       identifier: this.tokenService.randomHash(),
       value: this.tokenService.sign(value, { expiresIn }),

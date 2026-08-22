@@ -14,6 +14,7 @@ import { CacheableMemory } from 'cacheable';
 import Redis from 'ioredis';
 import Keyv from 'keyv';
 import { UseCacheInterceptor } from './interceptors/cache.interceptor';
+import { TokenRefreshInterceptor } from './interceptors/token-refresh.interceptor';
 import {
   EnvironmentVariables,
   TOKEN_ALGORITHM,
@@ -65,7 +66,7 @@ import { WaitlistModule } from './modules/waitlist/waitlist.module';
           entities: [__dirname + '/**/*.entity{.ts,.js}'],
           migrations: [__dirname + '/migrations/*{.ts,.js}'],
           migrationsTableName: '_migrations',
-          migrationsRun: isProduction,
+          migrationsRun: false,
           retryAttempts: 10,
           retryDelay: 5000,
         };
@@ -189,6 +190,10 @@ import { WaitlistModule } from './modules/waitlist/waitlist.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: UseCacheInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TokenRefreshInterceptor,
     },
     {
       provide: APP_GUARD,

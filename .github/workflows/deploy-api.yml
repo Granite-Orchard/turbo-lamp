@@ -35,7 +35,7 @@ jobs:
     needs: quality
     uses: ./.github/workflows/build-api.yml
     with:
-      image-tags: sha-${{ github.sha }},latest
+      image-tags: sha-${{ github.sha }}
     secrets: inherit
 
   deploy:
@@ -52,23 +52,53 @@ jobs:
         run: doctl registry login --expiry-seconds 600
 
       - name: Create deployment
-        run: doctl apps create-deployment "$DO_APP_ID" --image "$REGISTRY/$IMAGE_REPO:sha-${{ github.sha }}"
+        id: create-deployment
+        run: |
+          set -euo pipefail
+          DEPLOYMENT_ID="$(doctl apps create-deployment "$DO_APP_ID" --image "$REGISTRY/$IMAGE_REPO:sha-${{ github.sha }}" --format ID --no-header)"
+          echo "Created deployment $DEPLOYMENT_ID"
+          echo "deployment-id=$DEPLOYMENT_ID" >> "$GITHUB_OUTPUT"
         env:
           DO_APP_ID: ${{ secrets.DO_APP_ID }}
+
+      - name: Wait for deployment to complete
+        env:
+          DO_APP_ID: ${{ secrets.DO_APP_ID }}
+          DEPLOYMENT_ID: ${{ steps.create-deployment.outputs.deployment-id }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 60); do
+            phase="$(doctl apps get-deployment "$DO_APP_ID" "$DEPLOYMENT_ID" --format phase --no-header)"
+            echo "attempt ${attempt}/60: phase ${phase}"
+            case "$phase" in
+              DEPLOYED)
+                echo "Deployment $DEPLOYMENT_ID is live."
+                exit 0
+                ;;
+              ERROR|CANCELED|SUPERSEDED)
+                echo "Deployment $DEPLOYMENT_ID reached phase ${phase}." >&2
+                doctl apps get-deployment "$DO_APP_ID" "$DEPLOYMENT_ID" --format ID,phase,ProgressStepName >&2 || true
+                exit 1
+                ;;
+            esac
+            sleep 10
+          done
+          echo "Deployment $DEPLOYMENT_ID did not reach DEPLOYED within 10 minutes." >&2
+          exit 1
 
       - name: Wait for health
         env:
           HEALTH_URL: ${{ env.HEALTH_URL }}
         run: |
           set -euo pipefail
-          for attempt in $(seq 1 60); do
+          for attempt in $(seq 1 30); do
             code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$HEALTH_URL" || true)"
-            echo "attempt ${attempt}/60: HTTP ${code:-timeout}"
+            echo "attempt ${attempt}/30: HTTP ${code:-timeout}"
             if [ "${code:-}" = "200" ]; then
               echo "API is healthy."
               exit 0
             fi
             sleep 10
           done
-          echo "API did not become healthy within 10 minutes." >&2
+          echo "API did not become healthy within 5 minutes." >&2
           exit 1

@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpStatus,
   Inject,
   Ip,
   Logger,
@@ -31,6 +32,7 @@ import {
 } from '../../libs/constants';
 import { Account } from '../accounts/entities/account.entity';
 import { InvitationsService } from '../invitations/invitations.service';
+import { SessionsService } from '../sessions/sessions.service';
 import { VerificationsService } from '../verifications/verifications.service';
 import { AuthService } from './auth.service';
 import { CookieService } from './cookie.service';
@@ -39,7 +41,7 @@ import { RegisterDto } from './dto/register.dto';
 import { SessionResponseDto } from './dto/session.response.dto';
 import { TokenService } from './token.service';
 
-@Throttle({ default: { limit: 3, ttl: 60_000 } })
+@Throttle({ short: { limit: 3, ttl: 60_000 } })
 @Controller({ path: 'auth', version: '1' })
 export class AuthController {
   private readonly logger: Logger = new Logger(AuthController.name);
@@ -56,7 +58,38 @@ export class AuthController {
     private readonly cookieService: CookieService,
     @Inject(InvitationsService)
     private readonly invitationsService: InvitationsService,
+    @Inject(SessionsService)
+    private readonly sessionService: SessionsService,
   ) {}
+
+  @Post('logout')
+  async logout(@Req() req: Request, @Res() res: Response) {
+    const token = this.extractToken(req);
+    if (token) {
+      try {
+        const session = await this.sessionService.findOneBy({ token });
+        if (session) {
+          await this.sessionService.remove(session.id);
+        }
+      } catch (error) {
+        this.logger.warn('Failed to revoke session on logout', error);
+      }
+    }
+    this.cookieService.attachCookie(res, CookieKey.SESSION, '', {
+      maxAge: 0,
+    });
+    return res.sendStatus(HttpStatus.NO_CONTENT);
+  }
+
+  private extractToken(req: Request): string | null {
+    const header = req.headers.authorization;
+    if (header?.startsWith('Bearer ')) {
+      return header.slice('Bearer '.length);
+    }
+    const cookie = (req as Request & { cookies?: Record<string, string> })
+      .cookies;
+    return typeof cookie?.session === 'string' ? cookie.session : null;
+  }
 
   @UseInterceptors(SessionCookieInterceptor)
   @Post('register')

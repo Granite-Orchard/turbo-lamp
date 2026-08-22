@@ -5,8 +5,12 @@ import { cookies } from "next/headers";
 
 export const authApi = {
   logout: async () => {
-    const cookieStore = await cookies();
-    if (cookieStore.has("session")) cookieStore.delete("session");
+    try {
+      await serverRequest("/auth/logout", "POST");
+    } finally {
+      const cookieStore = await cookies();
+      if (cookieStore.has("session")) cookieStore.delete("session");
+    }
     return;
   },
   login: async (data: Login) => {

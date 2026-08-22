@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
-import Image from "next/image";
 import type { Waitlist } from "@/lib/types";
+import Image from "next/image";
+import { useActionState } from "react";
 
 const benefits = [
   {

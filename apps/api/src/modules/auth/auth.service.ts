@@ -135,15 +135,14 @@ export class AuthService {
     const token_ttl = this.configService.get<number>(
       EnvironmentVariables.TOKEN_TTL,
     )!;
-    const expiresIn = token_ttl * 1000;
-    const expiresAt = new Date(Date.now() + expiresIn);
+    const expiresAt = new Date(Date.now() + token_ttl * 1000);
     const payload: TokenSchema = {
       sub: account.user.id,
       username: account.user.email,
       provider: account.providerId,
     };
     const token = this.tokenService.sign(payload, {
-      expiresIn,
+      expiresIn: token_ttl * 1000,
     });
     const session = await this.sessionService.create({
       userId: account.user.id,

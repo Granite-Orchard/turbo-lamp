@@ -13,7 +13,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { DataSource } from 'typeorm';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
+import { MeetingGroup } from '../meeting-groups/entities/meeting-group.entity';
+import { Meeting } from '../meetings/entities/meeting.entity';
 import { Account } from '../accounts/entities/account.entity';
 import { CreateMeetingAttendeeDto } from './dto/create-meeting-attendee.dto';
 import { UpdateMeetingAttendeeDto } from './dto/update-meeting-attendee.dto';
@@ -26,7 +29,10 @@ import { plainToInstance } from 'class-transformer';
 @Controller({ path: 'meeting-attendees', version: '1' })
 export class MeetingAttendeesController {
   private readonly logger: Logger = new Logger(MeetingAttendeesController.name);
-  constructor(private readonly attendeeService: MeetingAttendeesService) {}
+  constructor(
+    private readonly attendeeService: MeetingAttendeesService,
+    private readonly dataSource: DataSource,
+  ) {}
 
   @Post()
   async create(
@@ -37,6 +43,27 @@ export class MeetingAttendeesController {
       correlationId: '388875da-9a8c-4ff0-b14e-0c84ca91c111',
       userId: req.user.userId,
     });
+    const meeting = await this.dataSource.getRepository(Meeting).findOne({
+      where: { id: createMeetingAttendeeDto.meetingId },
+      relations: { meetingGroup: true },
+    });
+    if (!meeting) {
+      throw new NotFoundException();
+    }
+    const group = await this.dataSource.getRepository(MeetingGroup).findOne({
+      where: { id: meeting.meetingGroupId },
+      relations: { participants: true },
+    });
+    if (!group) {
+      throw new NotFoundException();
+    }
+    const isAuthor = group.authorId === req.user.userId;
+    const isParticipant = group.participants?.some(
+      (participant) => participant.userId === req.user.userId,
+    );
+    if (!isAuthor && !isParticipant) {
+      throw new NotFoundException();
+    }
     const result = await this.attendeeService.create({
       ...createMeetingAttendeeDto,
       createdBy: req.user.userId,

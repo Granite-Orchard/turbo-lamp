@@ -81,6 +81,13 @@ export class MeetingsController {
     if (!result) {
       throw new NotFoundException();
     }
+    const isAuthor = result.meetingGroup.authorId === req.user.userId;
+    const isAttendee = result.attendees.some(
+      (attendee) => attendee.userId === req.user.userId,
+    );
+    if (!isAuthor && !isAttendee) {
+      throw new NotFoundException();
+    }
     return plainToInstance(MeetingResponseDto, result, {
       excludeExtraneousValues: true,
     });

@@ -14,7 +14,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { DataSource } from 'typeorm';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
+import { MeetingGroup } from '../meeting-groups/entities/meeting-group.entity';
 import { Account } from '../accounts/entities/account.entity';
 import { CreateMeetingParticipantDto } from './dto/create-meeting-participant.dto';
 import { UpdateMeetingParticipantDto } from './dto/update-meeting-participant.dto';
@@ -32,6 +34,7 @@ export class MeetingParticipantsController {
   constructor(
     @Inject(MeetingParticipantsService)
     private readonly meetingParticipantsService: MeetingParticipantsService,
+    private readonly dataSource: DataSource,
   ) {}
 
   @Post()
@@ -44,6 +47,12 @@ export class MeetingParticipantsController {
       userId: req.user.userId,
       createMeetingParticipantDto,
     });
+    const group = await this.dataSource
+      .getRepository(MeetingGroup)
+      .findOneBy({ id: createMeetingParticipantDto.meetingGroupId });
+    if (!group || group.authorId !== req.user.userId) {
+      throw new NotFoundException();
+    }
     const result = await this.meetingParticipantsService.create({
       ...createMeetingParticipantDto,
       createdBy: req.user.userId,
@@ -63,6 +72,20 @@ export class MeetingParticipantsController {
       userId: req.user.userId,
       meetingGroupId,
     });
+    const group = await this.dataSource.getRepository(MeetingGroup).findOne({
+      where: { id: meetingGroupId },
+      relations: { participants: true },
+    });
+    if (!group) {
+      throw new NotFoundException();
+    }
+    const isAuthor = group.authorId === req.user.userId;
+    const isParticipant = group.participants?.some(
+      (participant) => participant.userId === req.user.userId,
+    );
+    if (!isAuthor && !isParticipant) {
+      throw new NotFoundException();
+    }
     const results = await this.meetingParticipantsService.findAllBy([
       { meetingGroupId },
     ]);

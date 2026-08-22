@@ -27,9 +27,9 @@ export class AccountsController {
   async findAll(@Req() req: Request & { user: Account }) {
     this.logger.debug('findAll invoked', {
       correlationId: '5e16b6fb-8661-4a58-a7cd-529d0e16fa81',
-      userId: req.user.id,
+      userId: req.user.userId,
     });
-    return await this.accountsService.findAllBy({ userId: req.user.id });
+    return await this.accountsService.findAllBy({ userId: req.user.userId });
   }
 
   @Get(':id')
@@ -39,12 +39,12 @@ export class AccountsController {
   ): Promise<AccountResponseDto> {
     this.logger.debug('findOne invoked', {
       correlationId: '35c5e445-28a3-469e-9620-58c0fb8b409d',
-      userId: req.user.id,
+      userId: req.user.userId,
       id,
     });
     const result = await this.accountsService.findOneBy({
       id,
-      userId: req.user.id,
+      userId: req.user.userId,
     });
     return plainToInstance(AccountResponseDto, result, {
       excludeExtraneousValues: true,
@@ -59,13 +59,13 @@ export class AccountsController {
   ): Promise<AccountResponseDto> {
     this.logger.debug('update invoked', {
       correlationId: '10d4a388-b8a0-4534-89c5-0c24fb0981d7',
-      userId: req.user.id,
+      userId: req.user.userId,
       id,
       body: updateAccountDto,
     });
     const found = await this.accountsService.findOneBy({
       id,
-      userId: req.user.id,
+      userId: req.user.userId,
     });
     if (!found) {
       throw new NotFoundException();
@@ -83,12 +83,12 @@ export class AccountsController {
   ): Promise<AccountResponseDto> {
     this.logger.debug('delete invoked', {
       correlationId: '6b7ee5bf-94ae-4448-b931-aee6119e8a24',
-      userId: req.user.id,
+      userId: req.user.userId,
       id,
     });
     const found = await this.accountsService.findOneBy({
       id,
-      userId: req.user.id,
+      userId: req.user.userId,
     });
     if (!found) {
       throw new NotFoundException();

@@ -33,6 +33,11 @@ export async function clientRequest<T>(
 
   const payload = await parseJsonSafe(res);
 
+  if (res.status === 401) {
+    window.location.href = "/login";
+    throw new ApiError(401, undefined, "Unauthorized", undefined);
+  }
+
   if (!res.ok) {
     const error = (payload ?? {}) as ApiErrorBody;
     throw new ApiError(
