@@ -7,7 +7,7 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { Observable, from, of } from 'rxjs';
-import { switchMap, tap } from 'rxjs/operators';
+import { switchMap, catchError, tap } from 'rxjs/operators';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject } from '@nestjs/common';
 import { Cache } from '@nestjs/cache-manager';
@@ -52,6 +52,16 @@ export class IdempotencyInterceptor implements NestInterceptor {
     const cacheKey = `idempotency:${userId}:${idempotencyKey}`;
 
     return from(this.cacheManager.get<string>(cacheKey)).pipe(
+      catchError((err) => {
+        this.logger.warn(
+          'idempotency cache read failed, proceeding without idempotency',
+          {
+            correlationId: 'dcc3b438-79ea-49ac-81be-138b43cf0bec',
+            error: err instanceof Error ? err.message : String(err),
+          },
+        );
+        return of(null);
+      }),
       switchMap((cached) => {
         if (cached) {
           this.logger.debug('cache hit, returning cached payload.', {
