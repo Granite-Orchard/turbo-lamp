@@ -52,11 +52,19 @@ jobs:
       - name: Login to DO Container Registry
         run: doctl registry login --expiry-seconds 600
 
-      - name: Create deployment
+      - name: Update image tag & deploy
         id: create-deployment
         run: |
           set -euo pipefail
-          DEPLOYMENT_ID="$(doctl apps create-deployment "$DO_APP_ID" --image "$REGISTRY/$IMAGE_REPO:sha-${{ github.sha }}" --format ID --no-header)"
+          IMAGE_TAG="sha-${{ github.sha }}"
+
+          # Fetch the current app spec and update the image tag
+          doctl apps spec get "$DO_APP_ID" > /tmp/app-spec.yaml
+          sed -i "s|tag: .*|tag: $IMAGE_TAG|" /tmp/app-spec.yaml
+
+          # Apply the updated spec, then create a deployment
+          doctl apps update "$DO_APP_ID" --spec /tmp/app-spec.yaml --format ID --no-header > /dev/null
+          DEPLOYMENT_ID="$(doctl apps create-deployment "$DO_APP_ID" --format ID --no-header)"
           echo "Created deployment $DEPLOYMENT_ID"
           echo "deployment-id=$DEPLOYMENT_ID" >> "$GITHUB_OUTPUT"
         env:
