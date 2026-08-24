@@ -1,5 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, Controller, Get, UseInterceptors } from '@nestjs/common';
+import {
+  INestApplication,
+  Controller,
+  Get,
+  UseInterceptors,
+} from '@nestjs/common';
 import request from 'supertest';
 import cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
@@ -45,7 +50,9 @@ describe('TokenRefreshInterceptor (e2e)', () => {
   };
 
   const mockSessionService = {
-    findOneBy: jest.fn().mockResolvedValue({ id: 'session-id', token: mockToken }),
+    findOneBy: jest
+      .fn()
+      .mockResolvedValue({ id: 'session-id', token: mockToken }),
     update: jest.fn().mockResolvedValue({}),
   };
 
@@ -76,7 +83,10 @@ describe('TokenRefreshInterceptor (e2e)', () => {
     jest.clearAllMocks();
     mockConfigService.get.mockReturnValue(3600);
     mockTokenService.sign.mockReturnValue(mockNewToken);
-    mockSessionService.findOneBy.mockResolvedValue({ id: 'session-id', token: mockToken });
+    mockSessionService.findOneBy.mockResolvedValue({
+      id: 'session-id',
+      token: mockToken,
+    });
     mockSessionService.update.mockResolvedValue({});
   });
 
@@ -130,7 +140,9 @@ describe('TokenRefreshInterceptor (e2e)', () => {
         { expiresIn: 3600000 },
       );
       expect(mockCookieService.attachCookie).toHaveBeenCalled();
-      expect(mockSessionService.findOneBy).toHaveBeenCalledWith({ token: mockToken });
+      expect(mockSessionService.findOneBy).toHaveBeenCalledWith({
+        token: mockToken,
+      });
       expect(mockSessionService.update).toHaveBeenCalledWith('session-id', {
         token: mockNewToken,
         expiresAt: expect.any(Date),

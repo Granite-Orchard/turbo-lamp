@@ -134,13 +134,10 @@ describe('TokenRefreshInterceptor', () => {
           expect(mockSessionService.findOneBy).toHaveBeenCalledWith({
             token: mockToken,
           });
-          expect(mockSessionService.update).toHaveBeenCalledWith(
-            'session-id',
-            {
-              token: mockNewToken,
-              expiresAt: expect.any(Date),
-            },
-          );
+          expect(mockSessionService.update).toHaveBeenCalledWith('session-id', {
+            token: mockNewToken,
+            expiresAt: expect.any(Date),
+          });
           done();
         }, 0);
       },

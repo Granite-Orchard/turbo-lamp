@@ -84,6 +84,39 @@ describe('CacheHealthIndicator', () => {
     expect(second.cache.status).toBe('up');
   });
 
+  it('reports up when Redis returns max requests limit exceeded', async () => {
+    const rateLimitError = Object.assign(
+      new Error(
+        'ERR max requests limit exceeded. Limit: 500000, Usage: 500003. See https://upstash.com/docs/redis/troubleshooting/max_requests_limit for details',
+      ),
+      { name: 'ReplyError' },
+    );
+    redis.ping.mockRejectedValueOnce(rateLimitError);
+
+    const result = await indicator.isHealthy('cache');
+
+    expect(result.cache.status).toBe('up');
+  });
+
+  it('never throws when Redis is completely unavailable', async () => {
+    redis.ping.mockRejectedValue(new Error('ECONNREFUSED'));
+
+    await expect(indicator.isHealthy('cache')).resolves.toBeDefined();
+
+    await jest.advanceTimersByTimeAsync(intervalMs + 1);
+
+    await expect(indicator.isHealthy('cache')).resolves.toBeDefined();
+  });
+
+  it('always returns a result even if ensurePing rejects unexpectedly', async () => {
+    redis.ping.mockRejectedValue(new Error('ENOTFOUND'));
+
+    const result = await indicator.isHealthy('cache');
+
+    expect(result).toBeDefined();
+    expect(result.cache.status).toBe('up');
+  });
+
   it('dedupes concurrent pings', async () => {
     let resolvePing!: () => void;
     redis.ping.mockImplementation(

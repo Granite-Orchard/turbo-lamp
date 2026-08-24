@@ -189,9 +189,7 @@ describe('AvailabilitiesService', () => {
       const result = await service.remove(mockAvailability.id);
 
       expect(mockRepository.findOne).toHaveBeenCalled();
-      expect(mockRepository.delete).toHaveBeenCalledWith(
-        mockAvailability.id,
-      );
+      expect(mockRepository.delete).toHaveBeenCalledWith(mockAvailability.id);
       expect(result).toEqual({ affected: 1 });
     });
 

@@ -334,9 +334,7 @@ describe('MeetingGroupsService', () => {
       const result = await service.remove(mockMeetingGroup.id);
 
       expect(mockRepository.findOne).toHaveBeenCalled();
-      expect(mockRepository.delete).toHaveBeenCalledWith(
-        mockMeetingGroup.id,
-      );
+      expect(mockRepository.delete).toHaveBeenCalledWith(mockMeetingGroup.id);
       expect(result).toEqual({ affected: 1 });
     });
 

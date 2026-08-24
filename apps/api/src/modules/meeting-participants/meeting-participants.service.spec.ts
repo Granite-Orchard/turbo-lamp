@@ -254,7 +254,9 @@ describe('MeetingParticipantsService', () => {
       mockRepository.update.mockResolvedValue({ affected: 0 });
 
       await expect(
-        service.update(mockParticipant.id, { invitationState: ParticipantInvitationState.ACCEPTED }),
+        service.update(mockParticipant.id, {
+          invitationState: ParticipantInvitationState.ACCEPTED,
+        }),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -280,9 +282,7 @@ describe('MeetingParticipantsService', () => {
       const result = await service.remove(mockParticipant.id);
 
       expect(mockRepository.findOne).toHaveBeenCalled();
-      expect(mockRepository.delete).toHaveBeenCalledWith(
-        mockParticipant.id,
-      );
+      expect(mockRepository.delete).toHaveBeenCalledWith(mockParticipant.id);
       expect(result).toEqual({ affected: 1 });
     });
 

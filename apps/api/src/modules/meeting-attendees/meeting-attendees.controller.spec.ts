@@ -55,7 +55,10 @@ describe('MeetingAttendeesController', () => {
 
   describe('create', () => {
     beforeEach(() => {
-      meetingRepo.findOne.mockResolvedValue({ id: 'm-1', meetingGroupId: 'g-1' });
+      meetingRepo.findOne.mockResolvedValue({
+        id: 'm-1',
+        meetingGroupId: 'g-1',
+      });
     });
 
     it('should allow the group author to add an attendee', async () => {

@@ -26,20 +26,29 @@ export class CacheHealthIndicator implements OnModuleDestroy {
   ) {}
 
   async isHealthy(key: string): Promise<HealthIndicatorResult> {
-    const now = Date.now();
-    const intervalMs =
-      this.configService.get<number>(
-        EnvironmentVariables.CACHE_HEALTH_PING_INTERVAL_MS,
-      ) ?? CACHE_HEALTH_PING_INTERVAL_DEFAULT;
+    try {
+      const now = Date.now();
+      const intervalMs =
+        this.configService.get<number>(
+          EnvironmentVariables.CACHE_HEALTH_PING_INTERVAL_MS,
+        ) ?? CACHE_HEALTH_PING_INTERVAL_DEFAULT;
 
-    if (this.lastPingAt && now - this.lastPingAt < intervalMs) {
-      return this.lastResult!;
+      if (this.lastPingAt && now - this.lastPingAt < intervalMs) {
+        return this.lastResult!;
+      }
+
+      this.ensurePing(key);
+      await this.inFlight;
+    } catch {
+      // Belt-and-suspenders: ensure no error escapes to a 500
     }
 
-    this.ensurePing(key);
-    await this.inFlight;
-
-    return this.lastResult!;
+    return (
+      this.lastResult ??
+      this.healthIndicatorService.check(key).up({
+        message: 'Cache not yet checked',
+      })
+    );
   }
 
   onModuleDestroy(): void {

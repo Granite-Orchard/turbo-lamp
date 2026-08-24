@@ -79,7 +79,9 @@ describe('MeetingGroupsController', () => {
     jest.clearAllMocks();
     mockService.findAllBy.mockResolvedValue([group]);
     mockService.findOneBy.mockResolvedValue(group);
-    mockService.validateMeetingGroupConstraints.mockImplementation(() => undefined);
+    mockService.validateMeetingGroupConstraints.mockImplementation(
+      () => undefined,
+    );
     mockService.generateMagicLink.mockResolvedValue('magic-link');
     mockService.update.mockResolvedValue(group);
     mockService.remove.mockResolvedValue({ affected: 1 });
@@ -248,7 +250,9 @@ describe('MeetingGroupsController', () => {
     it('should reject when the verification does not exist', async () => {
       mockVerificationService.findOneBy.mockResolvedValue(null);
       await expect(
-        controller.accept({} as any, 'g-1', 'tok-1', { redirect: jest.fn() } as any),
+        controller.accept({} as any, 'g-1', 'tok-1', {
+          redirect: jest.fn(),
+        } as any),
       ).rejects.toBeInstanceOf(BadRequestException);
     });
 
@@ -258,7 +262,9 @@ describe('MeetingGroupsController', () => {
         expiresAt: new Date(Date.now() - 1_000),
       });
       await expect(
-        controller.accept({} as any, 'g-1', 'tok-1', { redirect: jest.fn() } as any),
+        controller.accept({} as any, 'g-1', 'tok-1', {
+          redirect: jest.fn(),
+        } as any),
       ).rejects.toBeInstanceOf(BadRequestException);
     });
 
@@ -271,7 +277,9 @@ describe('MeetingGroupsController', () => {
         after: '/invitation-accepted',
       });
       await expect(
-        controller.accept({} as any, 'g-1', 'tok-1', { redirect: jest.fn() } as any),
+        controller.accept({} as any, 'g-1', 'tok-1', {
+          redirect: jest.fn(),
+        } as any),
       ).rejects.toBeInstanceOf(BadRequestException);
     });
   });

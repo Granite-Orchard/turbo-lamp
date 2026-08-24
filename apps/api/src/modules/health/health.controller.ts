@@ -8,7 +8,7 @@ import {
 } from '@nestjs/terminus';
 import { CacheHealthIndicator } from './indicators/cache-health.indicator';
 
-@SkipThrottle()
+@SkipThrottle({ short: true, medium: true, long: true })
 @ApiExcludeController()
 @Controller({ path: 'health', version: '1' })
 export class HealthController {

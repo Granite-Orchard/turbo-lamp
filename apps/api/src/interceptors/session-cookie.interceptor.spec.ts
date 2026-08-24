@@ -12,7 +12,9 @@ describe('SessionCookieInterceptor', () => {
   beforeEach(() => {
     mockResponse = { cookie: jest.fn() };
     mockCookieService = { attachCookie: jest.fn() };
-    interceptor = new SessionCookieInterceptor(mockCookieService as unknown as CookieService);
+    interceptor = new SessionCookieInterceptor(
+      mockCookieService as unknown as CookieService,
+    );
   });
 
   afterEach(() => {

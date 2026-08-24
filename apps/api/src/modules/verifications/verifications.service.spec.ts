@@ -278,9 +278,7 @@ describe('VerificationsService', () => {
       const result = await service.remove(mockVerification.id);
 
       expect(mockRepository.findOne).toHaveBeenCalled();
-      expect(mockRepository.delete).toHaveBeenCalledWith(
-        mockVerification.id,
-      );
+      expect(mockRepository.delete).toHaveBeenCalledWith(mockVerification.id);
       expect(result).toEqual({ affected: 1 });
     });
 

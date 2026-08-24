@@ -24,10 +24,18 @@ import {
             enableOfflineQueue: false,
             connectTimeout: 5_000,
             commandTimeout: 2_000,
-            maxRetriesPerRequest: 1,
+            maxRetriesPerRequest: 0,
           },
         );
-        redis.on('error', () => undefined);
+        redis.on('error', (err: Error) => {
+          // Log but never throw — health check must not crash the app
+          if (
+            !err.message.includes('max requests limit exceeded') &&
+            !err.message.includes('ECONNREFUSED')
+          ) {
+            console.warn('Health Redis client error:', err.message);
+          }
+        });
         return redis;
       },
     },
