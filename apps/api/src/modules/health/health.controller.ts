@@ -6,7 +6,10 @@ import {
   HealthCheckService,
   TypeOrmHealthIndicator,
 } from '@nestjs/terminus';
+import { plainToInstance } from 'class-transformer';
 import { CacheHealthIndicator } from './indicators/cache-health.indicator';
+import { HealthCheckResponseDto } from './dto/health-check.response.dto';
+import { HealthStatusResponseDto } from './dto/health-status.response.dto';
 
 @SkipThrottle({ short: true, medium: true, long: true })
 @ApiExcludeController()
@@ -20,20 +23,27 @@ export class HealthController {
 
   @Get()
   @HealthCheck()
-  check() {
-    return this.health.check([
+  async check(): Promise<HealthCheckResponseDto> {
+    const result = await this.health.check([
       () => this.db.pingCheck('database'),
       () => this.cache.isHealthy('cache'),
     ]);
+    return plainToInstance(HealthCheckResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @Get('/live')
-  liveness() {
-    return { status: 'live' };
+  liveness(): HealthStatusResponseDto {
+    return plainToInstance(HealthStatusResponseDto, { status: 'live' }, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @Get('ready')
-  readiness() {
-    return { status: 'ready' };
+  readiness(): HealthStatusResponseDto {
+    return plainToInstance(HealthStatusResponseDto, { status: 'ready' }, {
+      excludeExtraneousValues: true,
+    });
   }
 }
