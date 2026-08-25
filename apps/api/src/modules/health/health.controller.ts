@@ -35,15 +35,23 @@ export class HealthController {
 
   @Get('/live')
   liveness(): HealthStatusResponseDto {
-    return plainToInstance(HealthStatusResponseDto, { status: 'live' }, {
-      excludeExtraneousValues: true,
-    });
+    return plainToInstance(
+      HealthStatusResponseDto,
+      { status: 'live' },
+      {
+        excludeExtraneousValues: true,
+      },
+    );
   }
 
   @Get('ready')
   readiness(): HealthStatusResponseDto {
-    return plainToInstance(HealthStatusResponseDto, { status: 'ready' }, {
-      excludeExtraneousValues: true,
-    });
+    return plainToInstance(
+      HealthStatusResponseDto,
+      { status: 'ready' },
+      {
+        excludeExtraneousValues: true,
+      },
+    );
   }
 }

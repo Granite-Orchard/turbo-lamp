@@ -77,7 +77,7 @@ jobs:
         run: |
           set -euo pipefail
           for attempt in $(seq 1 60); do
-            phase="$(doctl apps get-deployment "$DO_APP_ID" "$DEPLOYMENT_ID" --format phase --no-header)"
+            phase="$(doctl apps get-deployment "$DO_APP_ID" "$DEPLOYMENT_ID" --format Phase --no-header)"
             echo "attempt ${attempt}/60: phase ${phase}"
             case "$phase" in
               DEPLOYED)
@@ -86,7 +86,7 @@ jobs:
                 ;;
               ERROR|CANCELED|SUPERSEDED)
                 echo "Deployment $DEPLOYMENT_ID reached phase ${phase}." >&2
-                doctl apps get-deployment "$DO_APP_ID" "$DEPLOYMENT_ID" --format ID,phase,ProgressStepName >&2 || true
+                doctl apps get-deployment "$DO_APP_ID" "$DEPLOYMENT_ID" --format ID,Phase,ProgressStepName >&2 || true
                 exit 1
                 ;;
             esac
