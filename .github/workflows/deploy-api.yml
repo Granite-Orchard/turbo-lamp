@@ -80,7 +80,7 @@ jobs:
             phase="$(doctl apps get-deployment "$DO_APP_ID" "$DEPLOYMENT_ID" --format Phase --no-header)"
             echo "attempt ${attempt}/60: phase ${phase}"
             case "$phase" in
-              DEPLOYED)
+              ACTIVE)
                 echo "Deployment $DEPLOYMENT_ID is live."
                 exit 0
                 ;;
@@ -92,7 +92,7 @@ jobs:
             esac
             sleep 10
           done
-          echo "Deployment $DEPLOYMENT_ID did not reach DEPLOYED within 10 minutes." >&2
+          echo "Deployment $DEPLOYMENT_ID did not reach ACTIVE within 10 minutes." >&2
           exit 1
 
       - name: Wait for health
