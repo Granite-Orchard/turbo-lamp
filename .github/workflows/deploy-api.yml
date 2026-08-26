@@ -24,7 +24,7 @@ permissions:
 env:
   REGISTRY: registry.digitalocean.com
   IMAGE_REPO: veen/api
-  HEALTH_URL: https://veen-api.ondigitalocean.app/api/core/v1/health
+  HEALTH_URL: https://api.veen.me/api/core/v1/health
 
 jobs:
   quality:
